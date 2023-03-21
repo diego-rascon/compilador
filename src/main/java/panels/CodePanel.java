@@ -32,8 +32,13 @@ public class CodePanel extends PanelTemplate {
         try {
             Theme theme = Theme.load(getClass().getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/monokai.xml"));
             theme.apply(codeArea);
-        } catch (IOException ioe) { // Never happens
-            ioe.printStackTrace();
+        } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo cargar el tema del editor de código.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
 
         add(scrollPane, BorderLayout.CENTER);
@@ -41,7 +46,7 @@ public class CodePanel extends PanelTemplate {
     }
 
     public void compile() {
-        final String code = codeArea.getText();
+        final String code = codeArea.getText() + "\n";
         int state = 0;
         for (int i = 0; i < code.length(); i++) {
             final char character = code.charAt(i);
@@ -50,20 +55,44 @@ public class CodePanel extends PanelTemplate {
 
             if (state < 0) {
                 switch (state) {
-                    case -1 -> System.out.println("Se tokenizó el carácter +");
-                    case -2 -> System.out.println("Se tokenizó el carácter ++");
-                    case -3 -> System.out.println("Se tokenizó el carácter +=");
+                    case -1 -> System.out.println("+");
+                    case -2 -> System.out.println("++");
+                    case -3 -> System.out.println("+=");
+                    case -4 -> System.out.println("-");
+                    case -5 -> System.out.println("--");
+                    case -6 -> System.out.println("-=");
+                    case -7 -> System.out.println("~");
+                    case -8 -> System.out.println("|");
+                    case -9 -> System.out.println("||");
                 }
+            }
+            if (state >= 500) {
+                state = 0;
             }
         }
     }
 
     private int getColumn(char character) {
-        if (character == '+')
-            return 0;
-        if (character == '=')
-            return 1;
-        return 2;
+        switch (character) {
+            case '+' -> {
+                return 0;
+            }
+            case '-' -> {
+                return 1;
+            }
+            case '~' -> {
+                return 2;
+            }
+            case '|' -> {
+                return 3;
+            }
+            case '\n' -> {
+                return 31;
+            }
+            default -> {
+                return 30;
+            }
+        }
     }
 
     final void loadMatrix() {
@@ -101,9 +130,5 @@ public class CodePanel extends PanelTemplate {
             );
             if (selection == JOptionPane.OK_OPTION) System.exit(0);
         }
-    }
-
-    public RSyntaxTextArea getCodeArea() {
-        return codeArea;
     }
 }
