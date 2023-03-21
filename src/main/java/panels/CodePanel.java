@@ -1,7 +1,7 @@
 package panels;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -13,7 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class CodePanel extends PanelTemplate {
 
@@ -43,12 +42,28 @@ public class CodePanel extends PanelTemplate {
 
     public void compile() {
         final String code = codeArea.getText();
-        //int state = 0;
+        int state = 0;
         for (int i = 0; i < code.length(); i++) {
             final char character = code.charAt(i);
-            System.out.println(character);
-            System.out.println(Arrays.deepToString(matrix));
+            int column = getColumn(character);
+            state = matrix[state][column];
+
+            if (state < 0) {
+                switch (state) {
+                    case -1 -> System.out.println("Se tokenizó el carácter +");
+                    case -2 -> System.out.println("Se tokenizó el carácter ++");
+                    case -3 -> System.out.println("Se tokenizó el carácter +=");
+                }
+            }
         }
+    }
+
+    private int getColumn(char character) {
+        if (character == '+')
+            return 0;
+        if (character == '=')
+            return 1;
+        return 2;
     }
 
     final void loadMatrix() {
@@ -60,11 +75,11 @@ public class CodePanel extends PanelTemplate {
 
             int rowCount = sheet.getLastRowNum();
 
-            for (int i = 1; i < rowCount; i++) {
-                XSSFRow row = sheet.getRow(i);
+            for (int i = 1; i <= rowCount; i++) {
+                Row row = sheet.getRow(i);
                 int columnCount = row.getLastCellNum();
 
-                matrix = new int[rowCount - 1][columnCount - 1];
+                if (i == 1) matrix = new int[rowCount][columnCount - 1];
 
                 for (int j = 1; j < columnCount; j++) {
                     Cell cell = row.getCell(j);
