@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class CountersPanel extends PanelTemplate {
 
+
     private final String[][] data = {
             {"Errores", "0"},
             {"Identificadores", "0"},

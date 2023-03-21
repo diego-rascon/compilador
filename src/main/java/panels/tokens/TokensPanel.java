@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TokensPanel extends PanelTemplate {
 
-    private final List<Token> tokens = new ArrayList<>();
+    private final List<Token> tokenList = new ArrayList<>();
     private final String[] columns = {"Token", "Lexema", "Línea"};
     private final DefaultTableModel tokensTableModel = new DefaultTableModel(columns, 0);
     private final JTable tokensTable = new JTable(tokensTableModel);
@@ -22,12 +22,18 @@ public class TokensPanel extends PanelTemplate {
     }
 
     final public void addToken(int token, String lexeme, int line) {
-        tokens.add(new Token(token, lexeme, line));
+        tokenList.add(new Token(token, lexeme, line));
         updateTable();
 
     }
 
+    final public void emptyTokensList() {
+        tokenList.clear();
+    }
+
     private void updateTable() {
-        // Implementar un método para que se actualice la tabla
+        for (Token token : tokenList) {
+            System.out.println(token.toString());
+        }
     }
 }

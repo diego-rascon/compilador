@@ -8,6 +8,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import panels.tokens.TokensPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,11 +19,16 @@ public class CodePanel extends PanelTemplate {
 
     private int[][] matrix;
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
+    private final TokensPanel tokensPanel;
+    private final CountersPanel countersPanel;
 
-    public CodePanel() {
+    public CodePanel(TokensPanel tokensPanel, CountersPanel countersPanel) {
         super("Código");
 
         final RTextScrollPane scrollPane = new RTextScrollPane(codeArea);
+
+        this.tokensPanel = tokensPanel;
+        this.countersPanel = countersPanel;
 
         codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
         codeArea.setCodeFoldingEnabled(true);
@@ -46,6 +52,7 @@ public class CodePanel extends PanelTemplate {
     }
 
     public void compile() {
+        tokensPanel.emptyTokensList();
         int i = 0;
         int state = 0;
         final StringBuilder lexeme = new StringBuilder();
@@ -58,6 +65,7 @@ public class CodePanel extends PanelTemplate {
             lexeme.append(character);
             if (state < 0) {
                 i--;
+                tokensPanel.addToken(state, String.valueOf(lexeme), 0);
                 switch (state) {
                     case -1 -> System.out.println("+");
                     case -2 -> System.out.println("++");

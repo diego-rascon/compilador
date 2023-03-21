@@ -3,7 +3,7 @@ package main;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import panels.CodePanel;
 import panels.CountersPanel;
-import panels.ErrorsPanel;
+import panels.errors.ErrorsPanel;
 import panels.tokens.TokensPanel;
 
 import javax.swing.*;
@@ -39,11 +39,9 @@ public class MainFrame extends JFrame {
         mainSplit.setDividerSize(padding);
         mainPanel.add(mainSplit, BorderLayout.CENTER);
 
-        final CodePanel codePanel = new CodePanel();
-
         final TokensPanel tokensPanel = new TokensPanel();
-
         final CountersPanel countersPanel = new CountersPanel();
+        final CodePanel codePanel = new CodePanel(tokensPanel, countersPanel);
 
         final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokensPanel, countersPanel);
         rightSplit.setResizeWeight(0.5);
