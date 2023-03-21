@@ -46,27 +46,29 @@ public class CodePanel extends PanelTemplate {
     }
 
     public void compile() {
-        final String code = codeArea.getText() + "\n";
         int state = 0;
+        final StringBuilder lexeme = new StringBuilder();
+        final String code = codeArea.getText() + "\n";
+
         for (int i = 0; i < code.length(); i++) {
             final char character = code.charAt(i);
             int column = getColumn(character);
             state = matrix[state][column];
-
+            lexeme.append(character);
             if (state < 0) {
-                switch (state) {
-                    case -1 -> System.out.println("+");
-                    case -2 -> System.out.println("++");
-                    case -3 -> System.out.println("+=");
-                    case -4 -> System.out.println("-");
-                    case -5 -> System.out.println("--");
-                    case -6 -> System.out.println("-=");
-                    case -7 -> System.out.println("~");
-                    case -8 -> System.out.println("|");
-                    case -9 -> System.out.println("||");
-                }
-            }
-            if (state >= 500) {
+//                switch (state) {
+//                    case -1 -> System.out.println("+");
+//                    case -2 -> System.out.println("++");
+//                    case -3 -> System.out.println("+=");
+//                    case -4 -> System.out.println("-");
+//                    case -5 -> System.out.println("--");
+//                    case -6 -> System.out.println("-=");
+//                    case -7 -> System.out.println("~");
+//                    case -8 -> System.out.println("|");
+//                    case -9 -> System.out.println("||");
+//                }
+                state = 0;
+            } else if (state >= 500) {
                 state = 0;
             }
         }
@@ -86,11 +88,17 @@ public class CodePanel extends PanelTemplate {
             case '|' -> {
                 return 3;
             }
+            case ' ' -> {
+                return 30;
+            }
             case '\n' -> {
                 return 31;
             }
+            case '\t' -> {
+                return 32;
+            }
             default -> {
-                return 30;
+                return 33;
             }
         }
     }

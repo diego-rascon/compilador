@@ -4,7 +4,7 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import panels.CodePanel;
 import panels.CountersPanel;
 import panels.ErrorsPanel;
-import panels.TokensPanel;
+import panels.tokens.TokensPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
