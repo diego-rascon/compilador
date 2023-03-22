@@ -2,9 +2,9 @@ package main;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import panels.CodePanel;
-import panels.CountersPanel;
-import panels.errors.ErrorsPanel;
-import panels.tokens.TokensPanel;
+import panels.CounterPanel;
+import panels.errors.ErrorPanel;
+import panels.tokens.TokenPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,9 +39,10 @@ public class MainFrame extends JFrame {
         mainSplit.setDividerSize(padding);
         mainPanel.add(mainSplit, BorderLayout.CENTER);
 
-        final TokensPanel tokensPanel = new TokensPanel();
-        final CountersPanel countersPanel = new CountersPanel();
-        final CodePanel codePanel = new CodePanel(tokensPanel, countersPanel);
+        final TokenPanel tokensPanel = new TokenPanel();
+        final CounterPanel countersPanel = new CounterPanel();
+        final ErrorPanel errorsPanel = new ErrorPanel();
+        final CodePanel codePanel = new CodePanel(tokensPanel, countersPanel, errorsPanel);
 
         final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokensPanel, countersPanel);
         rightSplit.setResizeWeight(0.5);
@@ -52,8 +53,6 @@ public class MainFrame extends JFrame {
         leftSplit.setDividerSize(padding);
 
         mainSplit.add(leftSplit);
-
-        final ErrorsPanel errorsPanel = new ErrorsPanel();
         mainSplit.add(errorsPanel);
 
         final JPanel buttonsPanel = new JPanel();

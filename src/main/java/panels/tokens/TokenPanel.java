@@ -6,15 +6,15 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 
-public class TokensPanel extends PanelTemplate {
+public class TokenPanel extends PanelTemplate {
 
     private final LinkedList<Token> tokenList = new LinkedList<>();
     private final String[] columns = {"Token", "Lexema", "Línea"};
-    private final DefaultTableModel tokensTableModel = new DefaultTableModel(columns, 0);
+    private final DefaultTableModel tokenTableModel = new DefaultTableModel(columns, 0);
 
-    public TokensPanel() {
+    public TokenPanel() {
         super("Tokens");
-        JTable tokensTable = new JTable(tokensTableModel);
+        JTable tokensTable = new JTable(tokenTableModel);
         final JScrollPane scrollPane = new JScrollPane(tokensTable);
         tokensTable.getTableHeader().setReorderingAllowed(false);
         add(scrollPane);
@@ -25,15 +25,15 @@ public class TokensPanel extends PanelTemplate {
     }
 
     final public void addToken(int token, String lexeme, int line) {
-        tokenList.add(new Token(token, lexeme, line));
-
+        final Token newToken = new Token(token, lexeme, line);
+        tokenList.add(newToken);
     }
 
     public void updateTable() {
-        tokensTableModel.setRowCount(0);
+        tokenTableModel.setRowCount(0);
         for (Token token : tokenList) {
             final Object[] tokenData = {token.token(), token.lexeme(), token.line()};
-            tokensTableModel.addRow(tokenData);
+            tokenTableModel.addRow(tokenData);
         }
     }
 }

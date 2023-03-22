@@ -8,7 +8,8 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import panels.tokens.TokensPanel;
+import panels.errors.ErrorPanel;
+import panels.tokens.TokenPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,16 +20,18 @@ public class CodePanel extends PanelTemplate {
 
     private int[][] matrix;
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
-    private final TokensPanel tokensPanel;
-    private final CountersPanel countersPanel;
+    private final TokenPanel tokenPanel;
+    private final CounterPanel counterPanel;
+    private final ErrorPanel errorPanel;
 
-    public CodePanel(TokensPanel tokensPanel, CountersPanel countersPanel) {
+    public CodePanel(TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel) {
         super("Código");
 
         final RTextScrollPane scrollPane = new RTextScrollPane(codeArea);
 
-        this.tokensPanel = tokensPanel;
-        this.countersPanel = countersPanel;
+        this.tokenPanel = tokensPanel;
+        this.counterPanel = countersPanel;
+        this.errorPanel = errorsPanel;
 
         codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
         codeArea.setCodeFoldingEnabled(true);
@@ -54,7 +57,8 @@ public class CodePanel extends PanelTemplate {
     }
 
     public void compile() {
-        tokensPanel.emptyTokensList();
+        tokenPanel.emptyTokensList();
+        errorPanel.emptyErrorsList();
         int i = 0;
         int state = 0;
         int lineNum = 1;
@@ -66,21 +70,24 @@ public class CodePanel extends PanelTemplate {
             int column = getColumn(character);
             state = matrix[state][column];
             if (state < 0) {
-                tokensPanel.addToken(state, String.valueOf(lexeme.toString().trim()), lineNum);
+                tokenPanel.addToken(state, lexeme.toString().trim(), lineNum);
                 lexeme.setLength(0);
-                state = 0;
                 i--;
+                state = 0;
             } else if (state >= 500) {
+                if (state == 500) lexeme.append(character);
+                else i--;
+                errorPanel.addError(state, lexeme.toString().trim(), lineNum);
                 lexeme.setLength(0);
                 state = 0;
-                i--;
             } else {
                 lexeme.append(character);
                 if (character == '\n') lineNum++;
             }
             i++;
         }
-        tokensPanel.updateTable();
+        tokenPanel.updateTable();
+        errorPanel.updateTable();
     }
 
     private int getColumn(char character) {
@@ -164,11 +171,10 @@ public class CodePanel extends PanelTemplate {
                 return 25;
             }
             default -> {
-                if (Character.isDigit(character)) {
+                if (character >= '0' && character <= '9')
                     return 26;
-                } else if (Character.isLetter(character)) {
+                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z')
                     return 27;
-                }
                 return 33;
             }
             case '@' -> {

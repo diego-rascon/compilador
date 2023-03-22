@@ -3,7 +3,7 @@ package panels;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-public class CountersPanel extends PanelTemplate {
+public class CounterPanel extends PanelTemplate {
 
 
     private final String[][] data = {
@@ -28,7 +28,7 @@ public class CountersPanel extends PanelTemplate {
     private final DefaultTableModel countersTableModel = new DefaultTableModel(data, columns);
     private final JTable countersTable = new JTable(countersTableModel);
 
-    public CountersPanel() {
+    public CounterPanel() {
         super("Contadores");
         final JScrollPane scrollPane = new JScrollPane(countersTable);
         countersTable.getTableHeader().setReorderingAllowed(false);
