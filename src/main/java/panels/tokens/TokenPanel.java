@@ -14,9 +14,11 @@ public class TokenPanel extends PanelTemplate {
 
     public TokenPanel() {
         super("Tokens");
-        JTable tokensTable = new JTable(tokenTableModel);
-        final JScrollPane scrollPane = new JScrollPane(tokensTable);
-        tokensTable.getTableHeader().setReorderingAllowed(false);
+
+        final JTable tokenTable = new JTable(tokenTableModel);
+        tokenTable.getTableHeader().setReorderingAllowed(false);
+
+        final JScrollPane scrollPane = new JScrollPane(tokenTable);
         add(scrollPane);
     }
 
@@ -32,8 +34,8 @@ public class TokenPanel extends PanelTemplate {
     public void updateTable() {
         tokenTableModel.setRowCount(0);
         for (Token token : tokenList) {
-            final Object[] tokenData = {token.state(), token.lexeme(), token.line()};
-            tokenTableModel.addRow(tokenData);
+            final Object[] tokenRow = {token.state(), token.lexeme(), token.line()};
+            tokenTableModel.addRow(tokenRow);
         }
     }
 }
