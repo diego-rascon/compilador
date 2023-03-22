@@ -4,12 +4,11 @@ import panels.PanelTemplate;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
 public class TokensPanel extends PanelTemplate {
 
-    private final List<Token> tokenList = new ArrayList<>();
+    private final LinkedList<Token> tokenList = new LinkedList<>();
     private final String[] columns = {"Token", "Lexema", "Línea"};
     private final DefaultTableModel tokensTableModel = new DefaultTableModel(columns, 0);
 

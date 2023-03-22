@@ -71,6 +71,7 @@ public class CodePanel extends PanelTemplate {
                 state = 0;
                 i--;
             } else if (state >= 500) {
+                lexeme.setLength(0);
                 state = 0;
                 i--;
             } else {
@@ -95,6 +96,86 @@ public class CodePanel extends PanelTemplate {
             case '|' -> {
                 return 3;
             }
+            case '&' -> {
+                return 4;
+            }
+            case '^' -> {
+                return 5;
+            }
+            case ',' -> {
+                return 6;
+            }
+            case '.' -> {
+                return 7;
+            }
+            case ';' -> {
+                return 8;
+            }
+            case ':' -> {
+                return 9;
+            }
+            case '*' -> {
+                return 10;
+            }
+            case '/' -> {
+                return 11;
+            }
+            case '%' -> {
+                return 12;
+            }
+            case '<' -> {
+                return 13;
+            }
+            case '>' -> {
+                return 14;
+            }
+            case '=' -> {
+                return 15;
+            }
+            case '!' -> {
+                return 16;
+            }
+            case '?' -> {
+                return 17;
+            }
+            case '{' -> {
+                return 18;
+            }
+            case '}' -> {
+                return 19;
+            }
+            case '[' -> {
+                return 20;
+            }
+            case ']' -> {
+                return 21;
+            }
+            case '(' -> {
+                return 22;
+            }
+            case ')' -> {
+                return 23;
+            }
+            case '"' -> {
+                return 24;
+            }
+            case '\'' -> {
+                return 25;
+            }
+            default -> {
+                if (Character.isDigit(character)) {
+                    return 26;
+                } else if (Character.isLetter(character)) {
+                    return 27;
+                }
+                return 33;
+            }
+            case '@' -> {
+                return 28;
+            }
+            case '_' -> {
+                return 29;
+            }
             case ' ' -> {
                 return 30;
             }
@@ -103,9 +184,6 @@ public class CodePanel extends PanelTemplate {
             }
             case '\t' -> {
                 return 32;
-            }
-            default -> {
-                return 33;
             }
         }
     }
