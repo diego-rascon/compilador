@@ -58,7 +58,7 @@ public class CodePanel extends PanelTemplate {
         int i = 0;
         int state = 0;
         int lineNum = 1;
-        final StringBuilder lexeme = new StringBuilder();
+        StringBuilder lexeme = new StringBuilder();
         final String code = codeArea.getText() + "\n";
 
         while (i < code.length()) {
@@ -66,7 +66,7 @@ public class CodePanel extends PanelTemplate {
             int column = getColumn(character);
             state = matrix[state][column];
             if (state < 0) {
-                tokensPanel.addToken(state, String.valueOf(lexeme), lineNum);
+                tokensPanel.addToken(state, String.valueOf(lexeme.toString().trim()), lineNum);
                 lexeme.setLength(0);
                 state = 0;
                 i--;
@@ -80,6 +80,7 @@ public class CodePanel extends PanelTemplate {
             }
             i++;
         }
+        tokensPanel.updateTable();
     }
 
     private int getColumn(char character) {

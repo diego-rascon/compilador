@@ -26,11 +26,10 @@ public class TokensPanel extends PanelTemplate {
 
     final public void addToken(int token, String lexeme, int line) {
         tokenList.add(new Token(token, lexeme, line));
-        updateTable();
 
     }
 
-    private void updateTable() {
+    public void updateTable() {
         tokensTableModel.setRowCount(0);
         for (Token token : tokenList) {
             final Object[] tokenData = {token.token(), token.lexeme(), token.line()};
