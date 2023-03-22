@@ -12,13 +12,17 @@ public class TokensPanel extends PanelTemplate {
     private final List<Token> tokenList = new ArrayList<>();
     private final String[] columns = {"Token", "Lexema", "Línea"};
     private final DefaultTableModel tokensTableModel = new DefaultTableModel(columns, 0);
-    private final JTable tokensTable = new JTable(tokensTableModel);
 
     public TokensPanel() {
         super("Tokens");
+        JTable tokensTable = new JTable(tokensTableModel);
         final JScrollPane scrollPane = new JScrollPane(tokensTable);
         tokensTable.getTableHeader().setReorderingAllowed(false);
         add(scrollPane);
+    }
+
+    final public void emptyTokensList() {
+        tokenList.clear();
     }
 
     final public void addToken(int token, String lexeme, int line) {
@@ -27,13 +31,11 @@ public class TokensPanel extends PanelTemplate {
 
     }
 
-    final public void emptyTokensList() {
-        tokenList.clear();
-    }
-
     private void updateTable() {
+        tokensTableModel.setRowCount(0);
         for (Token token : tokenList) {
-            System.out.println(token.toString());
+            final Object[] tokenData = {token.token(), token.lexeme(), token.line()};
+            tokensTableModel.addRow(tokenData);
         }
     }
 }

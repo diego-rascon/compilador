@@ -36,7 +36,9 @@ public class CodePanel extends PanelTemplate {
         codeArea.setAntiAliasingEnabled(true);
 
         try {
-            Theme theme = Theme.load(getClass().getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/monokai.xml"));
+            Theme theme = Theme.load(getClass().getResourceAsStream(
+                    "/org/fife/ui/rsyntaxtextarea/themes/monokai.xml"
+            ));
             theme.apply(codeArea);
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(
@@ -55,6 +57,7 @@ public class CodePanel extends PanelTemplate {
         tokensPanel.emptyTokensList();
         int i = 0;
         int state = 0;
+        int lineNum = 1;
         final StringBuilder lexeme = new StringBuilder();
         final String code = codeArea.getText() + "\n";
 
@@ -62,25 +65,17 @@ public class CodePanel extends PanelTemplate {
             final char character = code.charAt(i);
             int column = getColumn(character);
             state = matrix[state][column];
-            lexeme.append(character);
             if (state < 0) {
-                i--;
-                tokensPanel.addToken(state, String.valueOf(lexeme), 0);
-                switch (state) {
-                    case -1 -> System.out.println("+");
-                    case -2 -> System.out.println("++");
-                    case -3 -> System.out.println("+=");
-                    case -4 -> System.out.println("-");
-                    case -5 -> System.out.println("--");
-                    case -6 -> System.out.println("-=");
-                    case -7 -> System.out.println("~");
-                    case -8 -> System.out.println("|");
-                    case -9 -> System.out.println("||");
-                }
+                tokensPanel.addToken(state, String.valueOf(lexeme), lineNum);
+                lexeme.setLength(0);
                 state = 0;
+                i--;
             } else if (state >= 500) {
-                i--;
                 state = 0;
+                i--;
+            } else {
+                lexeme.append(character);
+                if (character == '\n') lineNum++;
             }
             i++;
         }
