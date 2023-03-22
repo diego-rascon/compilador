@@ -2,10 +2,11 @@ package panels;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.HashMap;
 
 public class CounterPanel extends PanelTemplate {
 
-
+    private final HashMap<String, Integer> counterMap = new HashMap<String, Integer>();
     private final String[][] data = {
             {"Errores", "0"},
             {"Identificadores", "0"},
@@ -33,5 +34,7 @@ public class CounterPanel extends PanelTemplate {
         final JScrollPane scrollPane = new JScrollPane(countersTable);
         countersTable.getTableHeader().setReorderingAllowed(false);
         add(scrollPane);
+
+        counterMap.put("Errores", 0);
     }
 }
