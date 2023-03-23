@@ -303,4 +303,8 @@ public class CodePanel extends PanelTemplate {
             if (selection == JOptionPane.OK_OPTION) System.exit(0);
         }
     }
+
+    public void setCode(String fileContent) {
+        codeArea.setText(fileContent);
+    }
 }
