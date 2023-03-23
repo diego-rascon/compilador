@@ -113,16 +113,21 @@ public class CodePanel extends PanelTemplate {
         int i = 0;
         int state = 0;
         int lineNum = 1;
+        int multiCommentLineNum = 1;
         StringBuilder lexeme = new StringBuilder();
         final String code = codeArea.getText() + "\n";
 
         while (i < code.length()) {
             final char character = code.charAt(i);
-            int column = getColumn(character);
+            final int column = getColumn(character);
             state = matrix[state][column];
             if (state < 0) {
-                if (state == -57) state = getKeywordToken(lexeme.toString().trim(), state);
-                tokenPanel.addToken(state, lexeme.toString().trim(), lineNum);
+                if (state == -57) state = getKeywordToken(lexeme.toString(), state);
+                if (state == -25) {
+                    tokenPanel.addToken(state, lexeme.toString(), multiCommentLineNum);
+                } else {
+                    tokenPanel.addToken(state, lexeme.toString(), lineNum);
+                }
                 counterPanel.addCounter(state);
                 lexeme.setLength(0);
                 i--;
@@ -130,21 +135,24 @@ public class CodePanel extends PanelTemplate {
             } else if (state >= 500) {
                 if (state == 500) {
                     lexeme.append(character);
-                    lexeme = (new StringBuilder(lexeme.toString().trim()));
                 } else i--;
-                errorPanel.addError(state, lexeme.toString().trim(), lineNum);
+                errorPanel.addError(state, lexeme.toString(), lineNum);
                 counterPanel.addCounter(state);
                 lexeme.setLength(0);
                 state = 0;
             } else {
-                lexeme.append(character);
-                lexeme = (new StringBuilder(lexeme.toString().trim()));
-                if (character == '\n') lineNum++;
+                if (state != 0) lexeme.append(character);
+                if (character == '\n') {
+                    lineNum++;
+                }
+                if (state == 22 && lexeme.toString().equals("/*")) {
+                    multiCommentLineNum = lineNum;
+                }
             }
             i++;
         }
         if (state != 0) {
-            errorPanel.addError(505, lexeme.toString().trim(), --lineNum);
+            errorPanel.addError(505, lexeme.toString(), multiCommentLineNum);
             counterPanel.addCounter(state);
         }
         tokenPanel.updateTable();
@@ -257,7 +265,7 @@ public class CodePanel extends PanelTemplate {
 
     private int getKeywordToken(String lexeme, int state) {
         if (Arrays.asList(keywords).contains(lexeme)) return state - Arrays.asList(keywords).indexOf(lexeme) - 1;
-        return -57;
+        return state;
     }
 
     final void loadMatrix() {
