@@ -147,7 +147,6 @@ public class CodePanel extends PanelTemplate {
             errorPanel.addError(505, lexeme.toString().trim(), --lineNum);
             counterPanel.addCounter(state);
         }
-        System.out.println(state);
         tokenPanel.updateTable();
         counterPanel.updateTable();
         errorPanel.updateTable();
