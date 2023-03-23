@@ -37,6 +37,7 @@ public class ErrorPanel extends PanelTemplate {
             case 502 -> description = "Se esperaba un '";
             case 503 -> description = "Se esperaba un número";
             case 504 -> description = "Se esperaba un \"+\", un \"-\" o un número";
+            case 505 -> description = "Se esperaba que se cerrara el comentario con */";
         }
         final String type = "Léxico";
         final Error newError = new Error(error, description, lexeme, type, line);
