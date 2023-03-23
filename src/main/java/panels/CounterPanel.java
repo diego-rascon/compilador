@@ -175,8 +175,8 @@ public class CounterPanel extends PanelTemplate {
     public void updateTable() {
         int row = 0;
         for (Map.Entry<String, Integer> counterEntry : counterMap.entrySet()) {
-            final Integer value = counterEntry.getValue();
-            counterTableModel.setValueAt(value, row++, 1);
+            final Integer newValue = counterEntry.getValue();
+            counterTableModel.setValueAt(newValue, row++, 1);
         }
     }
 }
