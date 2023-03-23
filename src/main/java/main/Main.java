@@ -1,5 +1,7 @@
 package main;
 
+import javax.swing.*;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -9,5 +11,6 @@ public class Main {
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setTitle("Léxico - 20130375");
         mainFrame.setVisible(true);
+        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 }
