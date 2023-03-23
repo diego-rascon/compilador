@@ -15,14 +15,65 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CodePanel extends PanelTemplate {
 
-    private int[][] matrix;
+    private final String[] keywords = {
+            "if",
+            "else",
+            "switch",
+            "for",
+            "do",
+            "while",
+            "console.log",
+            "forEach",
+            "break",
+            "continue",
+            "let",
+            "const",
+            "undefined",
+            "interface",
+            "typeof",
+            "Number",
+            "String",
+            "any",
+            "set",
+            "get",
+            "class",
+            "toLowerCase",
+            "toUpperCase",
+            "length",
+            "trim",
+            "charAt",
+            "startsWith",
+            "endsWith",
+            "indexOf",
+            "Includes",
+            "slice",
+            "replace",
+            "split",
+            "push",
+            "shift",
+            "in",
+            "of",
+            "splice",
+            "concat",
+            "find",
+            "findIndex",
+            "filter",
+            "map",
+            "sort",
+            "reverse",
+            "true",
+            "false",
+            "null"
+    };
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final TokenPanel tokenPanel;
     private final CounterPanel counterPanel;
     private final ErrorPanel errorPanel;
+    private int[][] matrix;
 
     public CodePanel(TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel) {
         super("Código");
@@ -39,17 +90,16 @@ public class CodePanel extends PanelTemplate {
         codeArea.setAntiAliasingEnabled(true);
 
         try {
-            Theme theme = Theme.load(getClass().getResourceAsStream(
-                    "/org/fife/ui/rsyntaxtextarea/themes/monokai.xml"
-            ));
+            Theme theme = Theme.load(
+                    getClass().getResourceAsStream("/org/fife/ui/rsyntaxtextarea/themes/monokai.xml")
+            );
             theme.apply(codeArea);
         } catch (IOException ioe) {
             JOptionPane.showMessageDialog(
                     this,
                     "No se pudo cargar el tema del editor de código.",
                     "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
 
         add(scrollPane, BorderLayout.CENTER);
@@ -58,7 +108,9 @@ public class CodePanel extends PanelTemplate {
 
     public void compile() {
         tokenPanel.emptyTokensList();
+        counterPanel.restartCounter();
         errorPanel.emptyErrorsList();
+
         int i = 0;
         int state = 0;
         int lineNum = 1;
@@ -70,23 +122,30 @@ public class CodePanel extends PanelTemplate {
             int column = getColumn(character);
             state = matrix[state][column];
             if (state < 0) {
+                if (state == -57) state = getKeywordToken(lexeme.toString().trim(), state);
                 tokenPanel.addToken(state, lexeme.toString().trim(), lineNum);
+                counterPanel.addCounter(state);
                 lexeme.setLength(0);
                 i--;
                 state = 0;
             } else if (state >= 500) {
-                if (state == 500) lexeme.append(character);
-                else i--;
+                if (state == 500) {
+                    lexeme.append(character);
+                    lexeme = (new StringBuilder(lexeme.toString().trim()));
+                } else i--;
                 errorPanel.addError(state, lexeme.toString().trim(), lineNum);
+                counterPanel.addCounter(state);
                 lexeme.setLength(0);
                 state = 0;
             } else {
                 lexeme.append(character);
+                lexeme = (new StringBuilder(lexeme.toString().trim()));
                 if (character == '\n') lineNum++;
             }
             i++;
         }
         tokenPanel.updateTable();
+        counterPanel.updateTable();
         errorPanel.updateTable();
     }
 
@@ -171,10 +230,8 @@ public class CodePanel extends PanelTemplate {
                 return 25;
             }
             default -> {
-                if (character >= '0' && character <= '9')
-                    return 26;
-                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z')
-                    return 27;
+                if (character >= '0' && character <= '9') return 26;
+                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') return 27;
                 return 33;
             }
             case '@' -> {
@@ -193,6 +250,11 @@ public class CodePanel extends PanelTemplate {
                 return 32;
             }
         }
+    }
+
+    private int getKeywordToken(String lexeme, int state) {
+        if (Arrays.asList(keywords).contains(lexeme)) return state - Arrays.asList(keywords).indexOf(lexeme) - 1;
+        return -57;
     }
 
     final void loadMatrix() {
@@ -226,8 +288,7 @@ public class CodePanel extends PanelTemplate {
                     JOptionPane.ERROR_MESSAGE,
                     null,
                     options,
-                    options[0]
-            );
+                    options[0]);
             if (selection == JOptionPane.OK_OPTION) System.exit(0);
         }
     }
