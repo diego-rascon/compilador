@@ -9,8 +9,6 @@ import panels.tokens.TokenPanel;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
 
@@ -59,18 +57,16 @@ public class MainFrame extends JFrame {
         mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
         final JButton openButton = new JButton("Abrir");
+        openButton.setMnemonic('A');
         buttonsPanel.add(openButton);
 
         final JButton exportButton = new JButton("Exportar");
+        exportButton.setMnemonic('E');
         buttonsPanel.add(exportButton);
 
         final JButton compileButton = new JButton("Compilar");
-        compileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                codePanel.compile();
-            }
-        });
+        compileButton.setMnemonic('C');
+        compileButton.addActionListener(e -> codePanel.compile());
         buttonsPanel.add(compileButton);
     }
 }
