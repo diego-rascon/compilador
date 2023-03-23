@@ -37,7 +37,11 @@ public class CounterPanel extends PanelTemplate {
     public CounterPanel() {
         super("Contadores");
 
-        final JTable counterTable = new JTable(counterTableModel);
+        final JTable counterTable = new JTable(counterTableModel) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         counterTable.getTableHeader().setReorderingAllowed(false);
 
         final JScrollPane scrollPane = new JScrollPane(counterTable);

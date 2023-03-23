@@ -15,7 +15,11 @@ public class ErrorPanel extends PanelTemplate {
     public ErrorPanel() {
         super("Errores");
 
-        final JTable errorTable = new JTable(errorTableModel);
+        final JTable errorTable = new JTable(errorTableModel) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         errorTable.getTableHeader().setReorderingAllowed(false);
 
         final JScrollPane scrollPane = new JScrollPane(errorTable);

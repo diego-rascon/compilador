@@ -15,7 +15,11 @@ public class TokenPanel extends PanelTemplate {
     public TokenPanel() {
         super("Tokens");
 
-        final JTable tokenTable = new JTable(tokenTableModel);
+        final JTable tokenTable = new JTable(tokenTableModel) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         tokenTable.getTableHeader().setReorderingAllowed(false);
 
         final JScrollPane scrollPane = new JScrollPane(tokenTable);
