@@ -24,7 +24,8 @@ public class CodePanel extends PanelTemplate {
             "for",
             "do",
             "while",
-            "console.log",
+            "console",
+            "log",
             "forEach",
             "break",
             "continue",
@@ -141,6 +142,10 @@ public class CodePanel extends PanelTemplate {
                 if (character == '\n') lineNum++;
             }
             i++;
+        }
+        if (state != 0) {
+            errorPanel.addError(state, lexeme.toString().trim(), lineNum);
+            counterPanel.addCounter(state);
         }
         System.out.println(state);
         tokenPanel.updateTable();
