@@ -1,6 +1,6 @@
 package panels;
 
-import panels.PanelTemplate;
+import model.Error;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
