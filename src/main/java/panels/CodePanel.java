@@ -8,8 +8,6 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import panels.errors.ErrorPanel;
-import panels.tokens.TokenPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -144,6 +142,7 @@ public class CodePanel extends PanelTemplate {
             }
             i++;
         }
+        System.out.println(state);
         tokenPanel.updateTable();
         counterPanel.updateTable();
         errorPanel.updateTable();
