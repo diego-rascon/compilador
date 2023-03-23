@@ -65,8 +65,8 @@ public class MainFrame extends JFrame {
         buttonsPanel.add(exportButton);
 
         final JButton compileButton = new JButton("Compilar");
-        compileButton.setMnemonic('C');
         compileButton.addActionListener(e -> codePanel.compile());
+        compileButton.setMnemonic('C');
         buttonsPanel.add(compileButton);
     }
 }
