@@ -5,6 +5,7 @@ import panels.CodePanel;
 import panels.CounterPanel;
 import panels.ErrorPanel;
 import panels.TokenPanel;
+import util.FileHandler;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -56,11 +57,17 @@ public class MainFrame extends JFrame {
         final JPanel buttonsPanel = new JPanel();
         mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
+        final FileHandler fileHandler = new FileHandler(
+                this, codePanel, tokenPanel, counterPanel, errorPanel
+        );
+
         final JButton openButton = new JButton("Abrir");
+        openButton.addActionListener(e -> fileHandler.openFile());
         openButton.setMnemonic('A');
         buttonsPanel.add(openButton);
 
         final JButton exportButton = new JButton("Exportar");
+        exportButton.addActionListener(e -> fileHandler.exportFile());
         exportButton.setMnemonic('E');
         buttonsPanel.add(exportButton);
 
