@@ -1,6 +1,6 @@
-package panels.tokens;
+package panels;
 
-import panels.PanelTemplate;
+import model.Token;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

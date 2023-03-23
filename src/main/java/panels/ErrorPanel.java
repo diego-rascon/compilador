@@ -1,4 +1,4 @@
-package panels.errors;
+package panels;
 
 import panels.PanelTemplate;
 
