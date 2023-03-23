@@ -35,8 +35,8 @@ public class CounterPanel extends PanelTemplate {
     private final String[] columns = {"Tipo", "Cantidad"};
     private final DefaultTableModel counterTableModel = new DefaultTableModel(columns, 0);
 
-    public CounterPanel() {
-        super("Contadores");
+    public CounterPanel(int padding) {
+        super("Contadores", padding);
 
         final JTable counterTable = new JTable(counterTableModel) {
             public boolean isCellEditable(int row, int column) {

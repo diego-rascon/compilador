@@ -12,8 +12,6 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
 
-    public static final byte padding = 8;
-
     public MainFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -31,16 +29,18 @@ public class MainFrame extends JFrame {
         mainPanel.setLayout(new BorderLayout());
         add(mainPanel);
 
+        final byte padding = 8;
+
         final JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainSplit.setBorder(new EmptyBorder(padding, padding, 0, padding));
         mainSplit.setResizeWeight(0.66);
         mainSplit.setDividerSize(padding);
         mainPanel.add(mainSplit, BorderLayout.CENTER);
 
-        final TokenPanel tokenPanel = new TokenPanel();
-        final CounterPanel counterPanel = new CounterPanel();
-        final ErrorPanel errorPanel = new ErrorPanel();
-        final CodePanel codePanel = new CodePanel(tokenPanel, counterPanel, errorPanel);
+        final TokenPanel tokenPanel = new TokenPanel(padding);
+        final CounterPanel counterPanel = new CounterPanel(padding);
+        final ErrorPanel errorPanel = new ErrorPanel(padding);
+        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel);
 
         final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokenPanel, counterPanel);
         rightSplit.setResizeWeight(0.5);

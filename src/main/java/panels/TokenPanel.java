@@ -13,8 +13,8 @@ public class TokenPanel extends PanelTemplate {
     private final String[] columns = {"Estado", "Lexema", "Línea"};
     private final DefaultTableModel tokenTableModel = new DefaultTableModel(columns, 0);
 
-    public TokenPanel() {
-        super("Tokens");
+    public TokenPanel(int padding) {
+        super("Tokens", padding);
 
         final JTable tokenTable = new JTable(tokenTableModel) {
             public boolean isCellEditable(int row, int column) {

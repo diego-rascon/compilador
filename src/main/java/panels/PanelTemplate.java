@@ -3,11 +3,9 @@ package panels;
 import javax.swing.*;
 import java.awt.*;
 
-import static main.MainFrame.padding;
-
 public abstract class PanelTemplate extends JPanel {
 
-    protected PanelTemplate(String title) {
+    protected PanelTemplate(String title, int padding) {
         setLayout(new BorderLayout(padding, padding));
 
         final JLabel codeLabel = new JLabel(title);

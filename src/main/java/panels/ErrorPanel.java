@@ -13,8 +13,8 @@ public class ErrorPanel extends PanelTemplate {
     private final String[] columns = {"Error", "Descripción", "Lexema", "Tipo", "Linea"};
     private final DefaultTableModel errorTableModel = new DefaultTableModel(columns, 0);
 
-    public ErrorPanel() {
-        super("Errores");
+    public ErrorPanel(int padding) {
+        super("Errores", padding);
 
         final JTable errorTable = new JTable(errorTableModel) {
             public boolean isCellEditable(int row, int column) {

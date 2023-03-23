@@ -74,8 +74,8 @@ public class CodePanel extends PanelTemplate {
     private final ErrorPanel errorPanel;
     private int[][] matrix;
 
-    public CodePanel(TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel) {
-        super("Código");
+    public CodePanel(int padding, TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel) {
+        super("Código", padding);
 
         final RTextScrollPane scrollPane = new RTextScrollPane(codeArea);
 
