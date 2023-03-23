@@ -14,9 +14,11 @@ public class ErrorPanel extends PanelTemplate {
 
     public ErrorPanel() {
         super("Errores");
-        final JTable errorsTable = new JTable(errorTableModel);
-        final JScrollPane scrollPane = new JScrollPane(errorsTable);
-        errorsTable.getTableHeader().setReorderingAllowed(false);
+
+        final JTable errorTable = new JTable(errorTableModel);
+        errorTable.getTableHeader().setReorderingAllowed(false);
+
+        final JScrollPane scrollPane = new JScrollPane(errorTable);
         add(scrollPane);
     }
 
@@ -40,14 +42,14 @@ public class ErrorPanel extends PanelTemplate {
     public void updateTable() {
         errorTableModel.setRowCount(0);
         for (Error error : errorList) {
-            final Object[] errorData = {
+            final Object[] errorRow = {
                     error.error(),
                     error.description(),
                     error.lexeme(),
                     error.type(),
                     error.line()
             };
-            errorTableModel.addRow(errorData);
+            errorTableModel.addRow(errorRow);
         }
     }
 }
