@@ -152,7 +152,8 @@ public class CodePanel extends PanelTemplate {
             i++;
         }
         if (state != 0) {
-            errorPanel.addError(505, lexeme.toString(), multiCommentLineNum);
+            state = 505;
+            errorPanel.addError(state, lexeme.toString(), multiCommentLineNum);
             counterPanel.addCounter(state);
         }
         tokenPanel.updateTable();
