@@ -2,9 +2,9 @@ package main;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import panels.CodePanel;
-import panels.TokenPanel;
 import panels.CounterPanel;
 import panels.ErrorPanel;
+import panels.TokenPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
