@@ -3,6 +3,7 @@ package panels;
 import model.Token;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 
@@ -21,6 +22,14 @@ public class TokenPanel extends PanelTemplate {
             }
         };
         tokenTable.getTableHeader().setReorderingAllowed(false);
+        tokenTable.getColumnModel().getColumn(0).setPreferredWidth(1);
+        tokenTable.getColumnModel().getColumn(2).setPreferredWidth(1);
+
+        final DefaultTableCellRenderer centeredCell = new DefaultTableCellRenderer();
+        centeredCell.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+
+        tokenTable.getColumnModel().getColumn(0).setCellRenderer(centeredCell);
+        tokenTable.getColumnModel().getColumn(2).setCellRenderer(centeredCell);
 
         final JScrollPane scrollPane = new JScrollPane(tokenTable);
         add(scrollPane);

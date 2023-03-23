@@ -3,6 +3,7 @@ package panels;
 import model.Error;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 
@@ -21,6 +22,15 @@ public class ErrorPanel extends PanelTemplate {
             }
         };
         errorTable.getTableHeader().setReorderingAllowed(false);
+        errorTable.getColumnModel().getColumn(0).setPreferredWidth(1);
+        errorTable.getColumnModel().getColumn(3).setPreferredWidth(1);
+        errorTable.getColumnModel().getColumn(4).setPreferredWidth(1);
+
+        final DefaultTableCellRenderer centeredCell = new DefaultTableCellRenderer();
+        centeredCell.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+
+        errorTable.getColumnModel().getColumn(0).setCellRenderer(centeredCell);
+        errorTable.getColumnModel().getColumn(4).setCellRenderer(centeredCell);
 
         final JScrollPane scrollPane = new JScrollPane(errorTable);
         add(scrollPane);

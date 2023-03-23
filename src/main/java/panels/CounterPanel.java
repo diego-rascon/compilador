@@ -1,6 +1,7 @@
 package panels;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,6 +44,12 @@ public class CounterPanel extends PanelTemplate {
             }
         };
         counterTable.getTableHeader().setReorderingAllowed(false);
+        counterTable.getColumnModel().getColumn(1).setPreferredWidth(1);
+
+        final DefaultTableCellRenderer centeredCell = new DefaultTableCellRenderer();
+        centeredCell.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+
+        counterTable.getColumnModel().getColumn(1).setCellRenderer(centeredCell);
 
         final JScrollPane scrollPane = new JScrollPane(counterTable);
         add(scrollPane);
