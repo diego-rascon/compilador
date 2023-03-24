@@ -12,15 +12,15 @@ public class ErrorPanel extends PanelTemplate {
     private final LinkedList<Error> errorList = new LinkedList<>();
     private final String[] columns = {"Error", "Descripción", "Lexema", "Tipo", "Linea"};
     private final DefaultTableModel errorTableModel = new DefaultTableModel(columns, 0);
+    final JTable errorTable = new JTable(errorTableModel) {
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public ErrorPanel(int padding) {
         super("Errores", padding);
 
-        final JTable errorTable = new JTable(errorTableModel) {
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
         errorTable.getTableHeader().setReorderingAllowed(false);
         errorTable.getColumnModel().getColumn(0).setPreferredWidth(1);
         errorTable.getColumnModel().getColumn(3).setPreferredWidth(1);
@@ -66,5 +66,9 @@ public class ErrorPanel extends PanelTemplate {
             };
             errorTableModel.addRow(errorRow);
         }
+    }
+
+    public JTable getErrorTable() {
+        return errorTable;
     }
 }

@@ -34,15 +34,15 @@ public class CounterPanel extends PanelTemplate {
     };
     private final String[] columns = {"Tipo", "Cantidad"};
     private final DefaultTableModel counterTableModel = new DefaultTableModel(columns, 0);
+    private final JTable counterTable = new JTable(counterTableModel) {
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public CounterPanel(int padding) {
         super("Contadores", padding);
 
-        final JTable counterTable = new JTable(counterTableModel) {
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
         counterTable.getTableHeader().setReorderingAllowed(false);
         counterTable.getColumnModel().getColumn(1).setPreferredWidth(1);
 
@@ -189,5 +189,9 @@ public class CounterPanel extends PanelTemplate {
             final Integer newValue = counterEntry.getValue();
             counterTableModel.setValueAt(newValue, row++, 1);
         }
+    }
+
+    public JTable getCounterTable() {
+        return counterTable;
     }
 }

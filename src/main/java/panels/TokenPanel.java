@@ -12,15 +12,15 @@ public class TokenPanel extends PanelTemplate {
     private final LinkedList<Token> tokenList = new LinkedList<>();
     private final String[] columns = {"Estado", "Lexema", "Línea"};
     private final DefaultTableModel tokenTableModel = new DefaultTableModel(columns, 0);
+    private final JTable tokenTable = new JTable(tokenTableModel) {
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public TokenPanel(int padding) {
         super("Tokens", padding);
 
-        final JTable tokenTable = new JTable(tokenTableModel) {
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
         tokenTable.getTableHeader().setReorderingAllowed(false);
         tokenTable.getColumnModel().getColumn(0).setPreferredWidth(1);
         tokenTable.getColumnModel().getColumn(2).setPreferredWidth(1);
@@ -50,5 +50,9 @@ public class TokenPanel extends PanelTemplate {
             final Object[] tokenRow = {token.state(), token.lexeme(), token.line()};
             tokenTableModel.addRow(tokenRow);
         }
+    }
+
+    public JTable getTokenTable() {
+        return tokenTable;
     }
 }
