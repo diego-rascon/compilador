@@ -5,10 +5,16 @@ import java.awt.*;
 
 public abstract class PanelTemplate extends JPanel {
 
+    private final JLabel panelLabel;
+
     protected PanelTemplate(String title, int padding) {
         setLayout(new BorderLayout(padding, padding));
 
-        final JLabel codeLabel = new JLabel(title);
-        add(codeLabel, BorderLayout.NORTH);
+        panelLabel = new JLabel(title);
+        add(panelLabel, BorderLayout.NORTH);
+    }
+
+    public String getLabel() {
+        return panelLabel.getText();
     }
 }
