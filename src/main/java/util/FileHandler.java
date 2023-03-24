@@ -1,15 +1,22 @@
 package util;
 
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import panels.CodePanel;
 import panels.CounterPanel;
 import panels.ErrorPanel;
 import panels.TokenPanel;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class FileHandler {
 
@@ -35,30 +42,95 @@ public class FileHandler {
     }
 
     public void openFile() {
-        int result = fileChooser.showOpenDialog(mainFrame);
+        fileChooser.setDialogTitle("Abrir un archivo de texto");
+        final int result = fileChooser.showOpenDialog(mainFrame);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-
+            final File selectedFile = fileChooser.getSelectedFile();
             try {
-                BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
-                StringBuilder newText = new StringBuilder();
+                final BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
+                final StringBuilder newText = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     newText.append(line).append("\n");
                 }
                 reader.close();
-                String fileContent = newText.toString();
+                final String fileContent = newText.toString();
                 codePanel.setCode(fileContent);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(
-                        mainFrame,
-                        "No fue posible abrir el archivo seleccionado"
-                );
+                JOptionPane.showMessageDialog(mainFrame, "No fue posible abrir el archivo seleccionado.");
             }
         }
     }
 
     public void exportFile() {
-        System.out.println("export");
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            final LinkedHashMap<String, JTable> tablesMap = new LinkedHashMap<>();
+            tablesMap.put(tokenPanel.getLabel(), tokenPanel.getTokenTable());
+            tablesMap.put(counterPanel.getLabel(), counterPanel.getCounterTable());
+            tablesMap.put(errorPanel.getLabel(), errorPanel.getErrorTable());
+
+            for (Map.Entry<String, JTable> tableEntry : tablesMap.entrySet()) {
+                final JTable table = tableEntry.getValue();
+                final XSSFSheet sheet = workbook.createSheet(tableEntry.getKey());
+
+                final boolean onCounters = tableEntry.getKey().equals("Contadores");
+
+                if (onCounters) {
+                    final int rowCount = table.getColumnCount();
+                    for (int row = 0; row < rowCount; row++) {
+                        final XSSFRow sheetRow = sheet.createRow(row);
+                        final int columnCount = table.getRowCount();
+
+                        for (int column = 0; column < columnCount; column++) {
+                            final XSSFCell sheetCell = sheetRow.createCell(column);
+                            final Object cellValue = table.getValueAt(column, row);
+                            sheetCell.setCellValue(cellValue.toString());
+                        }
+                    }
+                } else {
+                    final JTableHeader tableHeader = table.getTableHeader();
+                    final TableColumnModel columnModel = tableHeader.getColumnModel();
+
+                    final int headingsCount = columnModel.getColumnCount();
+                    final String[] headers = new String[headingsCount];
+                    for (int i = 0; i < headingsCount; i++) {
+                        final TableColumn column = columnModel.getColumn(i);
+                        headers[i] = column.getHeaderValue().toString();
+                    }
+                    final XSSFRow headerRow = sheet.createRow(0);
+                    for (int i = 0; i < headers.length; i++) {
+                        final XSSFCell sheetCell = headerRow.createCell(i);
+                        sheetCell.setCellValue(headers[i]);
+                    }
+
+                    final int rowCount = table.getRowCount();
+                    for (int row = 0; row < rowCount; row++) {
+                        final XSSFRow sheetRow = sheet.createRow(row + 1);
+                        final int columnCount = table.getColumnCount();
+
+                        for (int column = 0; column < columnCount; column++) {
+                            final XSSFCell sheetCell = sheetRow.createCell(column);
+                            final Object cellValue = table.getValueAt(row, column);
+                            sheetCell.setCellValue(cellValue.toString());
+                        }
+                    }
+                }
+            }
+
+            fileChooser.setDialogTitle("Exportar los resultados a una hoja de cálculo");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel files (*.xlsx)", "xlsx"));
+            final int userSelection = fileChooser.showSaveDialog(null);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                if (!filePath.toLowerCase().endsWith(".xlsx")) {
+                    filePath += ".xlsx";
+                }
+                try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+                    workbook.write(outputStream);
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(mainFrame, "No fue posible exportar el archivo.");
+        }
     }
 }
