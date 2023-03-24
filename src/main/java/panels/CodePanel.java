@@ -124,6 +124,7 @@ public class CodePanel extends PanelTemplate {
             if (state < 0) {
                 if (state == -57) state = getKeywordToken(lexeme.toString(), state);
                 if (state == -25) {
+                    System.out.println("mutli");
                     tokenPanel.addToken(state, lexeme.toString(), multiCommentLineNum);
                 } else {
                     tokenPanel.addToken(state, lexeme.toString(), lineNum);
@@ -145,7 +146,8 @@ public class CodePanel extends PanelTemplate {
                 if (character == '\n') {
                     lineNum++;
                 }
-                if (state == 22 && lexeme.toString().equals("/*")) {
+                if (state == 25 && lexeme.toString().equals("/*")) {
+                    System.out.println("hhahaha");
                     multiCommentLineNum = lineNum;
                 }
             }
