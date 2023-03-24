@@ -104,8 +104,14 @@ public class FileHandler {
                     }
 
                     final int rowCount = table.getRowCount();
+                    int rowOffset = 0;
                     for (int row = 0; row < rowCount; row++) {
-                        final XSSFRow sheetRow = sheet.createRow(row + 1);
+                        final String lexerValue = table.getValueAt(row, 1).toString();
+                        if (lexerValue.startsWith("/*") || lexerValue.startsWith("//")) {
+                            rowOffset++;
+                            continue;
+                        }
+                        final XSSFRow sheetRow = sheet.createRow(row + 1 - rowOffset);
                         final int columnCount = table.getColumnCount();
 
                         for (int column = 0; column < columnCount; column++) {
@@ -117,8 +123,13 @@ public class FileHandler {
                 }
             }
 
+            File defaultFile = new File("Resultados");
+
+            fileChooser.setSelectedFile(defaultFile);
             fileChooser.setDialogTitle("Exportar los resultados a una hoja de cálculo");
-            fileChooser.setFileFilter(new FileNameExtensionFilter("Excel files (*.xlsx)", "xlsx"));
+            fileChooser.setFileFilter(
+                    new FileNameExtensionFilter("Archivos de Excel (*.xlsx)", "xlsx")
+            );
             final int userSelection = fileChooser.showSaveDialog(null);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 String filePath = fileChooser.getSelectedFile().getAbsolutePath();
