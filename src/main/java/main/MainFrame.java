@@ -66,14 +66,14 @@ public class MainFrame extends JFrame {
         openButton.setMnemonic('A');
         buttonsPanel.add(openButton);
 
-        final JButton exportButton = new JButton("Exportar");
-        exportButton.addActionListener(e -> fileHandler.exportFile());
-        exportButton.setMnemonic('E');
-        buttonsPanel.add(exportButton);
-
         final JButton compileButton = new JButton("Compilar");
         compileButton.addActionListener(e -> codePanel.compile());
         compileButton.setMnemonic('C');
         buttonsPanel.add(compileButton);
+
+        final JButton exportButton = new JButton("Exportar");
+        exportButton.addActionListener(e -> fileHandler.exportFile());
+        exportButton.setMnemonic('E');
+        buttonsPanel.add(exportButton);
     }
 }
