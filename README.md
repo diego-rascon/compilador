@@ -1,2 +1,2 @@
 # Léxico
-Primera parte del proyecto del compilador de la clase de lenguajes y autómatas I, esta fase consiste en elaborar el léxico del lenguaje a elaborar. Elaborado por José Diego Rascón Amador (20130375) utilizando el Java (JDK 17.0.6), Maven e Intellij.
+Primera parte del proyecto del compilador de la clase de Lenguajes y Autómatas I, esta fase consiste en elaborar el léxico del lenguaje a elaborar. Hecho por José Diego Rascón Amador.
