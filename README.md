@@ -1,2 +1,2 @@
-# Sintaxis
-Segunda parte del proyecto del compilador de la clase de lenguajes y autómatas I, esta fase consiste en elaborar la sintaxis del lenguaje a elaborar. Elaborado por José Diego Rascón Amador (20130375) utilizando el Java (JDK 17.0.6), Maven e IntelliJ.
+# Compilador
+Ese repositorio está dedicado al proyecto del compilador de la clase de lenguajes y autómatas I y II, este proyecto consiste en crear todo el compilador de un lenguaje inspirado en TypeScript desde cero. Cada rama del repositorio representa una fase del proyecto. Elaborado por José Diego Rascón Amador.
