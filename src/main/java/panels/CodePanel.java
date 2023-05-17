@@ -129,7 +129,7 @@ public class CodePanel extends PanelTemplate {
             {-17, 254, 261}, //105
             {-17, 254, 262}, //106
             {-17, 254, 263}, //107
-            {273, 265, -17, 254, 273, 266},  //108
+            {273, 265, -17, 254, -17, 273, 266},  //108
             {-87, -57, 267, -57},  //109
             {-15, 273, 265},  //110
             {-15, 273, 266},  //111
@@ -145,17 +145,17 @@ public class CodePanel extends PanelTemplate {
             {-100, -50, 273, -51},  //121
             {-101, -50, 273, -51},  //122
             {-102, -50, 273, -51},  //123
-            {-103, -50, 273, -51},  //124
-            {-104, -50, 273, -51},  //125
+            {-103, -50, 273, -15, 273, -51},  //124
+            {-104, -50, 273, -15, 273, -51},  //125
             {-105, -50, 273, -51},  //126
             {-78, -50, 273, -15, 273, -51},  //127
             {-79, -50, 273, -15, 273, -51},  //128
             {-80, -50, 273, -15, 273, -15, -51},  //129
-            {-81, -50, 273, -15, 273, -51},  //130
-            {-82, -50, 273, -15, 273, -51},  //131
-            {-83, -50, 273, -15, 273, -51},  //132
-            {-84, -50, 273, -15, 273, -51},  //133
-            {-85, -50, 273, -15, 273, -51},  //134
+            {-81, -50, 273, -51},  //130
+            {-82, -50, 273, -51},  //131
+            {-83, -50, 273, -51},  //132
+            {-84, -50, 273, -51},  //133
+            {-85, -50, 273, -51},  //134
             {269},  //135
             {-48, 273, 272, -49},  //136
             {-15, 273, 272},  //137
@@ -310,43 +310,40 @@ public class CodePanel extends PanelTemplate {
     }
 
     private void checkSyntax() {
-        while (!syntaxTokens.isEmpty()) {
+        while (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
             int topSyntaxStack = syntaxStack.peek();
+            if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
+                Token token = syntaxTokens.getFirst();
+                int tokenCol = (token.token() * -1) - 1;
+                String lexeme = token.lexeme();
+                int lineNum = token.line();
 
-            if (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
-                if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
-                    Token token = syntaxTokens.getFirst();
-                    int tokenCol = (token.token() * -1) - 1;
-                    String lexeme = token.lexeme();
-                    int lineNum = token.line();
+                int production = syntaxMatrix[topSyntaxStack - 200][tokenCol];
 
-                    int production = syntaxMatrix[topSyntaxStack - 200][tokenCol];
-
-                    if (production > 500) {
-                        errorPanel.addError(tokenCol, lexeme, ErrorType.SINTAXIS, lineNum);
-                        errorTypesPanel.addCounter(ErrorType.SINTAXIS);
-                        syntaxTokens.removeFirst();
-                    } else if (production == 180) {
-                        syntaxStack.pop();
-                    } else {
-                        syntaxStack.pop();
-                        for (int j = productions[production].length - 1; j >= 0; j--) {
-                            syntaxStack.push(productions[production][j]);
-                        }
+                if (production > 500) {
+                    errorPanel.addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
+                    errorTypesPanel.addCounter(ErrorType.SINTAXIS);
+                    syntaxTokens.removeFirst();
+                } else if (production == 180) {
+                    syntaxStack.pop();
+                } else {
+                    syntaxStack.pop();
+                    for (int j = productions[production].length - 1; j >= 0; j--) {
+                        syntaxStack.push(productions[production][j]);
                     }
-                } else if (topSyntaxStack < 0) {
-                    int token = syntaxTokens.getFirst().token();
-                    if (token == topSyntaxStack) {
-                        syntaxStack.pop();
-                        syntaxTokens.removeFirst();
-                    } else if (token == -53 && topSyntaxStack == -52) {
-                        syntaxStack.pop();
-                        syntaxTokens.removeFirst();
-                    } else {
-                        System.out.println("Error de fuerza bruta.");
-                        syntaxStack.pop();
-                        syntaxTokens.removeFirst();
-                    }
+                }
+            } else if (topSyntaxStack < 0) {
+                int token = syntaxTokens.getFirst().token();
+                if (token == topSyntaxStack) {
+                    syntaxStack.pop();
+                    syntaxTokens.removeFirst();
+                } else if (token == -53 && topSyntaxStack == -52) {
+                    syntaxStack.pop();
+                    syntaxTokens.removeFirst();
+                } else {
+                    System.out.println("Error de fuerza bruta.");
+                    syntaxStack.pop();
+                    syntaxTokens.removeFirst();
                 }
             }
         }
