@@ -33,7 +33,7 @@ public class MainFrame extends JFrame {
         final CounterPanel counterPanel = new CounterPanel(padding);
         final ErrorPanel errorPanel = new ErrorPanel(padding);
         final ErrorTypesPanel errorTypesPanel = new ErrorTypesPanel(padding);
-        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel);
+        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel, errorTypesPanel);
 
         final JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainSplit.setBorder(new EmptyBorder(padding, padding, 0, padding));
