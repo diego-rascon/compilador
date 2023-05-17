@@ -51,7 +51,7 @@ public class ErrorPanel extends PanelTemplate {
             case 505 -> description = "Se esperaba que se cerrara el comentario con */.";
             case 510 -> description = "Se esperaba un ,.";
             case 523 -> description = "Se esperaba un ++, --, ~, !, (, ), \"\", '', un número, un identificador, un valor o un método.";
-            case 547 -> description = "Se esperaba un operador o una comparación";
+            case 543, 547 -> description = "Se esperaba un operador o una comparación";
             case 548 -> description = "Se esperaba que con ~.";
         }
         String type = "";
