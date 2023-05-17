@@ -1,5 +1,7 @@
 package panels;
 
+import model.ErrorType;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -10,7 +12,7 @@ public class ErrorTypesPanel extends PanelTemplate {
 
     private final LinkedHashMap<String, Integer> counterMap = new LinkedHashMap<>();
     private final String[] columns = {"Tipo", "Cantidad"};
-    private final String[] errorTypes = {"Léxico", "Sintaxis"};
+    private final String[] rowLabels = {"Léxico", "Sintaxis"};
     private final DefaultTableModel errorTypesTableModel = new DefaultTableModel(columns, 0);
     private final JTable errorTypesTable = new JTable(errorTypesTableModel) {
         public boolean isCellEditable(int row, int column) {
@@ -36,7 +38,7 @@ public class ErrorTypesPanel extends PanelTemplate {
     }
 
     final void initTable() {
-        for (String errorType : errorTypes) {
+        for (String errorType : rowLabels) {
             counterMap.put(errorType, 0);
             final Object[] counterRow = {errorType, 0};
             errorTypesTableModel.addRow(counterRow);
@@ -49,8 +51,18 @@ public class ErrorTypesPanel extends PanelTemplate {
         }
     }
 
-    public void addCounter(int state) {
-
+    public void addCounter(ErrorType errorType) {
+        String rowLabel = "";
+        switch (errorType) {
+            case LEXIC -> {
+                rowLabel = rowLabels[0];
+            }
+            case SINTAXIS -> {
+                rowLabel = rowLabels[1];
+            }
+        }
+        int newValue = counterMap.get(rowLabel) + 1;
+        counterMap.put(rowLabel, newValue);
     }
 
     public void updateTable() {
