@@ -4,10 +4,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import panels.CodePanel;
-import panels.CounterPanel;
-import panels.ErrorPanel;
-import panels.TokenPanel;
+import panels.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,20 +22,16 @@ public class FileHandler {
     private final TokenPanel tokenPanel;
     private final CounterPanel counterPanel;
     private final ErrorPanel errorPanel;
+    private final ErrorTypesPanel errorTypesPanel;
     private final JFileChooser fileChooser = new JFileChooser();
 
-    public FileHandler(
-            JFrame mainFrame,
-            CodePanel codePanel,
-            TokenPanel tokenPanel,
-            CounterPanel counterPanel,
-            ErrorPanel errorPanel
-    ) {
+    public FileHandler(JFrame mainFrame, CodePanel codePanel, TokenPanel tokenPanel, CounterPanel counterPanel, ErrorPanel errorPanel, ErrorTypesPanel errorTypesPanel) {
         this.mainFrame = mainFrame;
         this.codePanel = codePanel;
         this.tokenPanel = tokenPanel;
         this.counterPanel = counterPanel;
         this.errorPanel = errorPanel;
+        this.errorTypesPanel = errorTypesPanel;
     }
 
     public void openFile() {
@@ -68,12 +61,13 @@ public class FileHandler {
             tablesMap.put(tokenPanel.getLabel(), tokenPanel.getTokenTable());
             tablesMap.put(counterPanel.getLabel(), counterPanel.getCounterTable());
             tablesMap.put(errorPanel.getLabel(), errorPanel.getErrorTable());
+            tablesMap.put(errorTypesPanel.getLabel(), errorTypesPanel.getErrorTypesTable());
 
             for (Map.Entry<String, JTable> tableEntry : tablesMap.entrySet()) {
                 final JTable table = tableEntry.getValue();
                 final XSSFSheet sheet = workbook.createSheet(tableEntry.getKey());
 
-                final boolean onCounters = tableEntry.getKey().equals("Contadores");
+                final boolean onCounters = tableEntry.getKey().equals("Contadores") || tableEntry.getKey().equals("Tipos de errores");
 
                 if (onCounters) {
                     final int rowCount = table.getColumnCount();
@@ -123,13 +117,11 @@ public class FileHandler {
                 }
             }
 
-            File defaultFile = new File("Resultados");
+            File defaultFile = new File("Compilador - Diego Rascón (20130375)");
 
             fileChooser.setSelectedFile(defaultFile);
             fileChooser.setDialogTitle("Exportar los resultados a una hoja de cálculo");
-            fileChooser.setFileFilter(
-                    new FileNameExtensionFilter("Archivos de Excel (*.xlsx)", "xlsx")
-            );
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Excel (*.xlsx)", "xlsx"));
             final int userSelection = fileChooser.showSaveDialog(null);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 String filePath = fileChooser.getSelectedFile().getAbsolutePath();
