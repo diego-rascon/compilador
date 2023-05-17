@@ -1,10 +1,7 @@
 package main;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import panels.CodePanel;
-import panels.CounterPanel;
-import panels.ErrorPanel;
-import panels.TokenPanel;
+import panels.*;
 import util.FileHandler;
 
 import javax.swing.*;
@@ -32,27 +29,32 @@ public class MainFrame extends JFrame {
 
         final byte padding = 8;
 
+        final TokenPanel tokenPanel = new TokenPanel(padding);
+        final CounterPanel counterPanel = new CounterPanel(padding);
+        final ErrorPanel errorPanel = new ErrorPanel(padding);
+        final ErrorTypesPanel errorTypesPanel = new ErrorTypesPanel(padding);
+        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel);
+
         final JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainSplit.setBorder(new EmptyBorder(padding, padding, 0, padding));
         mainSplit.setResizeWeight(0.66);
         mainSplit.setDividerSize(padding);
         mainPanel.add(mainSplit, BorderLayout.CENTER);
 
-        final TokenPanel tokenPanel = new TokenPanel(padding);
-        final CounterPanel counterPanel = new CounterPanel(padding);
-        final ErrorPanel errorPanel = new ErrorPanel(padding);
-        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel);
-
         final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokenPanel, counterPanel);
-        rightSplit.setResizeWeight(0.5);
+        rightSplit.setResizeWeight(0.8);
         rightSplit.setDividerSize(padding);
 
         final JSplitPane leftSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, codePanel, rightSplit);
-        leftSplit.setResizeWeight(0.5);
+        leftSplit.setResizeWeight(0.9);
+        leftSplit.setDividerSize(padding);
+
+        final JSplitPane errorSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, errorPanel, errorTypesPanel);
+        errorSplit.setResizeWeight(1);
         leftSplit.setDividerSize(padding);
 
         mainSplit.add(leftSplit);
-        mainSplit.add(errorPanel);
+        mainSplit.add(errorSplit);
 
         final JPanel buttonsPanel = new JPanel();
         mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
