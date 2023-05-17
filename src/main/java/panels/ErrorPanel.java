@@ -1,6 +1,7 @@
 package panels;
 
 import model.Error;
+import model.ErrorType;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -40,7 +41,7 @@ public class ErrorPanel extends PanelTemplate {
         errorList.clear();
     }
 
-    final public void addError(int error, String lexeme, int line) {
+    final public void addError(int error, String lexeme, ErrorType errorType, int line) {
         String description = "Caracter no válido";
         switch (error) {
             case 501 -> description = "Se esperaba un \"";
@@ -49,7 +50,11 @@ public class ErrorPanel extends PanelTemplate {
             case 504 -> description = "Se esperaba un \"+\", un \"-\" o un número";
             case 505 -> description = "Se esperaba que se cerrara el comentario con */";
         }
-        final String type = "Léxico";
+        String type = "";
+        switch (errorType) {
+            case LEXIC -> type = "Léxico";
+            case SINTAXIS -> type = "Sintaxis";
+        }
         final Error newError = new Error(error, description, lexeme, type, line);
         errorList.add(newError);
     }
@@ -57,13 +62,7 @@ public class ErrorPanel extends PanelTemplate {
     public void updateTable() {
         errorTableModel.setRowCount(0);
         for (Error error : errorList) {
-            final Object[] errorRow = {
-                    error.error(),
-                    error.description(),
-                    error.lexeme(),
-                    error.type(),
-                    error.line()
-            };
+            final Object[] errorRow = {error.error(), error.description(), error.lexeme(), error.type(), error.line()};
             errorTableModel.addRow(errorRow);
         }
     }
