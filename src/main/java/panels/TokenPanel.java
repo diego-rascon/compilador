@@ -47,7 +47,7 @@ public class TokenPanel extends PanelTemplate {
     public void updateTable() {
         tokenTableModel.setRowCount(0);
         for (Token token : tokenList) {
-            final Object[] tokenRow = {token.state(), token.lexeme(), token.line()};
+            final Object[] tokenRow = {token.token(), token.lexeme(), token.line()};
             tokenTableModel.addRow(tokenRow);
         }
     }
