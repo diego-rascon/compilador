@@ -1,5 +1,6 @@
 package panels;
 
+import model.ErrorType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -16,65 +17,82 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class CodePanel extends PanelTemplate {
-
     private final String[] keywords = {
+            "true",
+            "false",
+            "null",
             "if",
             "else",
             "switch",
             "for",
             "do",
             "while",
-            "console",
+            "Console",
             "log",
-            "forEach",
+            "fuction",
+            "real",
+            "boolean",
+            "Array",
+            "new",
+            "read",
+            "case",
+            "default",
+            "return",
+            "expo",
+            "sqrtv",
+            "ConvBase",
+            "asc",
+            "sen",
+            "val",
+            "cos",
+            "tan",
             "break",
-            "continue",
             "let",
-            "const",
-            "undefined",
             "interface",
-            "typeof",
-            "Number",
-            "String",
-            "any",
+            "number",
+            "string",
             "set",
             "get",
             "class",
             "toLowerCase",
             "toUpperCase",
-            "length",
+            "legth",
             "trim",
             "charAt",
             "startsWith",
             "endsWith",
             "indexOf",
-            "Includes",
+            "includes",
             "slice",
             "replace",
             "split",
-            "push",
-            "shift",
             "in",
             "of",
-            "splice",
+            "Map",
+            "forEach",
+            "any",
+            "const",
+            "continue",
             "concat",
             "find",
             "findIndex",
             "filter",
-            "map",
+            "push",
+            "shift",
             "sort",
             "reverse",
-            "true",
-            "false",
-            "null"
+            "splice",
+            "typeof",
+            "undefined"
     };
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final TokenPanel tokenPanel;
     private final CounterPanel counterPanel;
     private final ErrorPanel errorPanel;
+    private final ErrorTypesPanel errorTypesPanel;
     private int[][] matrix;
 
-    public CodePanel(int padding, TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel) {
+    public CodePanel(int padding, TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel, ErrorTypesPanel errorTypesPanel) {
         super("Código", padding);
 
         final RTextScrollPane scrollPane = new RTextScrollPane(codeArea);
@@ -82,6 +100,7 @@ public class CodePanel extends PanelTemplate {
         this.tokenPanel = tokensPanel;
         this.counterPanel = countersPanel;
         this.errorPanel = errorsPanel;
+        this.errorTypesPanel = errorTypesPanel;
 
         codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
         codeArea.setCodeFoldingEnabled(true);
@@ -109,6 +128,7 @@ public class CodePanel extends PanelTemplate {
         tokenPanel.emptyTokensList();
         counterPanel.restartCounter();
         errorPanel.emptyErrorsList();
+        errorTypesPanel.restartCounter();
 
         int i = 0;
         int state = 0;
@@ -137,8 +157,9 @@ public class CodePanel extends PanelTemplate {
                 if (state == 500) {
                     lexeme.append(character);
                 } else i--;
-                errorPanel.addError(state, lexeme.toString(), lineNum);
                 counterPanel.addCounter(state);
+                errorPanel.addError(state, lexeme.toString(), lineNum);
+                errorTypesPanel.addCounter(ErrorType.LEXIC);
                 lexeme.setLength(0);
                 state = 0;
             } else {
@@ -155,12 +176,14 @@ public class CodePanel extends PanelTemplate {
         }
         if (state != 0) {
             state = 505;
-            errorPanel.addError(state, lexeme.toString(), multiCommentLineNum);
             counterPanel.addCounter(state);
+            errorPanel.addError(state, lexeme.toString(), multiCommentLineNum);
+            errorTypesPanel.addCounter(ErrorType.LEXIC);
         }
         tokenPanel.updateTable();
         counterPanel.updateTable();
         errorPanel.updateTable();
+        errorTypesPanel.updateTable();
     }
 
     private int getColumn(char character) {
