@@ -1,4 +1,4 @@
 package model;
 
-public record Token(int state, String lexeme, int line) {
+public record Token(int token, String lexeme, int line) {
 }
