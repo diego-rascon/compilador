@@ -59,9 +59,7 @@ public class MainFrame extends JFrame {
         final JPanel buttonsPanel = new JPanel();
         mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
-        final FileHandler fileHandler = new FileHandler(
-                this, codePanel, tokenPanel, counterPanel, errorPanel
-        );
+        final FileHandler fileHandler = new FileHandler(this, codePanel, tokenPanel, counterPanel, errorPanel, errorTypesPanel);
 
         final JButton openButton = new JButton("Abrir");
         openButton.addActionListener(e -> fileHandler.openFile());
