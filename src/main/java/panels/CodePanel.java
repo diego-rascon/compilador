@@ -273,7 +273,7 @@ public class CodePanel extends PanelTemplate {
 
     final void loadMatrix() {
         try {
-            FileInputStream matrixFile = new FileInputStream("./src/main/resources/matrix.xlsx");
+            FileInputStream matrixFile = new FileInputStream("./src/main/resources/matrix-lexic.xlsx");
 
             XSSFWorkbook workbook = new XSSFWorkbook(matrixFile);
             XSSFSheet sheet = workbook.getSheetAt(0);
