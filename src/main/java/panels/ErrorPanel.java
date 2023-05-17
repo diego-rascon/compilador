@@ -44,11 +44,15 @@ public class ErrorPanel extends PanelTemplate {
     final public void addError(int error, String lexeme, ErrorType errorType, int line) {
         String description = "Caracter no válido";
         switch (error) {
-            case 501 -> description = "Se esperaba un \"";
-            case 502 -> description = "Se esperaba un '";
-            case 503 -> description = "Se esperaba un número";
-            case 504 -> description = "Se esperaba un \"+\", un \"-\" o un número";
-            case 505 -> description = "Se esperaba que se cerrara el comentario con */";
+            case 501 -> description = "Se esperaba un \".";
+            case 502 -> description = "Se esperaba un '.";
+            case 503 -> description = "Se esperaba un número.";
+            case 504 -> description = "Se esperaba un \"+\", un \"-\" o un número.";
+            case 505 -> description = "Se esperaba que se cerrara el comentario con */.";
+            case 510 -> description = "Se esperaba un ,.";
+            case 523 -> description = "Se esperaba un ++, --, ~, !, (, ), \"\", '', un número, un identificador, un valor o un método.";
+            case 547 -> description = "Se esperaba un operador o una comparación";
+            case 548 -> description = "Se esperaba que con ~.";
         }
         String type = "";
         switch (errorType) {
