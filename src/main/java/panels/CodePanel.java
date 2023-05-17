@@ -240,6 +240,7 @@ public class CodePanel extends PanelTemplate {
     }
 
     public void compile() {
+        syntaxTokens.clear();
         syntaxStack.clear();
         syntaxStack.push(200);
         tokenPanel.emptyTokensList();
@@ -309,16 +310,13 @@ public class CodePanel extends PanelTemplate {
     }
 
     private void checkSyntax() {
-        int i = 0;
         while (!syntaxTokens.isEmpty()) {
             int topSyntaxStack = syntaxStack.peek();
 
             if (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
                 if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                     Token token = syntaxTokens.getFirst();
-                    int tokenCol = token.token();
-                    tokenCol *= -1;
-                    tokenCol--;
+                    int tokenCol = (token.token() * -1) - 1;
                     String lexeme = token.lexeme();
                     int lineNum = token.line();
 
