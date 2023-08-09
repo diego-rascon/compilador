@@ -4,7 +4,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import panels.*;
+import view.*;
+import view.Errors;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -18,19 +19,19 @@ import java.util.Map;
 public class FileHandler {
 
     private final JFrame mainFrame;
-    private final CodePanel codePanel;
-    private final TokenPanel tokenPanel;
-    private final CounterPanel counterPanel;
-    private final ErrorPanel errorPanel;
-    private final ErrorTypesPanel errorTypesPanel;
+    private final Code codePanel;
+    private final Tokens tokenPanel;
+    private final Counters countersPanel;
+    private final Errors errorsPanel;
+    private final ErrorTypes errorTypesPanel;
     private final JFileChooser fileChooser = new JFileChooser();
 
-    public FileHandler(JFrame mainFrame, CodePanel codePanel, TokenPanel tokenPanel, CounterPanel counterPanel, ErrorPanel errorPanel, ErrorTypesPanel errorTypesPanel) {
+    public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
         this.codePanel = codePanel;
         this.tokenPanel = tokenPanel;
-        this.counterPanel = counterPanel;
-        this.errorPanel = errorPanel;
+        this.countersPanel = countersPanel;
+        this.errorsPanel = errorsPanel;
         this.errorTypesPanel = errorTypesPanel;
     }
 
@@ -59,8 +60,8 @@ public class FileHandler {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             final LinkedHashMap<String, JTable> tablesMap = new LinkedHashMap<>();
             tablesMap.put(tokenPanel.getLabel(), tokenPanel.getTokenTable());
-            tablesMap.put(counterPanel.getLabel(), counterPanel.getCounterTable());
-            tablesMap.put(errorPanel.getLabel(), errorPanel.getErrorTable());
+            tablesMap.put(countersPanel.getLabel(), countersPanel.getCounterTable());
+            tablesMap.put(errorsPanel.getLabel(), errorsPanel.getErrorTable());
             tablesMap.put(errorTypesPanel.getLabel(), errorTypesPanel.getErrorTypesTable());
 
             for (Map.Entry<String, JTable> tableEntry : tablesMap.entrySet()) {

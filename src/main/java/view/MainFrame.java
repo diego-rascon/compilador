@@ -1,7 +1,6 @@
-package main;
+package view;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import panels.*;
 import util.FileHandler;
 
 import javax.swing.*;
@@ -29,11 +28,11 @@ public class MainFrame extends JFrame {
 
         final byte padding = 8;
 
-        final TokenPanel tokenPanel = new TokenPanel(padding);
-        final CounterPanel counterPanel = new CounterPanel(padding);
-        final ErrorPanel errorPanel = new ErrorPanel(padding);
-        final ErrorTypesPanel errorTypesPanel = new ErrorTypesPanel(padding);
-        final CodePanel codePanel = new CodePanel(padding, tokenPanel, counterPanel, errorPanel, errorTypesPanel);
+        final Tokens tokenPanel = new Tokens(padding);
+        final Counters countersPanel = new Counters(padding);
+        final Errors errorsPanel = new Errors(padding);
+        final ErrorTypes errorTypesPanel = new ErrorTypes(padding);
+        final Code codePanel = new Code(padding, tokenPanel, countersPanel, errorsPanel, errorTypesPanel);
 
         final JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainSplit.setBorder(new EmptyBorder(padding, padding, 0, padding));
@@ -41,7 +40,7 @@ public class MainFrame extends JFrame {
         mainSplit.setDividerSize(padding);
         mainPanel.add(mainSplit, BorderLayout.CENTER);
 
-        final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokenPanel, counterPanel);
+        final JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tokenPanel, countersPanel);
         rightSplit.setResizeWeight(0.8);
         rightSplit.setDividerSize(padding);
 
@@ -49,7 +48,7 @@ public class MainFrame extends JFrame {
         leftSplit.setResizeWeight(0.9);
         leftSplit.setDividerSize(padding);
 
-        final JSplitPane errorSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, errorPanel, errorTypesPanel);
+        final JSplitPane errorSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, errorsPanel, errorTypesPanel);
         errorSplit.setResizeWeight(1);
         leftSplit.setDividerSize(padding);
 
@@ -59,7 +58,7 @@ public class MainFrame extends JFrame {
         final JPanel buttonsPanel = new JPanel();
         mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
-        final FileHandler fileHandler = new FileHandler(this, codePanel, tokenPanel, counterPanel, errorPanel, errorTypesPanel);
+        final FileHandler fileHandler = new FileHandler(this, codePanel, tokenPanel, countersPanel, errorsPanel, errorTypesPanel);
 
         final JButton openButton = new JButton("Abrir");
         openButton.addActionListener(e -> fileHandler.openFile());

@@ -1,4 +1,4 @@
-package panels;
+package view;
 
 import model.ErrorType;
 
@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ErrorTypesPanel extends PanelTemplate {
+public class ErrorTypes extends PanelTemplate {
 
     private final LinkedHashMap<String, Integer> counterMap = new LinkedHashMap<>();
     private final String[] columns = {"Tipo", "Cantidad"};
@@ -20,7 +20,7 @@ public class ErrorTypesPanel extends PanelTemplate {
         }
     };
 
-    public ErrorTypesPanel(int padding) {
+    public ErrorTypes(int padding) {
         super("Tipos de errores", padding);
 
         errorTypesTable.getTableHeader().setReorderingAllowed(false);

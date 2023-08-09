@@ -1,15 +1,13 @@
-package panels;
-
-import model.Token;
+package view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 
-public class TokenPanel extends PanelTemplate {
+public class Tokens extends PanelTemplate {
 
-    private final LinkedList<Token> tokenList = new LinkedList<>();
+    private final LinkedList<model.Token> tokenList = new LinkedList<>();
     private final String[] columns = {"Estado", "Lexema", "Línea"};
     private final DefaultTableModel tokenTableModel = new DefaultTableModel(columns, 0);
     private final JTable tokenTable = new JTable(tokenTableModel) {
@@ -18,7 +16,7 @@ public class TokenPanel extends PanelTemplate {
         }
     };
 
-    public TokenPanel(int padding) {
+    public Tokens(int padding) {
         super("Tokens", padding);
 
         tokenTable.getTableHeader().setReorderingAllowed(false);
@@ -40,13 +38,13 @@ public class TokenPanel extends PanelTemplate {
     }
 
     final public void addToken(int state, String lexeme, int line) {
-        final Token newToken = new Token(state, lexeme, line);
+        final model.Token newToken = new model.Token(state, lexeme, line);
         tokenList.add(newToken);
     }
 
     public void updateTable() {
         tokenTableModel.setRowCount(0);
-        for (Token token : tokenList) {
+        for (model.Token token : tokenList) {
             final Object[] tokenRow = {token.token(), token.lexeme(), token.line()};
             tokenTableModel.addRow(tokenRow);
         }

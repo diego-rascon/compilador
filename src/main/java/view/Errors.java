@@ -1,6 +1,5 @@
-package panels;
+package view;
 
-import model.Error;
 import model.ErrorType;
 
 import javax.swing.*;
@@ -8,9 +7,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 
-public class ErrorPanel extends PanelTemplate {
+public class Errors extends PanelTemplate {
 
-    private final LinkedList<Error> errorList = new LinkedList<>();
+    private final LinkedList<model.Error> errorList = new LinkedList<>();
     private final String[] columns = {"Error", "Descripción", "Lexema", "Tipo", "Linea"};
     private final DefaultTableModel errorTableModel = new DefaultTableModel(columns, 0);
     final JTable errorTable = new JTable(errorTableModel) {
@@ -19,7 +18,7 @@ public class ErrorPanel extends PanelTemplate {
         }
     };
 
-    public ErrorPanel(int padding) {
+    public Errors(int padding) {
         super("Errores", padding);
 
         errorTable.getTableHeader().setReorderingAllowed(false);
@@ -96,13 +95,13 @@ public class ErrorPanel extends PanelTemplate {
             case LEXIC -> type = "Léxico";
             case SINTAXIS -> type = "Sintaxis";
         }
-        final Error newError = new Error(error, description, lexeme, type, line);
+        final model.Error newError = new model.Error(error, description, lexeme, type, line);
         errorList.add(newError);
     }
 
     public void updateTable() {
         errorTableModel.setRowCount(0);
-        for (Error error : errorList) {
+        for (model.Error error : errorList) {
             final Object[] errorRow = {error.error(), error.description(), error.lexeme(), error.type(), error.line()};
             errorTableModel.addRow(errorRow);
         }

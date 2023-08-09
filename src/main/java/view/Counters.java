@@ -1,4 +1,4 @@
-package panels;
+package view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -6,7 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class CounterPanel extends PanelTemplate {
+public class Counters extends PanelTemplate {
 
     private final LinkedHashMap<String, Integer> counterMap = new LinkedHashMap<>();
     private final String[] rowLabels = {
@@ -40,7 +40,7 @@ public class CounterPanel extends PanelTemplate {
         }
     };
 
-    public CounterPanel(int padding) {
+    public Counters(int padding) {
         super("Contadores", padding);
 
         counterTable.getTableHeader().setReorderingAllowed(false);
