@@ -1,7 +1,6 @@
-package panels;
+package view;
 
 import model.ErrorType;
-import model.Token;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -19,7 +18,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
 
-public class CodePanel extends PanelTemplate {
+public class Code extends PanelTemplate {
     private final String[] keywords = {"true", "false", "null", "if", "else", "switch", "for", "do", "while", "Console", "log", "fuction", "real", "boolean", "Array", "new", "read", "case", "default", "return", "expo", "sqrtv", "ConvBase", "asc", "sen", "val", "cos", "tan", "break", "let", "interface", "number", "string", "set", "get", "class", "toLowerCase", "toUpperCase", "legth", "trim", "charAt", "startsWith", "endsWith", "indexOf", "includes", "slice", "replace", "split", "in", "of", "Map", "forEach", "any", "const", "continue", "concat", "find", "findIndex", "filter", "push", "shift", "sort", "reverse", "splice", "typeof", "undefined"};
     private final int[][] productions = {{201, -46, 254, 206, -47},     // 0
             {247, 201},        // 1
@@ -49,6 +48,7 @@ public class CodePanel extends PanelTemplate {
             {-71},    // 25
             {-60},    // 26
             {-70},    // 27
+            {-69},    // #
             {-52},    // 28
             {-54},    // 29
             {-58},    // 30
@@ -203,23 +203,23 @@ public class CodePanel extends PanelTemplate {
             {-7}  //179
     };
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
-    private final TokenPanel tokenPanel;
-    private final CounterPanel counterPanel;
-    private final ErrorPanel errorPanel;
-    private final ErrorTypesPanel errorTypesPanel;
-    private final LinkedList<Token> syntaxTokens = new LinkedList<>();
+    private final Tokens tokenPanel;
+    private final Counters countersPanel;
+    private final Errors errorsPanel;
+    private final ErrorTypes errorTypesPanel;
+    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
 
-    public CodePanel(int padding, TokenPanel tokensPanel, CounterPanel countersPanel, ErrorPanel errorsPanel, ErrorTypesPanel errorTypesPanel) {
+    public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         super("Código", padding);
 
         final RTextScrollPane scrollPane = new RTextScrollPane(codeArea);
 
         this.tokenPanel = tokensPanel;
-        this.counterPanel = countersPanel;
-        this.errorPanel = errorsPanel;
+        this.countersPanel = countersPanel;
+        this.errorsPanel = errorsPanel;
         this.errorTypesPanel = errorTypesPanel;
 
         codeArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
@@ -244,16 +244,16 @@ public class CodePanel extends PanelTemplate {
         syntaxStack.clear();
         syntaxStack.push(200);
         tokenPanel.emptyTokensList();
-        counterPanel.restartCounter();
-        errorPanel.emptyErrorsList();
+        countersPanel.restartCounter();
+        errorsPanel.emptyErrorsList();
         errorTypesPanel.restartCounter();
 
         checkLexic();
         checkSyntax();
 
         tokenPanel.updateTable();
-        counterPanel.updateTable();
-        errorPanel.updateTable();
+        countersPanel.updateTable();
+        errorsPanel.updateTable();
         errorTypesPanel.updateTable();
     }
 
@@ -270,14 +270,14 @@ public class CodePanel extends PanelTemplate {
             final int column = getColumn(character);
             state = lexicMatrix[state][column];
             if (state < 0) {
-                if (state == -57) state = getKeywordToken(lexeme.toString(), state);
+                if (state == -58) state = getKeywordToken(lexeme.toString(), state);
                 if (state == -25) {
                     tokenPanel.addToken(state, lexeme.toString(), multiCommentLineNum);
                 } else {
                     tokenPanel.addToken(state, lexeme.toString(), lineNum);
                 }
-                if (state != -25 && state != 23) syntaxTokens.add(new Token(state, lexeme.toString(), lineNum));
-                counterPanel.addCounter(state);
+                if (state != -25 && state != 23) syntaxTokens.add(new model.Token(state, lexeme.toString(), lineNum));
+                countersPanel.addCounter(state);
                 lexeme.setLength(0);
                 i--;
                 state = 0;
@@ -285,8 +285,8 @@ public class CodePanel extends PanelTemplate {
                 if (state == 500) {
                     lexeme.append(character);
                 } else i--;
-                counterPanel.addCounter(state);
-                errorPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, lineNum);
+                countersPanel.addCounter(state);
+                errorsPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, lineNum);
                 errorTypesPanel.addCounter(ErrorType.LEXIC);
                 lexeme.setLength(0);
                 state = 0;
@@ -303,8 +303,8 @@ public class CodePanel extends PanelTemplate {
         }
         if (state != 0) {
             state = 505;
-            counterPanel.addCounter(state);
-            errorPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, multiCommentLineNum);
+            countersPanel.addCounter(state);
+            errorsPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, multiCommentLineNum);
             errorTypesPanel.addCounter(ErrorType.LEXIC);
         }
     }
@@ -313,7 +313,7 @@ public class CodePanel extends PanelTemplate {
         while (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
             int topSyntaxStack = syntaxStack.peek();
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
-                Token token = syntaxTokens.getFirst();
+                model.Token token = syntaxTokens.getFirst();
                 int tokenCol = (token.token() * -1) - 1;
                 String lexeme = token.lexeme();
                 int lineNum = token.line();
@@ -321,7 +321,7 @@ public class CodePanel extends PanelTemplate {
                 int production = syntaxMatrix[topSyntaxStack - 200][tokenCol];
 
                 if (production > 500) {
-                    errorPanel.addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
+                    errorsPanel.addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
                     errorTypesPanel.addCounter(ErrorType.SINTAXIS);
                     syntaxTokens.removeFirst();
                 } else if (production == 180) {
@@ -429,25 +429,28 @@ public class CodePanel extends PanelTemplate {
             case '\'' -> {
                 return 25;
             }
-            default -> {
-                if (character >= '0' && character <= '9') return 26;
-                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') return 27;
-                return 33;
+            case '#' -> {
+                return 27;
             }
             case '@' -> {
-                return 28;
-            }
-            case '_' -> {
                 return 29;
             }
-            case ' ' -> {
+            case '_' -> {
                 return 30;
             }
-            case '\n' -> {
+            case ' ' -> {
                 return 31;
             }
-            case '\t' -> {
+            case '\n' -> {
                 return 32;
+            }
+            case '\t' -> {
+                return 33;
+            }
+            default -> {
+                if (character >= '0' && character <= '9') return 26;
+                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') return 28;
+                return 34;
             }
         }
     }
