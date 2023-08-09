@@ -54,12 +54,8 @@ public class ErrorTypes extends PanelTemplate {
     public void addCounter(ErrorType errorType) {
         String rowLabel = "";
         switch (errorType) {
-            case LEXIC -> {
-                rowLabel = rowLabels[0];
-            }
-            case SINTAXIS -> {
-                rowLabel = rowLabels[1];
-            }
+            case LEXIC -> rowLabel = rowLabels[0];
+            case SINTAXIS -> rowLabel = rowLabels[1];
         }
         int newValue = counterMap.get(rowLabel) + 1;
         counterMap.put(rowLabel, newValue);
