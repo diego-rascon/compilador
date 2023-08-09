@@ -48,7 +48,6 @@ public class Code extends PanelTemplate {
             {-71},    // 25
             {-60},    // 26
             {-70},    // 27
-            {-69},    // #
             {-52},    // 28
             {-54},    // 29
             {-58},    // 30
@@ -270,7 +269,7 @@ public class Code extends PanelTemplate {
             final int column = getColumn(character);
             state = lexicMatrix[state][column];
             if (state < 0) {
-                if (state == -58) state = getKeywordToken(lexeme.toString(), state);
+                if (state == -57) state = getKeywordToken(lexeme.toString(), state);
                 if (state == -25) {
                     tokenPanel.addToken(state, lexeme.toString(), multiCommentLineNum);
                 } else {
@@ -429,28 +428,30 @@ public class Code extends PanelTemplate {
             case '\'' -> {
                 return 25;
             }
+            /*
             case '#' -> {
                 return 27;
             }
+             */
             case '@' -> {
-                return 29;
+                return 28;
             }
             case '_' -> {
-                return 30;
+                return 29;
             }
             case ' ' -> {
-                return 31;
+                return 30;
             }
             case '\n' -> {
-                return 32;
+                return 31;
             }
             case '\t' -> {
-                return 33;
+                return 32;
             }
             default -> {
                 if (character >= '0' && character <= '9') return 26;
-                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') return 28;
-                return 34;
+                else if (character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') return 27;
+                return 33;
             }
         }
     }
