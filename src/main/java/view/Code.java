@@ -268,7 +268,8 @@ public class Code extends PanelTemplate {
             {-42},                                                                  // 178
             {-7},                                                                   // 179
             {-57, -58},                                                             // 180
-            {253, 273, 289}                                                         // 181
+            {253, 273, 289},                                                        // 181
+            {-76, 273, -18, 268}                                                    // 182
     };
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final Tokens tokenPanel;
@@ -403,7 +404,7 @@ public class Code extends PanelTemplate {
                     errorsPanel.addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
                     errorTypesPanel.addCounter(ErrorType.SINTAXIS);
                     syntaxTokens.removeFirst();
-                } else if (production == 182) {
+                } else if (production == 183) {
                     syntaxStack.pop();
                 } else {
                     syntaxStack.pop();
