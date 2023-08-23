@@ -384,14 +384,12 @@ public class Code extends PanelTemplate {
 
             int topSyntaxStack = syntaxStack.peek();
 
-
             System.out.println("Tope de pila: " + topSyntaxStack + ": ");
             System.out.println();
             for (Integer integer : syntaxStack) {
                 System.out.print(integer + " ");
             }
             System.out.println();
-
 
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                 model.Token token = syntaxTokens.getFirst();
