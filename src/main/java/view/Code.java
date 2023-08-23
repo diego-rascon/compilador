@@ -87,7 +87,8 @@ public class Code extends PanelTemplate {
             "typeof",
             "undefined"
     };
-    private final int[][] productions = {{201, -46, 254, 206, -47},                 // 0
+    private final int[][] productions = {
+            {201, -46, 254, 206, -47},                                              // 0
             {247, 201},                                                             // 1
             {207, 201},                                                             // 2
             {220, 202, 203},                                                        // 3
@@ -380,16 +381,17 @@ public class Code extends PanelTemplate {
 
     private void checkSyntax() {
         while (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
-            System.out.println("size: " + syntaxStack.size() + " lexeme: " + syntaxTokens.getFirst().lexeme() + " ");
-
             int topSyntaxStack = syntaxStack.peek();
 
+            /*
+            System.out.println("size: " + syntaxStack.size() + " lexeme: " + syntaxTokens.getFirst().lexeme() + " ");
             System.out.println("Tope de pila: " + topSyntaxStack + ": ");
             System.out.println();
             for (Integer integer : syntaxStack) {
                 System.out.print(integer + " ");
             }
             System.out.println();
+             */
 
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                 model.Token token = syntaxTokens.getFirst();
@@ -407,9 +409,7 @@ public class Code extends PanelTemplate {
                     syntaxStack.pop();
                 } else {
                     syntaxStack.pop();
-
-                    System.out.print("prod: " + production);
-
+                    //System.out.print("prod: " + production);
                     for (int j = productions[production].length - 1; j >= 0; j--) {
                         syntaxStack.push(productions[production][j]);
                     }
@@ -417,20 +417,15 @@ public class Code extends PanelTemplate {
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
-
-                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
-
+                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -53 && topSyntaxStack == -52) {
-
-                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
-
+                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -55 && topSyntaxStack == -56) {
-                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
-
+                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
