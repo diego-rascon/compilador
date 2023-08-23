@@ -345,7 +345,7 @@ public class Code extends PanelTemplate {
                 } else {
                     tokenPanel.addToken(state, lexeme.toString(), lineNum);
                 }
-                if (state != -25 && state != 23) syntaxTokens.add(new model.Token(state, lexeme.toString(), lineNum));
+                if (state != -23 && state != -25) syntaxTokens.add(new model.Token(state, lexeme.toString(), lineNum));
                 countersPanel.addCounter(state);
                 lexeme.setLength(0);
                 i--;
@@ -380,17 +380,18 @@ public class Code extends PanelTemplate {
 
     private void checkSyntax() {
         while (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
-            //System.out.println("size: " + syntaxStack.size() + " lexeme: " + syntaxTokens.getFirst().lexeme() + " ");
+            System.out.println("size: " + syntaxStack.size() + " lexeme: " + syntaxTokens.getFirst().lexeme() + " ");
 
             int topSyntaxStack = syntaxStack.peek();
 
-            /*
+
             System.out.println("Tope de pila: " + topSyntaxStack + ": ");
+            System.out.println();
             for (Integer integer : syntaxStack) {
                 System.out.print(integer + " ");
             }
             System.out.println();
-             */
+
 
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                 model.Token token = syntaxTokens.getFirst();
@@ -409,7 +410,7 @@ public class Code extends PanelTemplate {
                 } else {
                     syntaxStack.pop();
 
-                    //System.out.print("prod: " + production);
+                    System.out.print("prod: " + production);
 
                     for (int j = productions[production].length - 1; j >= 0; j--) {
                         syntaxStack.push(productions[production][j]);
@@ -419,18 +420,23 @@ public class Code extends PanelTemplate {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
 
-                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
+                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
 
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -53 && topSyntaxStack == -52) {
 
-                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
+                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
+
+                    syntaxStack.pop();
+                    syntaxTokens.removeFirst();
+                } else if (token == -55 && topSyntaxStack == -56) {
+                    System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
 
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
-                    //System.out.println("Error de fuerza bruta.");
+                    System.out.println("Error de fuerza bruta.");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 }
