@@ -1,5 +1,6 @@
 package view;
 
+import model.Ambit;
 import model.ErrorType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -9,6 +10,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
@@ -88,7 +90,7 @@ public class Code extends PanelTemplate {
             "undefined"
     };
     private final int[][] productions = {
-            {201, -46, 254, 206, -47},                                              // 0
+            {1000, 201, -46, 254, 206, 1001, -47},                                  // 0    A
             {247, 201},                                                             // 1
             {207, 201},                                                             // 2
             {220, 202, 203},                                                        // 3
@@ -99,17 +101,17 @@ public class Code extends PanelTemplate {
             {-17, 210, 205},                                                        // 8
             {-17, 254, 206},                                                        // 9
             {-17, 254, 206},                                                        // 10
-            {-94, -58, -46, 246, 208, 249, 209, -47},                               // 11
+            {-94, -58, -46, 1000, 246, 208, 249, 209, 1001, -47},                   // 11   A
             {-17, 246, 208},                                                        // 12
             {249, 209},                                                             // 13
-            {-70, -58, -50, 246, 211, -51, 212, -46, 254, 213, -47},                // 14
+            {-70, -58, -50, 1000, 246, 211, -51, 212, -46, 254, 213, 1001, -47},    // 14   A
             {-15, 246, 211},                                                        // 15
             {-18, 218},                                                             // 16
             {-17, 254, 213},                                                        // 17
-            {-92, -58, -50, 246, 215, -51, -46, 254, 216, -47},                     // 18
+            {-92, -58, -50, 1000, 246, 215, -51, -46, 254, 216, 1001, -47},         // 18   A
             {-15, 246, 215},                                                        // 19
             {-17, 254, 216},                                                        // 20
-            {-93, -58, -50, -51, -18, 218, -46, 254, 217, -47},                     // 21
+            {-93, -58, -50, 1000, -51, -18, 218, -46, 254, 217, 1001, -47},         // 21   A
             {-17, 254, 217},                                                        // 22
             {-91},                                                                  // 23
             {-90},                                                                  // 24
@@ -124,11 +126,11 @@ public class Code extends PanelTemplate {
             {-61},                                                                  // 33
             {-88, -58, 221},                                                        // 34
             {-38, 222},                                                             // 35
-            {-70, -50, 246, 223, -51, 224, -46, 254, 225, -47},                     // 36
+            {-70, -50, 1000, 246, 223, -51, 224, -46, 254, 225, 1001, -47},         // 36   A
             {-15, 246, 223},                                                        // 37
             {-18, 218},                                                             // 38
             {-17, 254, 226},                                                        // 39
-            {-50, 246, 226, -51, -41, 254},                                         // 40
+            {-50, 1000, 246, 226, -51, -41, 254, 1001},                             // 40   A
             {-15, 246, 226},                                                        // 41
             {-18, 227},                                                             // 42
             {-73, -28, 228, -32, -38, 229},                                         // 43
@@ -159,9 +161,9 @@ public class Code extends PanelTemplate {
             {273, 245},                                                             // 68
             {-15, 273, 245},                                                        // 69
             {-58, -18, 218},                                                        // 70
-            {-89, -58, -46, 246, 248, -47},                                         // 71
+            {-89, -58, -46, 1000, 246, 248, 1001, -47},                             // 71   A
             {-17, 246, 248},                                                        // 72
-            {-58, -50, 246, 250, -51, 251, -46, 254, 252, -47},                     // 73
+            {-58, -50, 1000, 246, 250, -51, 251, -46, 254, 252, 1001, -47},         // 73   A
             {-15, 246, 250},                                                        // 74
             {-18, 218},                                                             // 75
             {-17, 254, 252},                                                        // 76
@@ -279,6 +281,8 @@ public class Code extends PanelTemplate {
     private final ErrorTypes errorTypesPanel;
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
+    private final Stack<Ambit> ambitStack = new Stack<>();
+    private int ambit = 0;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
 
@@ -391,14 +395,13 @@ public class Code extends PanelTemplate {
                 System.out.print(integer + " ");
             }
             System.out.println();
-             */
+            */
 
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                 model.Token token = syntaxTokens.getFirst();
                 int tokenCol = (token.token() * -1) - 1;
                 String lexeme = token.lexeme();
                 int lineNum = token.line();
-
                 int production = syntaxMatrix[topSyntaxStack - 200][tokenCol];
 
                 if (production > 499) {
@@ -412,6 +415,21 @@ public class Code extends PanelTemplate {
                     //System.out.print("prod: " + production);
                     for (int j = productions[production].length - 1; j >= 0; j--) {
                         syntaxStack.push(productions[production][j]);
+                    }
+                }
+            } else if (topSyntaxStack >= 1000) {
+                syntaxStack.pop();
+                int ambitLine = syntaxTokens.getFirst().line();
+                switch (topSyntaxStack) {
+                    case 1000 -> {
+                        ambitStack.push(new Ambit(ambit, ambitLine));
+                        printAction("Se agregó el ámbito", ambit, ambitLine);
+                        ambit++;
+                    }
+                    case 1001 -> {
+                        ambit--;
+                        ambitStack.pop();
+                        printAction("Se eliminó el ámbito", ambit, ambitLine);
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -435,6 +453,25 @@ public class Code extends PanelTemplate {
                 }
             }
         }
+    }
+
+    private void printAction(String action, int ambitNumber, int ambitLine) {
+        System.out.printf("\n%s: [%d, %d]\n", action, ambitNumber, ambitLine);
+        StringBuilder formattedStack = new StringBuilder("Pila ");
+        if (ambitStack.empty()) {
+            formattedStack.append("vacía");
+        } else {
+            formattedStack.append("-> [");
+            int stackSize = ambitStack.size();
+            for (int i = 0; i < stackSize; i++) {
+                formattedStack.append(ambitStack.get(i).number());
+                if (i < stackSize - 1) {
+                    formattedStack.append(", ");
+                }
+            }
+            formattedStack.append("]");
+        }
+        System.out.println(formattedStack);
     }
 
     private int getColumn(char character) {
