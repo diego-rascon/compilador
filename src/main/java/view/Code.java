@@ -91,28 +91,28 @@ public class Code extends PanelTemplate {
             "undefined"
     };
     private final int[][] productions = {
-            {1000, 201, -46, 254, 206, 1001, -47},                                  // 0    A
-            {247, 201},                                                             // 1
-            {207, 201},                                                             // 2
-            {220, 202, 203},                                                        // 3
-            {210, 204},                                                             // 4
-            {-17, 220, 202},                                                        // 5
-            {210, 205},                                                             // 6
-            {-17, 210, 204},                                                        // 7
-            {-17, 210, 205},                                                        // 8
-            {-17, 254, 206},                                                        // 9
-            {-17, 254, 206},                                                        // 10
-            {-94, -58, -46, 1000, 246, 208, 249, 209, 1001, -47},                   // 11   A
-            {-17, 246, 208},                                                        // 12
-            {249, 209},                                                             // 13
-            {-70, -58, -50, 1000, 246, 211, -51, 212, -46, 254, 213, 1001, -47},    // 14   A
-            {-15, 246, 211},                                                        // 15
-            {-18, 218},                                                             // 16
-            {-17, 254, 213},                                                        // 17
-            {-92, -58, -50, 1000, 246, 215, -51, -46, 254, 216, 1001, -47},         // 18   A
-            {-15, 246, 215},                                                        // 19
-            {-17, 254, 216},                                                        // 20
-            {-93, -58, -50, 1000, -51, -18, 218, -46, 254, 217, 1001, -47},         // 21   A
+            {1000, 201, -46, 1002, 254, 206, 1003, 1001, -47},                                  // 0    A   DE  EJ
+            {247, 201},                                                                         // 1
+            {207, 201},                                                                         // 2
+            {220, 202, 203},                                                                    // 3
+            {210, 204},                                                                         // 4
+            {-17, 220, 202},                                                                    // 5
+            {210, 205},                                                                         // 6
+            {-17, 210, 204},                                                                    // 7
+            {-17, 210, 205},                                                                    // 8
+            {-17, 254, 206},                                                                    // 9
+            {-17, 254, 206},                                                                    // 10
+            {-94, -58, -46, 1000, 246, 208, 249, 209, 1001, -47},                               // 11   A
+            {-17, 246, 208},                                                                    // 12
+            {249, 209},                                                                         // 13
+            {-70, -58, -50, 1000, 246, 211, -51, 212, -46, 1002, 254, 213, 1003, 1001, -47},    // 14   A   EJ
+            {-15, 246, 211},                                                                    // 15
+            {-18, 218},                                                                         // 16
+            {-17, 254, 213},                                                                    // 17
+            {-92, -58, -50, 1000, 246, 215, -51, -46, 1002, 254, 216, 1003, 1001, -47},         // 18   A   EJ
+            {-15, 246, 215},                                                                    // 19
+            {-17, 254, 216},                                                                    // 20
+            {-93, -58, -50, 1000, -51, -18, 218, -46, 1002, 254, 217, 1003, 1001, -47},         // 21   A   EJ
             {-17, 254, 217},                                                        // 22
             {-91},                                                                  // 23
             {-90},                                                                  // 24
@@ -127,11 +127,11 @@ public class Code extends PanelTemplate {
             {-61},                                                                  // 33
             {-88, -58, 221},                                                        // 34
             {-38, 222},                                                             // 35
-            {-70, -50, 1000, 246, 223, -51, 224, -46, 254, 225, 1001, -47},         // 36   A
+            {-70, -50, 1000, 246, 223, -51, 224, -46, 1002, 254, 225, 1003, 1001, -47},         // 36   A   EJ
             {-15, 246, 223},                                                        // 37
             {-18, 218},                                                             // 38
             {-17, 254, 226},                                                        // 39
-            {-50, 1000, 246, 226, -51, -41, 254, 1001},                             // 40   A
+            {-50, 1000, 246, 226, -51, -41, 1002, 254, 1003, 1001},                             // 40   A   EJ
             {-15, 246, 226},                                                        // 41
             {-18, 227},                                                             // 42
             {-73, -28, 228, -32, -38, 229},                                         // 43
@@ -144,7 +144,7 @@ public class Code extends PanelTemplate {
             {218, 232},                                                             // 50
             {-38, 233},                                                             // 51
             {219},                                                                  // 52
-            {-46, 246, -15, 234, 214, 235, 249, 236, -47},                          // 53
+            {-46, 1000, 246, -15, 234, 214, 235, 249, 236, 1001, -47},              // 53   A
             {246, -15},                                                             // 54
             {-15, 214},                                                             // 55
             {-15, 249},                                                             // 56
@@ -164,7 +164,7 @@ public class Code extends PanelTemplate {
             {-58, -18, 218},                                                        // 70
             {-89, -58, -46, 1000, 246, 248, 1001, -47},                             // 71   A
             {-17, 246, 248},                                                        // 72
-            {-58, -50, 1000, 246, 250, -51, 251, -46, 254, 252, 1001, -47},         // 73   A
+            {-58, -50, 1000, 246, 250, -51, 251, -46, 1002, 254, 252, 1003, 1001, -47},         // 73   A   EJ
             {-15, 246, 250},                                                        // 74
             {-18, 218},                                                             // 75
             {-17, 254, 252},                                                        // 76
@@ -425,13 +425,19 @@ public class Code extends PanelTemplate {
                 switch (topSyntaxStack) {
                     case 1000 -> {
                         ambitStack.push(new Ambit(ambit, ambitLine));
-                        printAction("creó", ambit, ambitLine);
+                        printAmbitAction("creó", ambit, ambitLine);
                         ambit++;
                     }
                     case 1001 -> {
                         ambit--;
                         ambitStack.pop();
-                        printAction("eliminó", ambit, ambitLine);
+                        printAmbitAction("eliminó", ambit, ambitLine);
+                    }
+                    case 1002 -> {
+                        printAreaAction(ambitLine, "ejecución", "apertura");
+                    }
+                    case 1003 -> {
+                        printAreaAction(ambitLine, "ejecución", "cierre");
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -454,12 +460,12 @@ public class Code extends PanelTemplate {
         }
     }
 
-    private void printAction(String action, int ambitNumber, int ambitLine) {
+    private void printAmbitAction(String action, int ambitNumber, int ambitLine) {
         String content = "Se " + action + " el ámbito: [" + ambitNumber + ", " + ambitLine + "]\n";
         writeTxt(content);
         StringBuilder formattedStack = new StringBuilder("Pila ");
         if (ambitStack.empty()) {
-            formattedStack.append("vacía");
+            formattedStack.append("vacía\n\n");
         } else {
             formattedStack.append("-> [");
             int stackSize = ambitStack.size();
@@ -472,6 +478,11 @@ public class Code extends PanelTemplate {
             formattedStack.append("]\n\n");
         }
         writeTxt(String.valueOf(formattedStack));
+    }
+
+    private void printAreaAction(int line, String type, String action) {
+        String content = line + ", " + type + ", " + action + "\n\n";
+        writeTxt(content);
     }
 
     private void writeTxt(String content) {
