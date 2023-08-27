@@ -425,13 +425,13 @@ public class Code extends PanelTemplate {
                 switch (topSyntaxStack) {
                     case 1000 -> {
                         ambitStack.push(new Ambit(ambit, ambitLine));
-                        printAction("Se agregó el ámbito", ambit, ambitLine);
+                        printAction("creó", ambit, ambitLine);
                         ambit++;
                     }
                     case 1001 -> {
                         ambit--;
                         ambitStack.pop();
-                        printAction("Se eliminó el ámbito", ambit, ambitLine);
+                        printAction("eliminó", ambit, ambitLine);
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -455,7 +455,7 @@ public class Code extends PanelTemplate {
     }
 
     private void printAction(String action, int ambitNumber, int ambitLine) {
-        String content = action + ": [" + ambitNumber + ", " + ambitLine + "]\n";
+        String content = "Se " + action + " el ámbito: [" + ambitNumber + ", " + ambitLine + "]\n";
         writeTxt(content);
         StringBuilder formattedStack = new StringBuilder("Pila ");
         if (ambitStack.empty()) {
