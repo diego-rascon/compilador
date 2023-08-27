@@ -433,12 +433,10 @@ public class Code extends PanelTemplate {
                         ambitStack.pop();
                         printAmbitAction("eliminó", ambit, ambitLine);
                     }
-                    case 1002 -> {
-                        printAreaAction(ambitLine, "ejecución", "apertura");
-                    }
-                    case 1003 -> {
-                        printAreaAction(ambitLine, "ejecución", "cierre");
-                    }
+                    case 1002 -> printAreaAction(ambitLine, "ejecución", "apertura");
+                    case 1003 -> printAreaAction(ambitLine, "ejecución", "cierre");
+                    case 1004 -> printAreaAction(ambitLine, "declaración", "apertura");
+                    case 1005 -> printAreaAction(ambitLine, "declaración", "cierre");
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
