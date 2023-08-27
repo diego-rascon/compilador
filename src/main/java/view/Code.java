@@ -14,6 +14,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -282,6 +283,7 @@ public class Code extends PanelTemplate {
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
+    private FileWriter txtResult;
     private int ambit = 0;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
@@ -314,6 +316,12 @@ public class Code extends PanelTemplate {
     }
 
     public void compile() {
+        try {
+            txtResult = new FileWriter("Resultados - 20130375.txt");
+        } catch (IOException e) {
+            System.out.println("Ocurrió un error creando el archivo de resultados");
+        }
+
         syntaxTokens.clear();
         syntaxStack.clear();
         syntaxStack.push(200);
@@ -329,6 +337,11 @@ public class Code extends PanelTemplate {
         countersPanel.updateTable();
         errorsPanel.updateTable();
         errorTypesPanel.updateTable();
+        try {
+            txtResult.close();
+        } catch (IOException e) {
+            System.out.println("Ocurrió un error cerrando el archivo de resultados");
+        }
     }
 
     private void checkLexic() {
@@ -387,16 +400,6 @@ public class Code extends PanelTemplate {
         while (!syntaxTokens.isEmpty() && !syntaxStack.isEmpty()) {
             int topSyntaxStack = syntaxStack.peek();
 
-            /*
-            System.out.println("size: " + syntaxStack.size() + " lexeme: " + syntaxTokens.getFirst().lexeme() + " ");
-            System.out.println("Tope de pila: " + topSyntaxStack + ": ");
-            System.out.println();
-            for (Integer integer : syntaxStack) {
-                System.out.print(integer + " ");
-            }
-            System.out.println();
-            */
-
             if (topSyntaxStack >= 200 && topSyntaxStack <= 292) {
                 model.Token token = syntaxTokens.getFirst();
                 int tokenCol = (token.token() * -1) - 1;
@@ -412,7 +415,6 @@ public class Code extends PanelTemplate {
                     syntaxStack.pop();
                 } else {
                     syntaxStack.pop();
-                    //System.out.print("prod: " + production);
                     for (int j = productions[production].length - 1; j >= 0; j--) {
                         syntaxStack.push(productions[production][j]);
                     }
@@ -435,15 +437,12 @@ public class Code extends PanelTemplate {
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
-                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -53 && topSyntaxStack == -52) {
-                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -55 && topSyntaxStack == -56) {
-                    //System.out.print("Lexeme:" + syntaxTokens.getFirst().lexeme() + " ");
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
@@ -456,7 +455,8 @@ public class Code extends PanelTemplate {
     }
 
     private void printAction(String action, int ambitNumber, int ambitLine) {
-        System.out.printf("\n%s: [%d, %d]\n", action, ambitNumber, ambitLine);
+        String content = action + ": [" + ambitNumber + ", " + ambitLine + "]\n";
+        writeTxt(content);
         StringBuilder formattedStack = new StringBuilder("Pila ");
         if (ambitStack.empty()) {
             formattedStack.append("vacía");
@@ -469,9 +469,17 @@ public class Code extends PanelTemplate {
                     formattedStack.append(", ");
                 }
             }
-            formattedStack.append("]");
+            formattedStack.append("]\n\n");
         }
-        System.out.println(formattedStack);
+        writeTxt(String.valueOf(formattedStack));
+    }
+
+    private void writeTxt(String content) {
+        try {
+            txtResult.write(content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int getColumn(char character) {
