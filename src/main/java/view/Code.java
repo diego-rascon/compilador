@@ -1,6 +1,8 @@
 package view;
 
 import model.Ambit;
+import model.Element;
+import model.ElementType;
 import model.ErrorType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -161,7 +163,7 @@ public class Code extends PanelTemplate {
             {-48, 244, -49},                                                                                // 67
             {273, 245},                                                                                     // 68
             {-15, 273, 245},                                                                                // 69
-            {-58, -18, 218},                                                                                // 70
+            {2000, -58, -18, 218, 2001},                                                                    // 70               VA
             {-89, -58, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                         // 71   A   DE
             {-17, 246, 248},                                                                                // 72
             {-58, -50, 1004, 1000, 246, 250, 1005, -51, 251, -46, 1002, 254, 252, 1003, 1001, -47},         // 73   A   DE  EJ
@@ -281,12 +283,15 @@ public class Code extends PanelTemplate {
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
+    private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private FileWriter txtResult;
-    private int ambit = 0;
+    private ElementType currentType = ElementType.NONE;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
+    private int ambit = 0;
+    private boolean customType = false;
 
     public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         super("Código", padding);
@@ -342,6 +347,10 @@ public class Code extends PanelTemplate {
             txtResult.close();
         } catch (IOException e) {
             System.out.println("Ocurrió un error cerrando el archivo de resultados");
+        }
+
+        for (Element element : elementsStack) {
+            System.out.println(element);
         }
     }
 
@@ -438,10 +447,33 @@ public class Code extends PanelTemplate {
                     case 1003 -> printAreaAction(line, "ejecución", "cierre");
                     case 1004 -> printAreaAction(line, "declaración", "apertura");
                     case 1005 -> printAreaAction(line, "declaración", "cierre");
+                    case 2000 -> currentType = ElementType.DECVAR;
+                    case 2001 -> currentType = ElementType.NONE;
+                    case 2002 -> currentType = ElementType.NONE;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
+                    if (currentType != ElementType.NONE) {
+                        int ambitNumber = ambitStack.peek().number();
+                        String lexeme = syntaxTokens.getFirst().lexeme();
+                        switch (currentType) {
+                            case DECVAR -> {
+                                if (topSyntaxStack == -58) {
+                                    elementsStack.add(new Element(lexeme, "variable", ambitNumber));
+                                }
+                                Element lastElement = elementsStack.peek();
+                                switch (topSyntaxStack) {
+
+                                    case -61 -> lastElement.setType("null");
+                                    case -71 -> lastElement.setType("real");
+                                    case -72 -> lastElement.setType("boolean");
+                                    case -90 -> lastElement.setType("number");
+                                    case -91 -> lastElement.setType("string");
+                                }
+                            }
+                        }
+                    }
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else if (token == -53 && topSyntaxStack == -52) {
