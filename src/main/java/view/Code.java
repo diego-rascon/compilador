@@ -422,23 +422,22 @@ public class Code extends PanelTemplate {
                 }
             } else if (topSyntaxStack >= 1000) {
                 syntaxStack.pop();
-                int ambitLine = syntaxTokens.getFirst().line();
+                int line = syntaxTokens.getFirst().line();
                 switch (topSyntaxStack) {
                     case 1000 -> {
-                        ambitStack.push(new Ambit(ambit, ambitLine));
-                        printAmbitAction("creó", ambit, ambitLine);
+                        ambitStack.push(new Ambit(ambit, line));
+                        printAmbitAction("creó", ambit, line);
                         ambit++;
                     }
                     case 1001 -> {
-                        //ambit--;
                         int topAmbitLine = ambitStack.peek().number();
                         ambitStack.pop();
-                        printAmbitAction("eliminó", topAmbitLine, ambitLine);
+                        printAmbitAction("eliminó", topAmbitLine, line);
                     }
-                    case 1002 -> printAreaAction(ambitLine, "ejecución", "apertura");
-                    case 1003 -> printAreaAction(ambitLine, "ejecución", "cierre");
-                    case 1004 -> printAreaAction(ambitLine, "declaración", "apertura");
-                    case 1005 -> printAreaAction(ambitLine, "declaración", "cierre");
+                    case 1002 -> printAreaAction(line, "ejecución", "apertura");
+                    case 1003 -> printAreaAction(line, "ejecución", "cierre");
+                    case 1004 -> printAreaAction(line, "declaración", "apertura");
+                    case 1005 -> printAreaAction(line, "declaración", "cierre");
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
