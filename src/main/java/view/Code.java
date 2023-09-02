@@ -107,7 +107,7 @@ public class Code extends PanelTemplate {
             {-94, -58, -46, 1004, 1000, 246, 208, 249, 209, 1005, 1001, -47},                               // 11   A   DE
             {-17, 246, 208},                                                                                // 12
             {249, 209},                                                                                     // 13
-            {-70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 212, -46, 1002, 254, 213, 1003, 1001, -47},    // 14   A   DE  EJ
+            {2004, -70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 212, 2005, -46, 1002, 254, 213, 1003, 1001, -47},    // 14   A   DE  EJ
             {-15, 246, 211},                                                                                // 15
             {-18, 218},                                                                                     // 16
             {-17, 254, 213},                                                                                // 17
@@ -164,22 +164,22 @@ public class Code extends PanelTemplate {
             {273, 245},                                                                                     // 68
             {-15, 273, 245},                                                                                // 69
             {2000, -58, -18, 218, 2001},                                                                    // 70               VA
-            {-89, -58, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                         // 71   A   DE
-            {-17, 246, 248},                                                                                // 72
-            {-58, -50, 1004, 1000, 246, 250, 1005, -51, 251, -46, 1002, 254, 252, 1003, 1001, -47},         // 73   A   DE  EJ
-            {-15, 246, 250},                                                                                // 74
-            {-18, 218},                                                                                     // 75
-            {-17, 254, 252},                                                                                // 76
-            {-38},                                                                                          // 77
-            {-3},                                                                                           // 78
-            {-24},                                                                                          // 79
-            {-21},                                                                                          // 80
-            {-6},                                                                                           // 81
-            {-27},                                                                                          // 82
-            {-12},                                                                                          // 83
-            {-14},                                                                                          // 84
-            {-30},                                                                                          // 85
-            {-36},                                                                                          // 86
+            {-89, -58, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                                     // 71   A   DE
+            {-17, 246, 248},                                                                                            // 72
+            {2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47},   // 73   A   DE  EJ
+            {-15, 246, 250},                                                                                        // 74
+            {-18, 218},                                                                                             // 75
+            {-17, 254, 252},                                                                                        // 76
+            {-38},                                                                                                  // 77
+            {-3},                                                                                                   // 78
+            {-24},                                                                                                  // 79
+            {-21},                                                                                                  // 80
+            {-6},                                                                                                   // 81
+            {-27},                                                                                                  // 82
+            {-12},                                                                                                  // 83
+            {-14},                                                                                                  // 84
+            {-30},                                                                                                  // 85
+            {-36},                                                                                                  // 86
             {-35},                                                                                          // 87
             {-68, -16, 255},                                                                                // 88
             {-62, -50, 273, -51, 254, 257},                                                                 // 89
@@ -292,6 +292,10 @@ public class Code extends PanelTemplate {
     private int[][] syntaxMatrix;
     private int ambit = 0;
     private boolean customType = false;
+    private boolean decParameters = false;
+    private int tempParameters = 0;
+    private int tempPosition = 0;
+
 
     public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         super("Código", padding);
@@ -327,10 +331,12 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error creando el archivo de resultados");
         }
 
+        ambit = 0;
         syntaxTokens.clear();
         syntaxStack.clear();
         syntaxStack.push(200);
         ambitStack.clear();
+        elementsStack.clear();
         tokenPanel.emptyTokensList();
         countersPanel.restartCounter();
         errorsPanel.emptyErrorsList();
@@ -449,7 +455,21 @@ public class Code extends PanelTemplate {
                     case 1005 -> printAreaAction(line, "declaración", "cierre");
                     case 2000 -> currentType = ElementType.DECVAR;
                     case 2001 -> currentType = ElementType.NONE;
-                    case 2002 -> currentType = ElementType.NONE;
+                    case 2002 -> {
+                        decParameters = true;
+                        currentType = ElementType.DECMET;
+                    }
+                    case 2004 -> {
+                        decParameters = true;
+                        currentType = ElementType.DECFUN;
+                    }
+                    case 2003, 2005 -> {
+                        Element lastMethod = elementsStack.get(tempPosition);
+                        lastMethod.setParQuantity(tempParameters);
+                        tempParameters = 0;
+                        decParameters = false;
+                        currentType = ElementType.NONE;
+                    }
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -457,22 +477,7 @@ public class Code extends PanelTemplate {
                     if (currentType != ElementType.NONE) {
                         int ambitNumber = ambitStack.peek().number();
                         String lexeme = syntaxTokens.getFirst().lexeme();
-                        switch (currentType) {
-                            case DECVAR -> {
-                                if (topSyntaxStack == -58) {
-                                    elementsStack.add(new Element(lexeme, "variable", ambitNumber));
-                                }
-                                Element lastElement = elementsStack.peek();
-                                switch (topSyntaxStack) {
-
-                                    case -61 -> lastElement.setType("null");
-                                    case -71 -> lastElement.setType("real");
-                                    case -72 -> lastElement.setType("boolean");
-                                    case -90 -> lastElement.setType("number");
-                                    case -91 -> lastElement.setType("string");
-                                }
-                            }
-                        }
+                        createElement(lexeme, ambitNumber, topSyntaxStack);
                     }
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
@@ -488,6 +493,54 @@ public class Code extends PanelTemplate {
                     syntaxTokens.removeFirst();
                 }
             }
+        }
+    }
+
+    private void createElement(String lexeme, int ambitNumber, int topSyntaxStack) {
+        String classType = "";
+        switch (currentType) {
+            case DECVAR -> classType = "variable";
+            case DECMET -> classType = "metodo";
+            case DECFUN -> classType = "funcion";
+        }
+        if (topSyntaxStack == -58) {
+            elementsStack.add(new Element(lexeme, classType, ambitNumber));
+            Element lastElement = elementsStack.peek();
+            switch (currentType) {
+                case DECVAR -> {
+                    if (decParameters){
+                        tempParameters++;
+                        lastElement.setParType(elementsStack.get(tempPosition).getName());
+                    }
+                }
+                case DECMET, DECFUN -> {
+                    tempPosition = elementsStack.size() - 1;
+                    lastElement.setType("void");
+                    lastElement.setParType(String.valueOf(ambit));
+                }
+            }
+        }
+        if (!elementsStack.isEmpty()) {
+            Element lastElement = elementsStack.peek();
+            switch (currentType) {
+                case DECVAR -> setType(lexeme, topSyntaxStack, lastElement);
+                case DECMET, DECFUN -> setType(lexeme, topSyntaxStack, elementsStack.get(tempPosition));
+            }
+        }
+    }
+
+    private void setType(String lexeme, int topSyntaxStack, Element element) {
+        switch (topSyntaxStack) {
+            case -57 -> customType = true;
+            case -58 -> {
+                if (customType) element.setType("#" + lexeme);
+                customType = false;
+            }
+            case -61 -> element.setType("null");
+            case -71 -> element.setType("real");
+            case -72 -> element.setType("boolean");
+            case -90 -> element.setType("number");
+            case -91 -> element.setType("string");
         }
     }
 
