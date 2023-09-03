@@ -71,15 +71,6 @@ public class Element {
 
     @Override
     public String toString() {
-        return "Element{" +
-                "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", classType='" + classType + '\'' +
-                ", ambit=" + ambit +
-                ", arraySize=" + arraySize +
-                ", arrayDim=" + arrayDim +
-                ", parQuantity=" + parQuantity +
-                ", parType='" + parType + '\'' +
-                '}';
+        return String.format("%10s%10s%10s%10d%15d%15d%15d%15s", name, type, classType, ambit, arraySize, arrayDim, parQuantity, parType);
     }
 }
