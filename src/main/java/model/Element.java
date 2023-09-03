@@ -71,6 +71,6 @@ public class Element {
 
     @Override
     public String toString() {
-        return String.format("%10s%10s%10s%10d%15d%15d%15d%15s", name, type, classType, ambit, arraySize, arrayDim, parQuantity, parType);
+        return String.format("%10s%10s%20s%10d%15d%15d%15d%15s", name, type, classType, ambit, arraySize, arrayDim, parQuantity, parType);
     }
 }
