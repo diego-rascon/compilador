@@ -93,32 +93,32 @@ public class Code extends PanelTemplate {
             "undefined"
     };
     private final int[][] productions = {
-            {1004, 1000, 201, 1005, -46, 1002, 254, 206, 1003, 1001, -47},                                  // 0    A   DE  EJ
-            {247, 201},                                                                                     // 1
-            {207, 201},                                                                                     // 2
-            {220, 202, 203},                                                                                // 3
-            {210, 204},                                                                                     // 4
-            {-17, 220, 202},                                                                                // 5
-            {210, 205},                                                                                     // 6
-            {-17, 210, 204},                                                                                // 7
-            {-17, 210, 205},                                                                                // 8
-            {-17, 254, 206},                                                                                // 9
-            {-17, 254, 206},                                                                                // 10
-            {-94, -58, -46, 1004, 1000, 246, 208, 249, 209, 1005, 1001, -47},                               // 11   A   DE
-            {-17, 246, 208},                                                                                // 12
-            {249, 209},                                                                                     // 13
-            {2004, -70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 212, 2005, -46, 1002, 254, 213, 1003, 1001, -47},    // 14   A   DE  EJ
-            {-15, 246, 211},                                                                                // 15
-            {-18, 218},                                                                                     // 16
-            {-17, 254, 213},                                                                                // 17
-            {-92, -58, -50, 1004, 1000, 246, 215, 1005, -51, -46, 1002, 254, 216, 1003, 1001, -47},         // 18   A   DE  EJ
-            {-15, 246, 215},                                                                                // 19
-            {-17, 254, 216},                                                                                // 20
-            {-93, -58, -50, 1004, 1000, 1005, -51, -18, 218, -46, 1002, 254, 217, 1003, 1001, -47},         // 21   A   DE  EJ
-            {-17, 254, 217},                                                                                // 22
-            {-91},                                                                                          // 23
-            {-90},                                                                                          // 24
-            {-72},                                                                                          // 25
+            {1004, 1000, 201, 1005, -46, 1002, 254, 206, 1003, 1001, -47},                                                  // 0    A   DE  EJ
+            {247, 201},                                                                                                     // 1
+            {207, 201},                                                                                                     // 2
+            {220, 202, 203},                                                                                                // 3
+            {210, 204},                                                                                                     // 4
+            {-17, 220, 202},                                                                                                // 5
+            {210, 205},                                                                                                     // 6
+            {-17, 210, 204},                                                                                                // 7
+            {-17, 210, 205},                                                                                                // 8
+            {-17, 254, 206},                                                                                                // 9
+            {-17, 254, 206},                                                                                                // 10
+            {2006, -94, -58, -46, 2007, 1004, 1000, 246, 208, 249, 209, 1005, 1001, -47},                                   // 11   A   DE
+            {-17, 246, 208},                                                                                                // 12
+            {249, 209},                                                                                                     // 13
+            {2004, -70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 2004, 212, 2005, -46, 1002, 254, 213, 1003, 1001, -47},  // 14   A   DE  EJ
+            {-15, 246, 211},                                                                                                // 15
+            {-18, 218},                                                                                                     // 16
+            {-17, 254, 213},                                                                                                // 17
+            {2012, -92, -58, -50, 1004, 1000, 246, 215, 1005, -51, 2013, -46, 1002, 254, 216, 1003, 1001, -47},             // 18   A   DE  EJ
+            {-15, 246, 215},                                                                                                // 19
+            {-17, 254, 216},                                                                                                // 20
+            {2010, -93, -58, -50, 1004, 1000, 1005, -51, -18, 218, 2011, -46, 1002, 254, 217, 1003, 1001, -47},             // 21   A   DE  EJ
+            {-17, 254, 217},                                                                                                // 22
+            {-91},                                                                                                          // 23
+            {-90},                                                                                                          // 24
+            {-72},                                                                                                          // 25
             {-61},                                                                                          // 26
             {-71},                                                                                          // 27
             {-52},                                                                                          // 28
@@ -150,23 +150,23 @@ public class Code extends PanelTemplate {
             {246, -15},                                                                                     // 54
             {-15, 214},                                                                                     // 55
             {-15, 249},                                                                                     // 56
-            {-58, 237},                                                                                     // 57
-            {-38, 238},                                                                                     // 58
-            {219},                                                                                          // 59
-            {-46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                          // 60   A   DE
-            {246, -15},                                                                                     // 61
-            {-15, 214},                                                                                     // 62
-            {-15, 249},                                                                                     // 63
-            {242, -28, 218, -15, 218, -32, -38, 243},                                                       // 64
-            {-109},                                                                                         // 65
-            {-74, -109, -50, -51},                                                                          // 66
-            {-48, 244, -49},                                                                                // 67
-            {273, 245},                                                                                     // 68
-            {-15, 273, 245},                                                                                // 69
-            {2000, -58, -18, 218, 2001},                                                                    // 70               VA
-            {-89, -58, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                                     // 71   A   DE
-            {-17, 246, 248},                                                                                            // 72
-            {2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47},   // 73   A   DE  EJ
+            {-58, 237},                                                                                                     // 57
+            {-38, 238},                                                                                                     // 58
+            {219},                                                                                                          // 59
+            {-46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                                          // 60   A   DE
+            {246, -15},                                                                                                     // 61
+            {-15, 214},                                                                                                     // 62
+            {-15, 249},                                                                                                     // 63
+            {242, -28, 218, -15, 218, -32, -38, 243},                                                                       // 64
+            {-109},                                                                                                         // 65
+            {-74, -109, -50, -51},                                                                                          // 66
+            {-48, 244, -49},                                                                                                // 67
+            {273, 245},                                                                                                     // 68
+            {-15, 273, 245},                                                                                                // 69
+            {2000, -58, -18, 218, 2001},                                                                                    // 70               VA
+            {2008, -89, -58, 2009, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                             // 71   A   DE
+            {-17, 246, 248},                                                                                                // 72
+            {2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47},       // 73   A   DE  EJ
             {-15, 246, 250},                                                                                        // 74
             {-18, 218},                                                                                             // 75
             {-17, 254, 252},                                                                                        // 76
@@ -180,11 +180,11 @@ public class Code extends PanelTemplate {
             {-14},                                                                                                  // 84
             {-30},                                                                                                  // 85
             {-36},                                                                                                  // 86
-            {-35},                                                                                          // 87
-            {-68, -16, 255},                                                                                // 88
-            {-62, -50, 273, -51, 254, 257},                                                                 // 89
-            {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                         // 90
-            {-46, 254, 263, -47},                                                                           // 91
+            {-35},                                                                                                  // 87
+            {-68, -16, 255},                                                                                        // 88
+            {-62, -50, 273, -51, 254, 257},                                                                         // 89
+            {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
+            {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 273, -51, 254},                                              // 92
             {273, -17},                                                             // 93
             {-78, 273, -17},                                                        // 94
@@ -355,6 +355,8 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error cerrando el archivo de resultados");
         }
 
+        System.out.printf("%10s%10s%10s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
+        System.out.println();
         for (Element element : elementsStack) {
             System.out.println(element);
         }
@@ -453,17 +455,24 @@ public class Code extends PanelTemplate {
                     case 1003 -> printAreaAction(line, "ejecución", "cierre");
                     case 1004 -> printAreaAction(line, "declaración", "apertura");
                     case 1005 -> printAreaAction(line, "declaración", "cierre");
-                    case 2000 -> currentType = ElementType.DECVAR;
-                    case 2001 -> currentType = ElementType.NONE;
+                    case 2000 -> currentType = ElementType.DEC_VAR;
+                    case 2001, 2007, 2009 -> currentType = ElementType.NONE;
                     case 2002 -> {
                         decParameters = true;
-                        currentType = ElementType.DECMET;
+                        currentType = ElementType.DEC_MET;
                     }
                     case 2004 -> {
                         decParameters = true;
-                        currentType = ElementType.DECFUN;
+                        currentType = ElementType.DEC_FUN;
                     }
-                    case 2003, 2005 -> {
+                    case 2006 -> currentType = ElementType.DEC_CLASS;
+                    case 2008 -> currentType = ElementType.DEC_INTER;
+                    case 2010 -> currentType = ElementType.DEC_GET;
+                    case 2012 -> {
+                        decParameters = true;
+                        currentType = ElementType.DEC_SET;
+                    }
+                    case 2003, 2005, 2011, 2013 -> {
                         Element lastMethod = elementsStack.get(tempPosition);
                         lastMethod.setParQuantity(tempParameters);
                         tempParameters = 0;
@@ -499,32 +508,37 @@ public class Code extends PanelTemplate {
     private void createElement(String lexeme, int ambitNumber, int topSyntaxStack) {
         String classType = "";
         switch (currentType) {
-            case DECVAR -> classType = "variable";
-            case DECMET -> classType = "metodo";
-            case DECFUN -> classType = "funcion";
+            case DEC_VAR -> classType = "variable";
+            case DEC_MET -> classType = "metodo";
+            case DEC_FUN -> classType = "funcion";
+            case DEC_CLASS -> classType = "clase";
+            case DEC_INTER -> classType = "interface";
+            case DEC_GET -> classType = "get";
+            case DEC_SET -> classType = "set";
         }
         if (topSyntaxStack == -58) {
             elementsStack.add(new Element(lexeme, classType, ambitNumber));
             Element lastElement = elementsStack.peek();
             switch (currentType) {
-                case DECVAR -> {
+                case DEC_VAR -> {
                     if (decParameters){
                         tempParameters++;
                         lastElement.setParType(elementsStack.get(tempPosition).getName());
                     }
                 }
-                case DECMET, DECFUN -> {
+                case DEC_MET, DEC_FUN, DEC_GET, DEC_SET -> {
                     tempPosition = elementsStack.size() - 1;
                     lastElement.setType("void");
                     lastElement.setParType(String.valueOf(ambit));
                 }
+                case DEC_CLASS, DEC_INTER -> lastElement.setParType(String.valueOf(ambit));
             }
         }
         if (!elementsStack.isEmpty()) {
             Element lastElement = elementsStack.peek();
             switch (currentType) {
-                case DECVAR -> setType(lexeme, topSyntaxStack, lastElement);
-                case DECMET, DECFUN -> setType(lexeme, topSyntaxStack, elementsStack.get(tempPosition));
+                case DEC_VAR -> setType(lexeme, topSyntaxStack, lastElement);
+                case DEC_MET, DEC_FUN, DEC_GET, DEC_SET -> setType(lexeme, topSyntaxStack, elementsStack.get(tempPosition));
             }
         }
     }
