@@ -129,11 +129,11 @@ public class Code extends PanelTemplate {
             {-61},                                                                                                          // 33
             {-88, 2014, -58, 221},                                                                                          // 34
             {-38, 222},                                                                                                     // 35
-            {2015, -70, -50, 1004, 1000, 246, 223, 1005, -51, 2015, 224, 2016, -46, 1002, 254, 225, 1003, 1001, -47},       // 36   A   DE  EJ
+            {2016, -70, -50, 1004, 1000, 246, 223, 1005, -51, 2016, 224, 2017, -46, 1002, 254, 225, 1003, 1001, -47},       // 36   A   DE  EJ
             {-15, 246, 223},                                                                                                // 37
             {-18, 218},                                                                                                     // 38
             {-17, 254, 226},                                                                                                // 39
-            {2017, -50, 1004, 1000, 246, 226, 1005, -51, 2017, 2018, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
+            {2018, -50, 1004, 1000, 246, 226, 1005, -51, 2018, 2019, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
             {-15, 246, 226},                                                                                // 41
             {-18, 227},                                                                                     // 42
             {-73, -28, 228, -32, -38, 229},                                                                 // 43
@@ -145,14 +145,14 @@ public class Code extends PanelTemplate {
             {-74, -73, -50, -51},                                                                           // 49
             {218, 232},                                                                                     // 50
             {-38, 233},                                                                                                     // 51
-            {219},                                                                                                          // 52
+            {219, 2015},                                                                                                    // 52
             {-46, 1004, 1000, 246, -15, 234, 214, 235, 249, 236, 1005, 1001, -47},                                          // 53   A   DE
             {246, -15},                                                                                                     // 54
             {-15, 214},                                                                                                     // 55
             {-15, 249},                                                                                                     // 56
             {-58, 237},                                                                                                     // 57
             {-38, 238},                                                                                                     // 58
-            {219},                                                                                                          // 59
+            {219, 2015},                                                                                                          // 59
             {-46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                                          // 60   A   DE
             {246, -15},                                                                                                     // 61
             {-15, 214},                                                                                                     // 62
@@ -288,14 +288,18 @@ public class Code extends PanelTemplate {
     private final Stack<Ambit> ambitStack = new Stack<>();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
+    private boolean customType = false;
+    private boolean idType = false;
+    private boolean decParameters = false;
+    private boolean decLet = false;
+    private boolean decAnClass = false;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
     private int ambit = 0;
-    private boolean customType = false;
-    private boolean decParameters = false;
-    private String tempLet = "";
     private int tempParameters = 0;
     private int tempPosition = 0;
+    private String tempLet = "";
+    private String tempTipo = "";
 
 
     public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
@@ -457,7 +461,6 @@ public class Code extends PanelTemplate {
                     case 1004 -> printAreaAction(line, "declaración", "apertura");
                     case 1005 -> printAreaAction(line, "declaración", "cierre");
                     case 2000 -> currentType = ElementType.DEC_VAR;
-                    case 2001, 2007, 2009 -> currentType = ElementType.NONE;
                     case 2002 -> {
                         decParameters = true;
                         currentType = ElementType.DEC_MET;
@@ -473,20 +476,28 @@ public class Code extends PanelTemplate {
                         decParameters = true;
                         currentType = ElementType.DEC_SET;
                     }
-                    case 2014 -> currentType = ElementType.DEC_LET;
-                    case 2015 -> {
+                    case 2014 -> {
+                        decLet = true;
+                        currentType = ElementType.DEC_LET;
+                    }
+                    case 2016 -> {
                         decParameters = true;
                         currentType = ElementType.DEC_AN_FUN;
                     }
-                    case 2017 -> {
+                    case 2018 -> {
                         decParameters = true;
                         currentType = ElementType.DEC_AN_MET;
                     }
-                    case 2003, 2005, 2011, 2013, 2016, 2018 -> {
+                    case 2001, 2007, 2009 -> currentType = ElementType.NONE;
+                    case 2003, 2005, 2011, 2013, 2017, 2019 -> {
                         Element lastMethod = elementsStack.get(tempPosition);
                         lastMethod.setParQuantity(tempParameters);
                         tempParameters = 0;
                         decParameters = false;
+                        currentType = ElementType.NONE;
+                    }
+                    case 2015 -> {
+                        decLet = false;
                         currentType = ElementType.NONE;
                     }
                 }
@@ -496,8 +507,10 @@ public class Code extends PanelTemplate {
                     if (currentType != ElementType.NONE) {
                         int ambitNumber = ambitStack.peek().number();
                         String lexeme = syntaxTokens.getFirst().lexeme();
-                        if (topSyntaxStack == -58 && currentType == ElementType.DEC_LET) {
-                            tempLet = lexeme;
+                        if (topSyntaxStack == -58 && decLet && !idType) {
+                            idType = true;
+                            elementsStack.add(new Element(lexeme, "variable let", ambitNumber));
+                            System.out.println(lexeme);
                         } else {
                             createElement(lexeme, ambitNumber, topSyntaxStack);
                         }
@@ -523,12 +536,14 @@ public class Code extends PanelTemplate {
         String classType = getClassType();
         if (topSyntaxStack == -50 && currentType == ElementType.DEC_AN_FUN || currentType == ElementType.DEC_AN_MET) {
             elementsStack.add(new Element(tempLet, classType, ambitNumber));
+            System.out.println(lexeme);
             tempPosition = elementsStack.size() - 1;
             Element lastElement = elementsStack.peek();
             lastElement.setType("void");
             lastElement.setParType(String.valueOf(ambit));
         } else if (topSyntaxStack == -58 && !customType) {
             elementsStack.add(new Element(lexeme, classType, ambitNumber));
+            System.out.println(lexeme);
             Element lastElement = elementsStack.peek();
             switch (currentType) {
                 case DEC_VAR -> {
@@ -567,6 +582,9 @@ public class Code extends PanelTemplate {
             case DEC_SET -> classType = "set";
             case DEC_AN_FUN -> classType = "función anónima";
             case DEC_AN_MET -> classType = "método anónimo";
+            default -> {
+                if (decLet) classType = "variable let";
+            }
         }
         return classType;
     }
@@ -575,8 +593,17 @@ public class Code extends PanelTemplate {
         switch (topSyntaxStack) {
             case -57 -> customType = true;
             case -58 -> {
-                if (customType) element.setType("#" + lexeme);
-                customType = false;
+                if (idType && decAnClass) {
+                    element.setType("@" + lexeme);
+                    Element newElement = new Element(lexeme, "@anónima", ambit);
+                    newElement.setParType(String.valueOf(ambit));
+                    elementsStack.add(newElement);
+                    idType = false;
+                }
+                if (customType) {
+                    element.setType("#" + lexeme);
+                    customType = false;
+                }
             }
             case -61 -> element.setType("null");
             case -71 -> element.setType("real");
