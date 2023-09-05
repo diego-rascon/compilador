@@ -387,7 +387,7 @@ public class Code extends PanelTemplate {
 //            for (Element element : elementsStack) {
 //                switch (element.getClassType()) {
 //                    case "variable" -> {
-//                        ResultSet resultSet = statement.executeQuery("INSERT INTO elementos (name, type, ambito) VALUES (?, ?)");
+//                        ResultSet resultSet = statement.executeQuery("INSERT INTO elementos (name, tipo, ambito, cant_parametro, tipo_parametro) VALUES (?, ?)");
 //                    }
 //                }
 //            }
@@ -513,10 +513,12 @@ public class Code extends PanelTemplate {
                     }
                     case 2014 -> decLet = true;
                     case 2018 -> {
+                        decLet = false;
                         decParameters = true;
                         currentType = ElementType.DEC_AN_FUN;
                     }
                     case 2020 -> {
+                        decLet = false;
                         decParameters = true;
                         currentType = ElementType.DEC_AN_MET;
                     }
