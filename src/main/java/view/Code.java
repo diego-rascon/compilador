@@ -18,6 +18,7 @@ import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -134,26 +135,26 @@ public class Code extends PanelTemplate {
             {-18, 218},                                                                                                     // 38
             {-17, 254, 226},                                                                                                // 39
             {2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
-            {-15, 246, 226},                                                                                // 41
-            {-18, 227},                                                                                     // 42
-            {-73, -28, 228, -32, -38, 229},                                                                 // 43
-            {218},                                                                                          // 44
-            {-58},                                                                                          // 45
-            {-46, 230, -47},                                                                                // 46
-            {273, 231},                                                                                     // 47
-            {-15, 273, 231},                                                                                // 48
-            {-74, -73, -50, -51},                                                                           // 49
+            {-15, 246, 226},                                                                                                // 41
+            {-18, 227},                                                                                                     // 42
+            {-73, -28, 228, -32, -38, 229},                                                                                 // 43
+            {218},                                                                                                          // 44
+            {-58},                                                                                                          // 45
+            {-46, 230, -47, 2017},                                                                                                // 46
+            {273, 231},                                                                                                     // 47
+            {-15, 273, 231},                                                                                                // 48
+            {-74, -73, -50, -51, 2017},                                                                                           // 49
             {218, 2015, 232},                                                                                               // 50
             {-38, 233},                                                                                                     // 51
             {219, 2015},                                                                                                    // 52
-            {-46, 1004, 1000, 246, -15, 234, 214, 235, 249, 236, 1005, 1001, -47},                                          // 53   A   DE
+            {2016, -46, 1004, 1000, 246, -15, 234, 214, 235, 249, 236, 1005, 1001, -47},                                    // 53   A   DE
             {246, -15},                                                                                                     // 54
             {-15, 214},                                                                                                     // 55
             {-15, 249},                                                                                                     // 56
             {-58, 237},                                                                                                     // 57
             {-38, 238},                                                                                                     // 58
-            {219, 2015},                                                                                                          // 59
-            {-46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                                          // 60   A   DE
+            {219, 2015},                                                                                                    // 59
+            {2016, -46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                                          // 60   A   DE
             {246, -15},                                                                                                     // 61
             {-15, 214},                                                                                                     // 62
             {-15, 249},                                                                                                     // 63
@@ -167,9 +168,9 @@ public class Code extends PanelTemplate {
             {2008, -89, -58, 2009, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                             // 71   A   DE
             {-17, 246, 248},                                                                                                // 72
             {2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47},       // 73   A   DE  EJ
-            {-15, 246, 250},                                                                                        // 74
-            {-18, 218},                                                                                             // 75
-            {-17, 254, 252},                                                                                        // 76
+            {-15, 246, 250},                                                                                                // 74
+            {-18, 218},                                                                                                     // 75
+            {-17, 254, 252},                                                                                                // 76
             {-38},                                                                                                  // 77
             {-3},                                                                                                   // 78
             {-24},                                                                                                  // 79
@@ -286,6 +287,9 @@ public class Code extends PanelTemplate {
     private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
+    private final Connection connection;
+    private final Statement statement;
+    private final LinkedList<Integer> tempArraySize = new LinkedList<>();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
     private boolean customType = false;
@@ -297,8 +301,18 @@ public class Code extends PanelTemplate {
     private int ambit = 0;
     private int tempParameters = 0;
     private int tempPosition = 0;
+    private int tempArrayDim = 0;
     private String tempLet = "";
     private String tempType = "";
+
+    {
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/a20130375", "root", "root");
+            statement = connection.createStatement();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         super("Código", padding);
@@ -341,6 +355,7 @@ public class Code extends PanelTemplate {
         ambit = 0;
         tempParameters = 0;
         tempPosition = 0;
+        tempArrayDim = 0;
         tempLet = "";
         tempType = "";
         syntaxTokens.clear();
@@ -348,6 +363,7 @@ public class Code extends PanelTemplate {
         syntaxStack.push(200);
         ambitStack.clear();
         elementsStack.clear();
+        tempArraySize.clear();
         tokenPanel.emptyTokensList();
         countersPanel.restartCounter();
         errorsPanel.emptyErrorsList();
@@ -366,6 +382,18 @@ public class Code extends PanelTemplate {
         } catch (IOException e) {
             System.out.println("Ocurrió un error cerrando el archivo de resultados");
         }
+
+//        try {
+//            for (Element element : elementsStack) {
+//                switch (element.getClassType()) {
+//                    case "variable" -> {
+//                        ResultSet resultSet = statement.executeQuery("INSERT INTO elementos (name, type, ambito) VALUES (?, ?)");
+//                    }
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
 
         System.out.printf("%10s%10s%20s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
         System.out.println();
@@ -508,8 +536,44 @@ public class Code extends PanelTemplate {
                             newElement.setType(tempType);
                             elementsStack.add(newElement);
                             if (tempType.charAt(0) == '@') {
-                                elementsStack.add(new Element(tempType, "@anónima", 0));
+                                Element typeElement = new Element(tempType, "@anónima", 0);
+                                typeElement.setParType("1");
+                                elementsStack.add(typeElement);
                             }
+                        }
+                    }
+                    case 2016 -> {
+                        if (decLet) {
+                            decLet = false;
+                            idType = false;
+                            Element newElement = new Element(tempLet, "clase anónima", 0);
+                            newElement.setType(tempType);
+                            elementsStack.add(newElement);
+                            if (tempType.charAt(0) == '@') {
+                                Element typeElement = new Element(tempType, "@anónima", 0);
+                                typeElement.setParType("1");
+                                elementsStack.add(typeElement);
+                            }
+                        }
+                    }
+                    case 2017 -> {
+                        if (decLet) {
+                            decLet = false;
+                            idType = false;
+                            Element newElement = new Element(tempLet, "arreglo", 0);
+                            if (tempType.charAt(0) == '@') {
+                                tempType = tempType.substring(1);
+                            }
+                            newElement.setType(tempType);
+                            newElement.setArrayDim(tempArrayDim == 0 ? 0 : tempArrayDim + 1);
+                            if (!tempArraySize.isEmpty()) {
+                                int[] arraySize = new int[tempArraySize.size()];
+                                for (int i = 0; i < tempArraySize.size(); i++) {
+                                    arraySize[i] = tempArraySize.get(i);
+                                }
+                                newElement.setArraySize(arraySize);
+                            }
+                            elementsStack.add(newElement);
                         }
                     }
                 }
@@ -523,6 +587,8 @@ public class Code extends PanelTemplate {
                             tempLet = lexeme;
                         } else {
                             switch (topSyntaxStack) {
+                                case -15 -> tempArrayDim++;
+                                case -54 -> tempArraySize.add(Integer.valueOf(lexeme));
                                 case -57 -> customType = true;
                                 case -58 -> {
                                     if (customType) {
@@ -553,7 +619,7 @@ public class Code extends PanelTemplate {
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
-                    System.out.println("Error de fuerza bruta, linea: "+ syntaxTokens.getFirst().line()+" lexema: "+ syntaxTokens.getFirst().lexeme());
+                    System.out.println("Error de fuerza bruta, linea: " + syntaxTokens.getFirst().line() + " lexema: " + syntaxTokens.getFirst().lexeme());
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 }
@@ -577,6 +643,7 @@ public class Code extends PanelTemplate {
                     if (decParameters) {
                         tempParameters++;
                         lastElement.setParType(elementsStack.get(tempPosition).getName());
+                        lastElement.setParQuantity(tempParameters);
                     }
                 }
                 case DEC_MET, DEC_FUN, DEC_GET, DEC_SET -> {
