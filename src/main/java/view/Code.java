@@ -129,11 +129,11 @@ public class Code extends PanelTemplate {
             {-61},                                                                                                          // 33
             {-88, 2014, -58, 221},                                                                                          // 34
             {-38, 222},                                                                                                     // 35
-            {2016, -70, -50, 1004, 1000, 246, 223, 1005, -51, 2016, 224, 2017, -46, 1002, 254, 225, 1003, 1001, -47},       // 36   A   DE  EJ
+            {2018, -70, -50, 1004, 1000, 246, 223, 1005, -51, 2018, 224, 2019, -46, 1002, 254, 225, 1003, 1001, -47},       // 36   A   DE  EJ
             {-15, 246, 223},                                                                                                // 37
             {-18, 218},                                                                                                     // 38
             {-17, 254, 226},                                                                                                // 39
-            {2018, -50, 1004, 1000, 246, 226, 1005, -51, 2018, 2019, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
+            {2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
             {-15, 246, 226},                                                                                // 41
             {-18, 227},                                                                                     // 42
             {-73, -28, 228, -32, -38, 229},                                                                 // 43
@@ -143,7 +143,7 @@ public class Code extends PanelTemplate {
             {273, 231},                                                                                     // 47
             {-15, 273, 231},                                                                                // 48
             {-74, -73, -50, -51},                                                                           // 49
-            {218, 232},                                                                                     // 50
+            {218, 2015, 232},                                                                                               // 50
             {-38, 233},                                                                                                     // 51
             {219, 2015},                                                                                                    // 52
             {-46, 1004, 1000, 246, -15, 234, 214, 235, 249, 236, 1005, 1001, -47},                                          // 53   A   DE
@@ -292,15 +292,13 @@ public class Code extends PanelTemplate {
     private boolean idType = false;
     private boolean decParameters = false;
     private boolean decLet = false;
-    private boolean decAnClass = false;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
     private int ambit = 0;
     private int tempParameters = 0;
     private int tempPosition = 0;
     private String tempLet = "";
-    private String tempTipo = "";
-
+    private String tempType = "";
 
     public Code(int padding, Tokens tokensPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         super("Código", padding);
@@ -336,7 +334,15 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error creando el archivo de resultados");
         }
 
+        customType = false;
+        idType = false;
+        decParameters = false;
+        decLet = false;
         ambit = 0;
+        tempParameters = 0;
+        tempPosition = 0;
+        tempLet = "";
+        tempType = "";
         syntaxTokens.clear();
         syntaxStack.clear();
         syntaxStack.push(200);
@@ -346,6 +352,7 @@ public class Code extends PanelTemplate {
         countersPanel.restartCounter();
         errorsPanel.emptyErrorsList();
         errorTypesPanel.restartCounter();
+        currentType = ElementType.NONE;
 
         checkLexic();
         checkSyntax();
@@ -476,20 +483,17 @@ public class Code extends PanelTemplate {
                         decParameters = true;
                         currentType = ElementType.DEC_SET;
                     }
-                    case 2014 -> {
-                        decLet = true;
-                        currentType = ElementType.DEC_LET;
-                    }
-                    case 2016 -> {
+                    case 2014 -> decLet = true;
+                    case 2018 -> {
                         decParameters = true;
                         currentType = ElementType.DEC_AN_FUN;
                     }
-                    case 2018 -> {
+                    case 2020 -> {
                         decParameters = true;
                         currentType = ElementType.DEC_AN_MET;
                     }
                     case 2001, 2007, 2009 -> currentType = ElementType.NONE;
-                    case 2003, 2005, 2011, 2013, 2017, 2019 -> {
+                    case 2003, 2005, 2011, 2013, 2019, 2021 -> {
                         Element lastMethod = elementsStack.get(tempPosition);
                         lastMethod.setParQuantity(tempParameters);
                         tempParameters = 0;
@@ -497,23 +501,48 @@ public class Code extends PanelTemplate {
                         currentType = ElementType.NONE;
                     }
                     case 2015 -> {
-                        decLet = false;
-                        currentType = ElementType.NONE;
+                        if (decLet) {
+                            decLet = false;
+                            idType = false;
+                            Element newElement = new Element(tempLet, "variable let", 0);
+                            newElement.setType(tempType);
+                            elementsStack.add(newElement);
+                            if (tempType.charAt(0) == '@') {
+                                elementsStack.add(new Element(tempType, "@anónima", 0));
+                            }
+                        }
                     }
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
-                    if (currentType != ElementType.NONE) {
-                        int ambitNumber = ambitStack.peek().number();
-                        String lexeme = syntaxTokens.getFirst().lexeme();
-                        if (topSyntaxStack == -58 && decLet && !idType) {
+                    String lexeme = syntaxTokens.getFirst().lexeme();
+                    if (decLet) {
+                        if (topSyntaxStack == -58 && !idType) {
                             idType = true;
-                            elementsStack.add(new Element(lexeme, "variable let", ambitNumber));
-                            System.out.println(lexeme);
+                            tempLet = lexeme;
                         } else {
-                            createElement(lexeme, ambitNumber, topSyntaxStack);
+                            switch (topSyntaxStack) {
+                                case -57 -> customType = true;
+                                case -58 -> {
+                                    if (customType) {
+                                        customType = false;
+                                        tempType = "#" + lexeme;
+                                    } else {
+                                        idType = false;
+                                        tempType = "@" + lexeme;
+                                    }
+                                }
+                                case -61 -> tempType = "null";
+                                case -71 -> tempType = "real";
+                                case -72 -> tempType = "boolean";
+                                case -90 -> tempType = "number";
+                                case -91 -> tempType = "string";
+                            }
                         }
+                    } else if (currentType != ElementType.NONE) {
+                        int ambitNumber = ambitStack.peek().number();
+                        createElement(lexeme, ambitNumber, topSyntaxStack);
                     }
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
@@ -524,7 +553,7 @@ public class Code extends PanelTemplate {
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
-                    System.out.println("Error de fuerza bruta.");
+                    System.out.println("Error de fuerza bruta, linea: "+ syntaxTokens.getFirst().line()+" lexema: "+ syntaxTokens.getFirst().lexeme());
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 }
@@ -536,14 +565,12 @@ public class Code extends PanelTemplate {
         String classType = getClassType();
         if (topSyntaxStack == -50 && currentType == ElementType.DEC_AN_FUN || currentType == ElementType.DEC_AN_MET) {
             elementsStack.add(new Element(tempLet, classType, ambitNumber));
-            System.out.println(lexeme);
             tempPosition = elementsStack.size() - 1;
             Element lastElement = elementsStack.peek();
             lastElement.setType("void");
             lastElement.setParType(String.valueOf(ambit));
         } else if (topSyntaxStack == -58 && !customType) {
             elementsStack.add(new Element(lexeme, classType, ambitNumber));
-            System.out.println(lexeme);
             Element lastElement = elementsStack.peek();
             switch (currentType) {
                 case DEC_VAR -> {
@@ -582,9 +609,6 @@ public class Code extends PanelTemplate {
             case DEC_SET -> classType = "set";
             case DEC_AN_FUN -> classType = "función anónima";
             case DEC_AN_MET -> classType = "método anónimo";
-            default -> {
-                if (decLet) classType = "variable let";
-            }
         }
         return classType;
     }
@@ -593,11 +617,7 @@ public class Code extends PanelTemplate {
         switch (topSyntaxStack) {
             case -57 -> customType = true;
             case -58 -> {
-                if (idType && decAnClass) {
-                    element.setType("@" + lexeme);
-                    Element newElement = new Element(lexeme, "@anónima", ambit);
-                    newElement.setParType(String.valueOf(ambit));
-                    elementsStack.add(newElement);
+                if (idType) {
                     idType = false;
                 }
                 if (customType) {
