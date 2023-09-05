@@ -1,12 +1,14 @@
 package model;
 
+import java.util.Arrays;
+
 public class Element {
 
     private final String name;
     private String type;
     private final String classType;
     private final int ambit;
-    private int arraySize;
+    private int[] arraySize;
     private int arrayDim;
     private int parQuantity;
     private String parType;
@@ -37,11 +39,11 @@ public class Element {
         return ambit;
     }
 
-    public int getArraySize() {
+    public int[] getArraySize() {
         return arraySize;
     }
 
-    public void setArraySize(int arraySize) {
+    public void setArraySize(int[] arraySize) {
         this.arraySize = arraySize;
     }
 
@@ -71,6 +73,6 @@ public class Element {
 
     @Override
     public String toString() {
-        return String.format("%10s%10s%20s%10d%15d%15d%15d%15s", name, type, classType, ambit, arraySize, arrayDim, parQuantity, parType);
+        return String.format("%10s%10s%20s%10d%15s%15d%15d%15s", name, type, classType, ambit, Arrays.toString(arraySize), arrayDim, parQuantity, parType);
     }
 }
