@@ -288,7 +288,6 @@ public class Code extends PanelTemplate {
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final Connection connection;
-    private final Statement statement;
     private final LinkedList<Integer> tempArraySize = new LinkedList<>();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
@@ -308,7 +307,6 @@ public class Code extends PanelTemplate {
     {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/a20130375", "root", "root");
-            statement = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -342,6 +340,14 @@ public class Code extends PanelTemplate {
     }
 
     public void compile() {
+        try {
+            Statement statement = connection.createStatement();
+            String deleteQuery = "DELETE FROM elementos WHERE id_element > 0";
+            statement.executeUpdate(deleteQuery);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             txtResult = new FileWriter("Resultados - 20130375.txt");
         } catch (IOException e) {
@@ -383,23 +389,83 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error cerrando el archivo de resultados");
         }
 
-//        try {
-//            for (Element element : elementsStack) {
-//                switch (element.getClassType()) {
-//                    case "variable" -> {
-//                        ResultSet resultSet = statement.executeQuery("INSERT INTO elementos (name, tipo, ambito, cant_parametro, tipo_parametro) VALUES (?, ?)");
-//                    }
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            for (Element element : elementsStack) {
+                String id = element.getId();
+                String type = element.getType();
+                String classType = element.getClassType();
+                String ambit = String.valueOf(element.getAmbit());
+                int[] arraySize = element.getArraySize();
+                String arrayDim = String.valueOf(element.getArrayDim());
+                String parQuantity = String.valueOf(element.getParQuantity());
+                String parType = element.getParType();
+                switch (element.getClassType()) {
+                    case "variable", "variable let", "@anónima", "función", "función anónima", "método", "método anónimo", "get", "set" -> {
+                        if (parType == null) {
+                            String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito) VALUES (?, ?, ?, ?)";
+                            PreparedStatement preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, id);
+                            preparedStatement.setString(2, type);
+                            preparedStatement.setString(3, classType);
+                            preparedStatement.setString(4, ambit);
+                            preparedStatement.executeUpdate();
+                            preparedStatement.close();
+                        } else {
+                            String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito, cant_parametro, tipo_parametro) VALUES (?, ?, ?, ?, ?, ?)";
+                            PreparedStatement preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, id);
+                            preparedStatement.setString(2, type);
+                            preparedStatement.setString(3, classType);
+                            preparedStatement.setString(4, ambit);
+                            preparedStatement.setString(5, parQuantity);
+                            preparedStatement.setString(6, parType);
+                            preparedStatement.executeUpdate();
+                            preparedStatement.close();
+                        }
+                    }
+                    case "interface", "clase", "clase anónima" -> {
+                        String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito, tipo_parametro) VALUES (?, ?, ?, ?, ?)";
+                        prepareStatement(id, type, classType, ambit, parType, query);
+                    }
+                    case "arreglo" -> {
+                        if (arraySize == null) {
+                            String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito, dim_arreglo) VALUES (?, ?, ?, ?, ?)";
+                            prepareStatement(id, type, classType, ambit, arrayDim, query);
+                        } else {
+                            String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito, tam_arreglo, dim_arreglo) VALUES (?, ?, ?, ?, ?, ?)";
+                            PreparedStatement preparedStatement = connection.prepareStatement(query);
+                            preparedStatement.setString(1, id);
+                            preparedStatement.setString(2, type);
+                            preparedStatement.setString(3, classType);
+                            preparedStatement.setString(4, ambit);
+                            preparedStatement.setString(5, Arrays.toString(arraySize));
+                            preparedStatement.setString(6, arrayDim);
+                            preparedStatement.executeUpdate();
+                            preparedStatement.close();
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         System.out.printf("%10s%10s%20s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
         System.out.println();
         for (Element element : elementsStack) {
             System.out.println(element);
         }
+    }
+
+    private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, id);
+        preparedStatement.setString(2, type);
+        preparedStatement.setString(3, classType);
+        preparedStatement.setString(4, ambit);
+        preparedStatement.setString(5, parType);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
     }
 
     private void checkLexic() {
@@ -644,7 +710,7 @@ public class Code extends PanelTemplate {
                 case DEC_VAR -> {
                     if (decParameters) {
                         tempParameters++;
-                        lastElement.setParType(elementsStack.get(tempPosition).getName());
+                        lastElement.setParType(elementsStack.get(tempPosition).getId());
                         lastElement.setParQuantity(tempParameters);
                     }
                 }
@@ -670,8 +736,8 @@ public class Code extends PanelTemplate {
         String classType = "";
         switch (currentType) {
             case DEC_VAR -> classType = "variable";
-            case DEC_MET -> classType = "metodo";
-            case DEC_FUN -> classType = "funcion";
+            case DEC_MET -> classType = "método";
+            case DEC_FUN -> classType = "función";
             case DEC_CLASS -> classType = "clase";
             case DEC_INTER -> classType = "interface";
             case DEC_GET -> classType = "get";
