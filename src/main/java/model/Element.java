@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Element {
 
-    private final String name;
+    private final String id;
     private String type;
     private final String classType;
     private final int ambit;
@@ -13,14 +13,14 @@ public class Element {
     private int parQuantity;
     private String parType;
 
-    public Element(String name, String classType, int ambit) {
-        this.name = name;
+    public Element(String id, String classType, int ambit) {
+        this.id = id;
         this.classType = classType;
         this.ambit = ambit;
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public String getType() {
@@ -73,6 +73,6 @@ public class Element {
 
     @Override
     public String toString() {
-        return String.format("%10s%10s%20s%10d%15s%15d%15d%15s", name, type, classType, ambit, Arrays.toString(arraySize), arrayDim, parQuantity, parType);
+        return String.format("%10s%10s%20s%10d%15s%15d%15d%15s", id, type, classType, ambit, Arrays.toString(arraySize), arrayDim, parQuantity, parType);
     }
 }
