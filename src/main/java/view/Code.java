@@ -291,6 +291,7 @@ public class Code extends PanelTemplate {
     private final LinkedList<Integer> tempArraySize = new LinkedList<>();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
+    private boolean exeArea = false;
     private boolean customType = false;
     private boolean idType = false;
     private boolean decParameters = false;
@@ -354,6 +355,7 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error creando el archivo de resultados");
         }
 
+        exeArea = false;
         customType = false;
         idType = false;
         decParameters = false;
@@ -450,11 +452,11 @@ public class Code extends PanelTemplate {
             throw new RuntimeException(e);
         }
 
-        System.out.printf("%10s%10s%20s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
-        System.out.println();
-        for (Element element : elementsStack) {
-            System.out.println(element);
-        }
+//        System.out.printf("%10s%10s%20s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
+//        System.out.println();
+//        for (Element element : elementsStack) {
+//            System.out.println(element);
+//        }
     }
 
     private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
@@ -557,8 +559,14 @@ public class Code extends PanelTemplate {
                         ambitStack.pop();
                         printAmbitAction("eliminó", topAmbitLine, line);
                     }
-                    case 1002 -> printAreaAction(line, "ejecución", "apertura");
-                    case 1003 -> printAreaAction(line, "ejecución", "cierre");
+                    case 1002 -> {
+                        exeArea = true;
+                        printAreaAction(line, "ejecución", "apertura");
+                    }
+                    case 1003 -> {
+                        exeArea = false;
+                        printAreaAction(line, "ejecución", "cierre");
+                    }
                     case 1004 -> printAreaAction(line, "declaración", "apertura");
                     case 1005 -> printAreaAction(line, "declaración", "cierre");
                     case 2000 -> currentType = ElementType.DEC_VAR;
