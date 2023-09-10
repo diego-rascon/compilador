@@ -89,11 +89,13 @@ public class Errors extends PanelTemplate {
             case 546 -> description = "Se esperaba un ( o un [.";
             case 547 -> description = "Se esperaba un ?.";
             case 548 -> description = "Se esperaba un ! o un ~.";
+            case 549 -> description = "Variable no declarada.";
         }
         String type = "";
         switch (errorType) {
             case LEXIC -> type = "Léxico";
             case SINTAXIS -> type = "Sintaxis";
+            case AMBIT -> type = "Ámbito";
         }
         final model.Error newError = new model.Error(error, description, lexeme, type, line);
         errorList.add(newError);
