@@ -288,7 +288,7 @@ public class Code extends PanelTemplate {
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final Connection connection;
-    private final LinkedList<Integer> tempArraySize = new LinkedList<>();
+    private final LinkedList<String> tempArraySize = new LinkedList<>();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
     private boolean exeArea = false;
@@ -397,7 +397,7 @@ public class Code extends PanelTemplate {
                 String type = element.getType();
                 String classType = element.getClassType();
                 String ambit = String.valueOf(element.getAmbit());
-                int[] arraySize = element.getArraySize();
+                String[] arraySize = element.getArraySize();
                 String arrayDim = String.valueOf(element.getArrayDim());
                 String parQuantity = String.valueOf(element.getParQuantity());
                 String parType = element.getParType();
@@ -498,9 +498,7 @@ public class Code extends PanelTemplate {
                 if (state == 500) {
                     lexeme.append(character);
                 } else i--;
-                countersPanel.addCounter(state);
-                errorsPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, lineNum);
-                errorTypesPanel.addCounter(ErrorType.LEXIC);
+                addError(state, lexeme.toString(), ErrorType.LEXIC, lineNum);
                 lexeme.setLength(0);
                 state = 0;
             } else {
@@ -516,9 +514,7 @@ public class Code extends PanelTemplate {
         }
         if (state != 0) {
             state = 505;
-            countersPanel.addCounter(state);
-            errorsPanel.addError(state, lexeme.toString(), ErrorType.LEXIC, multiCommentLineNum);
-            errorTypesPanel.addCounter(ErrorType.LEXIC);
+            addError(state, lexeme.toString(), ErrorType.LEXIC, multiCommentLineNum);
         }
     }
 
@@ -534,8 +530,7 @@ public class Code extends PanelTemplate {
                 int production = syntaxMatrix[topSyntaxStack - 200][tokenCol];
 
                 if (production > 499) {
-                    errorsPanel.addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
-                    errorTypesPanel.addCounter(ErrorType.SINTAXIS);
+                    addError(production, lexeme, ErrorType.SINTAXIS, lineNum);
                     syntaxTokens.removeFirst();
                 } else if (production == 183) {
                     syntaxStack.pop();
@@ -643,13 +638,15 @@ public class Code extends PanelTemplate {
                             newElement.setType(tempType);
                             newElement.setArrayDim(tempArrayDim == 0 ? 0 : tempArrayDim + 1);
                             if (!tempArraySize.isEmpty()) {
-                                int[] arraySize = new int[tempArraySize.size()];
+                                String[] arraySize = new String[tempArraySize.size()];
                                 for (int i = 0; i < tempArraySize.size(); i++) {
                                     arraySize[i] = tempArraySize.get(i);
                                 }
                                 newElement.setArraySize(arraySize);
                             }
                             elementsStack.add(newElement);
+                            tempArrayDim = 0;
+                            tempArraySize.clear();
                         }
                     }
                 }
@@ -664,7 +661,7 @@ public class Code extends PanelTemplate {
                         } else {
                             switch (topSyntaxStack) {
                                 case -15 -> tempArrayDim++;
-                                case -54 -> tempArraySize.add(Integer.valueOf(lexeme));
+                                case -52, -53, -54, -55, -56-> tempArraySize.add(lexeme);
                                 case -57 -> customType = true;
                                 case -58 -> {
                                     if (customType) {
@@ -685,6 +682,18 @@ public class Code extends PanelTemplate {
                     } else if (currentType != ElementType.NONE) {
                         int ambitNumber = ambitStack.peek().number();
                         createElement(lexeme, ambitNumber, topSyntaxStack);
+                    }
+                    if (topSyntaxStack == -58 && exeArea) {
+                        var elementExist = false;
+                        for (Element element : elementsStack) {
+                            if (element.getId().equals(lexeme)) {
+                                elementExist = true;
+                                break;
+                            };
+                        }
+                        if (!elementExist) {
+                            addError(549, lexeme, ErrorType.AMBIT, syntaxTokens.getFirst().line());
+                        }
                     }
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
@@ -918,6 +927,12 @@ public class Code extends PanelTemplate {
     private int getKeywordToken(String lexeme, int state) {
         if (Arrays.asList(keywords).contains(lexeme)) return state - Arrays.asList(keywords).indexOf(lexeme) - 1;
         return state;
+    }
+
+    private void addError(int error, String lexeme, ErrorType errorType, int lineNum) {
+        errorsPanel.addError(error, lexeme, errorType, lineNum);
+        errorTypesPanel.addCounter(errorType);
+        countersPanel.addCounter(error);
     }
 
     final void loadLexicMatrix() {
