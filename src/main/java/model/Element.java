@@ -8,7 +8,7 @@ public class Element {
     private String type;
     private final String classType;
     private final int ambit;
-    private int[] arraySize;
+    private String[] arraySize;
     private int arrayDim;
     private int parQuantity;
     private String parType;
@@ -39,11 +39,11 @@ public class Element {
         return ambit;
     }
 
-    public int[] getArraySize() {
+    public String[] getArraySize() {
         return arraySize;
     }
 
-    public void setArraySize(int[] arraySize) {
+    public void setArraySize(String[] arraySize) {
         this.arraySize = arraySize;
     }
 
