@@ -133,13 +133,6 @@ public class Counters extends PanelTemplate {
                 int newValue = counterMap.get(rowLabel) + 1;
                 counterMap.put(rowLabel, newValue);
             }
-            case -58, -59, -60, -61, -62, -63, -64, -65, -66, -67, -68, -69, -70, -71, -72, -73, -74, -75, -76, -77,
-                    -78, -79, -80, -81, -82, -83, -84, -85, -86, -87, -88, -89, -90, -91, -92, -93, -94, -95, -96, -97,
-                    -98, -99, -100, -101, -102, -103 -> {
-                String rowLabel = rowLabels[12];
-                int newValue = counterMap.get(rowLabel) + 1;
-                counterMap.put(rowLabel, newValue);
-            }
             case -25, -23 -> {
                 String rowLabel = rowLabels[13];
                 int newValue = counterMap.get(rowLabel) + 1;
@@ -170,10 +163,17 @@ public class Counters extends PanelTemplate {
                 int newValue = counterMap.get(rowLabel) + 1;
                 counterMap.put(rowLabel, newValue);
             }
-            case -57 -> {
+            case -58 -> {
                 String rowLabel = rowLabels[19];
                 int newValue = counterMap.get(rowLabel) + 1;
                 counterMap.put(rowLabel, newValue);
+            }
+            default -> {
+                if (state <= -59 && state >= -124) {
+                    String rowLabel = rowLabels[12];
+                    int newValue = counterMap.get(rowLabel) + 1;
+                    counterMap.put(rowLabel, newValue);
+                }
             }
             case 500, 501, 502, 503, 504, 505 -> {
                 String rowLabel = rowLabels[20];
