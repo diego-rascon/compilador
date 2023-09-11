@@ -286,6 +286,7 @@ public class Code extends PanelTemplate {
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
+    private final LinkedList<Ambit> ambits = new LinkedList<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final Connection connection;
     private final LinkedList<String> tempArraySize = new LinkedList<>();
@@ -369,6 +370,7 @@ public class Code extends PanelTemplate {
         syntaxTokens.clear();
         syntaxStack.clear();
         syntaxStack.push(200);
+        ambits.clear();
         ambitStack.clear();
         elementsStack.clear();
         tempArraySize.clear();
@@ -545,12 +547,14 @@ public class Code extends PanelTemplate {
                 int line = syntaxTokens.getFirst().line();
                 switch (topSyntaxStack) {
                     case 1000 -> {
-                        ambitStack.push(new Ambit(ambit, line));
+                        Ambit newAmbit = new Ambit(ambit);
+                        ambits.add(newAmbit);
+                        ambitStack.push(newAmbit);
                         printAmbitAction("creó", ambit, line);
                         ambit++;
                     }
                     case 1001 -> {
-                        int topAmbitLine = ambitStack.peek().number();
+                        int topAmbitLine = ambitStack.peek().getId();
                         ambitStack.pop();
                         printAmbitAction("eliminó", topAmbitLine, line);
                     }
@@ -606,6 +610,7 @@ public class Code extends PanelTemplate {
                             Element newElement = new Element(tempLet, "variable let", 0);
                             newElement.setType(tempType);
                             elementsStack.add(newElement);
+                            incAmbitCounter(tempType);
                             if (tempType.charAt(0) == '@') {
                                 Element typeElement = new Element(tempType, "@anónima", 0);
                                 typeElement.setParType("1");
@@ -661,7 +666,7 @@ public class Code extends PanelTemplate {
                         } else {
                             switch (topSyntaxStack) {
                                 case -15 -> tempArrayDim++;
-                                case -52, -53, -54, -55, -56-> tempArraySize.add(lexeme);
+                                case -52, -53, -54, -55, -56 -> tempArraySize.add(lexeme);
                                 case -57 -> customType = true;
                                 case -58 -> {
                                     if (customType) {
@@ -680,7 +685,7 @@ public class Code extends PanelTemplate {
                             }
                         }
                     } else if (currentType != ElementType.NONE) {
-                        int ambitNumber = ambitStack.peek().number();
+                        int ambitNumber = ambitStack.peek().getId();
                         createElement(lexeme, ambitNumber, topSyntaxStack);
                     }
                     if (topSyntaxStack == -58 && exeArea) {
@@ -689,7 +694,7 @@ public class Code extends PanelTemplate {
                             if (element.getId().equals(lexeme)) {
                                 elementExist = true;
                                 break;
-                            };
+                            }
                         }
                         if (!elementExist) {
                             addError(549, lexeme, ErrorType.AMBIT, syntaxTokens.getFirst().line());
@@ -773,15 +778,37 @@ public class Code extends PanelTemplate {
                     idType = false;
                 }
                 if (customType) {
-                    element.setType("#" + lexeme);
+                    String type = "#" + lexeme;
+                    element.setType(type);
+                    if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
                     customType = false;
                 }
             }
-            case -61 -> element.setType("null");
-            case -71 -> element.setType("real");
-            case -72 -> element.setType("boolean");
-            case -90 -> element.setType("number");
-            case -91 -> element.setType("string");
+            case -61 -> {
+                String type = "null";
+                element.setType(type);
+                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+            }
+            case -71 -> {
+                String type = "real";
+                element.setType(type);
+                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+            }
+            case -72 -> {
+                String type = "boolean";
+                element.setType(type);
+                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+            }
+            case -90 -> {
+                String type = "number";
+                element.setType(type);
+                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+            }
+            case -91 -> {
+                String type = "string";
+                element.setType(type);
+                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+            }
         }
     }
 
@@ -795,7 +822,7 @@ public class Code extends PanelTemplate {
             formattedStack.append("-> [");
             int stackSize = ambitStack.size();
             for (int i = 0; i < stackSize; i++) {
-                formattedStack.append(ambitStack.get(i).number());
+                formattedStack.append(ambitStack.get(i).getId());
                 if (i < stackSize - 1) {
                     formattedStack.append(", ");
                 }
@@ -933,6 +960,18 @@ public class Code extends PanelTemplate {
         errorsPanel.addError(error, lexeme, errorType, lineNum);
         errorTypesPanel.addCounter(errorType);
         countersPanel.addCounter(error);
+        if (errorType == ErrorType.AMBIT) {
+            incAmbitCounter("error");
+        }
+    }
+
+    private void incAmbitCounter(String type) {
+        for (Ambit currentAmbit : ambits) {
+            if (currentAmbit.getId() == ambitStack.peek().getId()) {
+                currentAmbit.incCounter(type);
+                break;
+            }
+        }
     }
 
     final void loadLexicMatrix() {
@@ -993,5 +1032,9 @@ public class Code extends PanelTemplate {
 
     public void setCode(String fileContent) {
         codeArea.setText(fileContent);
+    }
+
+    public LinkedList<Ambit> getAmbits() {
+        return ambits;
     }
 }
