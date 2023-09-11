@@ -90,6 +90,16 @@ public class Errors extends PanelTemplate {
             case 547 -> description = "Se esperaba un ?.";
             case 548 -> description = "Se esperaba un ! o un ~.";
             case 549 -> description = "Variable no declarada.";
+            case 550 -> description = "Variable duplicada.";
+            case 551 -> description = "Variable let duplicada.";
+            case 552 -> description = "Arreglo duplicado.";
+            case 553 -> description = "Función duplicada.";
+            case 554 -> description = "Función anónima duplicada.";
+            case 555 -> description = "Método duplicado.";
+            case 556 -> description = "Método anónimo duplicado.";
+            case 557 -> description = "Clase duplicada.";
+            case 558 -> description = "Clase anónima duplicada";
+            case 559 -> description = "Interfaz duplicada.";
         }
         String type = "";
         switch (errorType) {
