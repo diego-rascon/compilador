@@ -100,6 +100,8 @@ public class Errors extends PanelTemplate {
             case 557 -> description = "Clase duplicada.";
             case 558 -> description = "Clase anónima duplicada";
             case 559 -> description = "Interfaz duplicada.";
+            case 560 -> description = "Método get duplicado.";
+            case 561 -> description = "Método set duplicado.";
         }
         String type = "";
         switch (errorType) {
