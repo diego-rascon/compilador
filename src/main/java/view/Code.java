@@ -609,6 +609,7 @@ public class Code extends PanelTemplate {
                             idType = false;
                             Element newElement = new Element(tempLet, "variable let", 0);
                             newElement.setType(tempType);
+                            checkDuplicateElement(551, tempLet, line);
                             elementsStack.add(newElement);
                             incAmbitCounter(tempType);
                             if (tempType.charAt(0) == '@') {
@@ -624,6 +625,7 @@ public class Code extends PanelTemplate {
                             idType = false;
                             Element newElement = new Element(tempLet, "clase anónima", 0);
                             newElement.setType(tempType);
+                            checkDuplicateElement(558, tempLet, line);
                             elementsStack.add(newElement);
                             if (tempType.charAt(0) == '@') {
                                 Element typeElement = new Element(tempType, "@anónima", 0);
@@ -649,6 +651,7 @@ public class Code extends PanelTemplate {
                                 }
                                 newElement.setArraySize(arraySize);
                             }
+                            checkDuplicateElement(552, tempLet, line);
                             elementsStack.add(newElement);
                             tempArrayDim = 0;
                             tempArraySize.clear();
@@ -659,6 +662,7 @@ public class Code extends PanelTemplate {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
+                    int line = syntaxTokens.getFirst().line();
                     if (decLet) {
                         if (topSyntaxStack == -58 && !idType) {
                             idType = true;
@@ -686,7 +690,7 @@ public class Code extends PanelTemplate {
                         }
                     } else if (currentType != ElementType.NONE) {
                         int ambitNumber = ambitStack.peek().getId();
-                        createElement(lexeme, ambitNumber, topSyntaxStack);
+                        createElement(lexeme, line, ambitNumber, topSyntaxStack);
                     }
                     if (topSyntaxStack == -58 && exeArea) {
                         var elementExist = false;
@@ -717,15 +721,26 @@ public class Code extends PanelTemplate {
         }
     }
 
-    private void createElement(String lexeme, int ambitNumber, int topSyntaxStack) {
+    private void createElement(String lexeme, int line, int ambitNumber, int topSyntaxStack) {
         String classType = getClassType();
         if (topSyntaxStack == -50 && currentType == ElementType.DEC_AN_FUN || currentType == ElementType.DEC_AN_MET) {
+            switch (currentType) {
+                case DEC_AN_FUN -> checkDuplicateElement(554, tempLet, line);
+                case DEC_AN_MET -> checkDuplicateElement(556, tempLet, line);
+            }
             elementsStack.add(new Element(tempLet, classType, ambitNumber));
             tempPosition = elementsStack.size() - 1;
             Element lastElement = elementsStack.peek();
             lastElement.setType("void");
             lastElement.setParType(String.valueOf(ambit));
         } else if (topSyntaxStack == -58 && !customType) {
+            switch (currentType) {
+                case DEC_VAR -> checkDuplicateElement(550, lexeme, line);
+                case DEC_FUN -> checkDuplicateElement(553, lexeme, line);
+                case DEC_MET -> checkDuplicateElement(555, lexeme, line);
+                case DEC_CLASS -> checkDuplicateElement(557, lexeme, line);
+                case DEC_INTER -> checkDuplicateElement(558, lexeme, line);
+            }
             elementsStack.add(new Element(lexeme, classType, ambitNumber));
             Element lastElement = elementsStack.peek();
             switch (currentType) {
@@ -954,6 +969,22 @@ public class Code extends PanelTemplate {
     private int getKeywordToken(String lexeme, int state) {
         if (Arrays.asList(keywords).contains(lexeme)) return state - Arrays.asList(keywords).indexOf(lexeme) - 1;
         return state;
+    }
+
+    private void checkDuplicateElement(int error, String lexeme, int lineNum) {
+        for (Element element : elementsStack) {
+            if (element.getId().equals(lexeme)) {
+                var elementAmbit = element.getAmbit();
+                var ambitOpened = false;
+                for (Ambit activeAmbit : ambitStack) {
+                    if (activeAmbit.getId() == elementAmbit) {
+                        ambitOpened = true;
+                        break;
+                    }
+                }
+                if (ambitOpened) addError(error, lexeme, ErrorType.AMBIT, lineNum);
+            }
+        }
     }
 
     private void addError(int error, String lexeme, ErrorType errorType, int lineNum) {
