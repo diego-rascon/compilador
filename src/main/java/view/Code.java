@@ -453,12 +453,6 @@ public class Code extends PanelTemplate {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-//        System.out.printf("%10s%10s%20s%10s%15s%15s%15s%15s", "id", "tipo", "clase", "ambito", "arraySize", "arrayDim", "parQuantity", "parType");
-//        System.out.println();
-//        for (Element element : elementsStack) {
-//            System.out.println(element);
-//        }
     }
 
     private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
@@ -693,14 +687,8 @@ public class Code extends PanelTemplate {
                         createElement(lexeme, line, ambitNumber, topSyntaxStack);
                     }
                     if (topSyntaxStack == -58 && exeArea) {
-                        var elementExist = false;
-                        for (Element element : elementsStack) {
-                            if (element.getId().equals(lexeme)) {
-                                elementExist = true;
-                                break;
-                            }
-                        }
-                        if (!elementExist) {
+                        var validCode = elementExist(lexeme);
+                        if (!validCode) {
                             addError(549, lexeme, ErrorType.AMBIT, syntaxTokens.getFirst().line());
                         }
                     }
@@ -721,6 +709,22 @@ public class Code extends PanelTemplate {
         }
     }
 
+    private boolean elementExist(String lexeme) {
+        var validCode = false;
+        for (Element element : elementsStack) {
+            if (element.getId().equals(lexeme)) {
+                var elementAmbit = element.getAmbit();
+                for (Ambit activeAmbit : ambitStack) {
+                    if (activeAmbit.getId() == elementAmbit) {
+                        validCode = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return validCode;
+    }
+
     private void createElement(String lexeme, int line, int ambitNumber, int topSyntaxStack) {
         String classType = getClassType();
         if (topSyntaxStack == -50 && currentType == ElementType.DEC_AN_FUN || currentType == ElementType.DEC_AN_MET) {
@@ -739,7 +743,9 @@ public class Code extends PanelTemplate {
                 case DEC_FUN -> checkDuplicateElement(553, lexeme, line);
                 case DEC_MET -> checkDuplicateElement(555, lexeme, line);
                 case DEC_CLASS -> checkDuplicateElement(557, lexeme, line);
-                case DEC_INTER -> checkDuplicateElement(558, lexeme, line);
+                case DEC_INTER -> checkDuplicateElement(559, lexeme, line);
+                case DEC_GET -> checkDuplicateElement(560, lexeme, line);
+                case DEC_SET -> checkDuplicateElement(561, lexeme, line);
             }
             elementsStack.add(new Element(lexeme, classType, ambitNumber));
             Element lastElement = elementsStack.peek();
@@ -978,7 +984,15 @@ public class Code extends PanelTemplate {
                 var ambitOpened = false;
                 for (Ambit activeAmbit : ambitStack) {
                     if (activeAmbit.getId() == elementAmbit) {
-                        ambitOpened = true;
+                        switch (currentType) {
+                            case DEC_GET -> {
+                                if (element.getClassType().equals("get")) ambitOpened = true;
+                            }
+                            case DEC_SET -> {
+                                if (element.getClassType().equals("set")) ambitOpened = true;
+                            }
+                            default -> ambitOpened = true;
+                        }
                         break;
                     }
                 }
