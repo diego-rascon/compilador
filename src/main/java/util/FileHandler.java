@@ -1,5 +1,6 @@
 package util;
 
+import model.Ambit;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -14,6 +15,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.io.*;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class FileHandler {
@@ -25,6 +27,7 @@ public class FileHandler {
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
     private final JFileChooser fileChooser = new JFileChooser();
+    private final String[] ambitHeaders = {"Ámbito", "string", "number", "boolean", "real", "null", "#id", "errores", "total"};
 
     public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
@@ -116,6 +119,37 @@ public class FileHandler {
                         }
                     }
                 }
+            }
+
+            final XSSFSheet sheet = workbook.createSheet("Ámbitos");
+            final XSSFRow sheetRow = sheet.createRow(0);
+            for (int i = 0; i < ambitHeaders.length; i++) {
+                final XSSFCell sheetCell = sheetRow.createCell(i);
+                sheetCell.setCellValue(ambitHeaders[i]);
+            }
+
+            LinkedList<Ambit> ambits = codePanel.getAmbits();
+            for (int i = 0; i < ambits.size(); i++) {
+                var column = 0;
+                final XSSFRow row = sheet.createRow(i + 1);
+                final XSSFCell ambitCell = row.createCell(column++);
+                ambitCell.setCellValue(ambits.get(i).getId());
+                final XSSFCell stringCell = row.createCell(column++);
+                stringCell.setCellValue(ambits.get(i).getStrings());
+                final XSSFCell numberCell = row.createCell(column++);
+                numberCell.setCellValue(ambits.get(i).getNumbers());
+                final XSSFCell boolCell = row.createCell(column++);
+                boolCell.setCellValue(ambits.get(i).getBooleans());
+                final XSSFCell realCell = row.createCell(column++);
+                realCell.setCellValue(ambits.get(i).getReals());
+                final XSSFCell nullCell = row.createCell(column++);
+                nullCell.setCellValue(ambits.get(i).getNulls());
+                final XSSFCell customCell = row.createCell(column++);
+                customCell.setCellValue(ambits.get(i).getCustoms());
+                final XSSFCell errorCell = row.createCell(column++);
+                errorCell.setCellValue(ambits.get(i).getErrors());
+                final XSSFCell totalCell = row.createCell(column);
+                totalCell.setCellValue(ambits.get(i).getTotal());
             }
 
             File defaultFile = new File("Compilador - Diego Rascón (20130375)");
