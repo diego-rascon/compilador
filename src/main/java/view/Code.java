@@ -592,6 +592,11 @@ public class Code extends PanelTemplate {
                     case 2001, 2007, 2009 -> currentType = ElementType.NONE;
                     case 2003, 2005, 2011, 2013, 2019, 2021 -> {
                         Element lastMethod = elementsStack.get(tempPosition);
+                        if (topSyntaxStack != 2011) {
+                            if (lastMethod.getType().equals("void")) {
+                                incAmbitCounter("void");
+                            }
+                        }
                         lastMethod.setParQuantity(tempParameters);
                         tempParameters = 0;
                         decParameters = false;
@@ -1011,9 +1016,15 @@ public class Code extends PanelTemplate {
     }
 
     private void incAmbitCounter(String type) {
-        for (Ambit currentAmbit : ambits) {
-            if (currentAmbit.getId() == ambitStack.peek().getId()) {
-                currentAmbit.incCounter(type);
+        int currentAmbit = ambitStack.peek().getId();
+        if (type.equals("void")) {
+            Ambit lastAmbit = ambitStack.pop();
+            currentAmbit = ambitStack.peek().getId();
+            ambitStack.push(lastAmbit);
+        }
+        for (Ambit tempAmbit : ambits) {
+            if (tempAmbit.getId() == currentAmbit) {
+                tempAmbit.incCounter(type);
                 break;
             }
         }
