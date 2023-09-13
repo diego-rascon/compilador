@@ -2,7 +2,7 @@ package model;
 
 public class Ambit {
     private final int id;
-    private int booleans, numbers, reals, strings, nulls, customs, errors, total;
+    private int booleans, numbers, reals, strings, nulls, customs, voids, errors, total;
 
     public Ambit(int id) {
         this.id = id;
@@ -28,6 +28,10 @@ public class Ambit {
             }
             case "null" -> {
                 nulls++;
+                total++;
+            }
+            case "void" -> {
+                voids++;
                 total++;
             }
             case "error" -> errors++;
@@ -66,6 +70,10 @@ public class Ambit {
 
     public int getCustoms() {
         return customs;
+    }
+
+    public int getVoids() {
+        return voids;
     }
 
     public int getErrors() {
