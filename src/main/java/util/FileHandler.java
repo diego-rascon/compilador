@@ -27,7 +27,7 @@ public class FileHandler {
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
     private final JFileChooser fileChooser = new JFileChooser();
-    private final String[] ambitHeaders = {"Ámbito", "string", "number", "boolean", "real", "null", "#id", "errores", "total"};
+    private final String[] ambitHeaders = {"Ámbito", "string", "number", "boolean", "real", "null", "#id", "void", "errores", "total"};
 
     public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
@@ -122,34 +122,77 @@ public class FileHandler {
             }
 
             final XSSFSheet sheet = workbook.createSheet("Ámbitos");
-            final XSSFRow sheetRow = sheet.createRow(0);
+            int rowNum = 0;
+            final XSSFRow sheetRow = sheet.createRow(rowNum++);
             for (int i = 0; i < ambitHeaders.length; i++) {
                 final XSSFCell sheetCell = sheetRow.createCell(i);
                 sheetCell.setCellValue(ambitHeaders[i]);
             }
 
+            int[] totals = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
             LinkedList<Ambit> ambits = codePanel.getAmbits();
-            for (int i = 0; i < ambits.size(); i++) {
+            for (Ambit ambit : ambits) {
                 var column = 0;
-                final XSSFRow row = sheet.createRow(i + 1);
+                final XSSFRow row = sheet.createRow(rowNum++);
+
                 final XSSFCell ambitCell = row.createCell(column++);
-                ambitCell.setCellValue(ambits.get(i).getId());
+                ambitCell.setCellValue(ambit.getId());
+
                 final XSSFCell stringCell = row.createCell(column++);
-                stringCell.setCellValue(ambits.get(i).getStrings());
+                int tempStrings = ambit.getStrings();
+                totals[0] += tempStrings;
+                stringCell.setCellValue(tempStrings);
+
                 final XSSFCell numberCell = row.createCell(column++);
-                numberCell.setCellValue(ambits.get(i).getNumbers());
+                int tempNumbers = ambit.getNumbers();
+                totals[1] += tempNumbers;
+                numberCell.setCellValue(tempNumbers);
+
                 final XSSFCell boolCell = row.createCell(column++);
-                boolCell.setCellValue(ambits.get(i).getBooleans());
+                int tempBooleans = ambit.getBooleans();
+                totals[2] += tempBooleans;
+                boolCell.setCellValue(tempBooleans);
+
                 final XSSFCell realCell = row.createCell(column++);
-                realCell.setCellValue(ambits.get(i).getReals());
+                int tempReals = ambit.getReals();
+                totals[3] += tempReals;
+                realCell.setCellValue(tempReals);
+
                 final XSSFCell nullCell = row.createCell(column++);
-                nullCell.setCellValue(ambits.get(i).getNulls());
+                int tempNulls = ambit.getNulls();
+                totals[4] += tempNulls;
+                nullCell.setCellValue(tempNulls);
+
                 final XSSFCell customCell = row.createCell(column++);
-                customCell.setCellValue(ambits.get(i).getCustoms());
+                int tempCustoms = ambit.getCustoms();
+                totals[5] += tempCustoms;
+                customCell.setCellValue(tempCustoms);
+
+                final XSSFCell voidCell = row.createCell(column++);
+                int tempVoids = ambit.getVoids();
+                totals[6] += tempVoids;
+                voidCell.setCellValue(tempVoids);
+
                 final XSSFCell errorCell = row.createCell(column++);
-                errorCell.setCellValue(ambits.get(i).getErrors());
+                int tempErrors = ambit.getErrors();
+                totals[7] += tempErrors;
+                errorCell.setCellValue(tempErrors);
+
                 final XSSFCell totalCell = row.createCell(column);
-                totalCell.setCellValue(ambits.get(i).getTotal());
+                int tempTotals = ambit.getTotal();
+                totals[8] += tempTotals;
+                totalCell.setCellValue(tempTotals);
+            }
+
+            int totalsColumns = 0;
+            final XSSFRow totalsRow = sheet.createRow(rowNum);
+            final XSSFCell labelCell = totalsRow.createCell(totalsColumns++);
+            labelCell.setCellValue("total");
+
+            for (int total : totals) {
+                final XSSFCell totalCell = totalsRow.createCell(totalsColumns++);
+                totalCell.setCellValue(total);
             }
 
             File defaultFile = new File("Compilador - Diego Rascón (20130375)");
