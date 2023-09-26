@@ -450,6 +450,27 @@ public class Code extends PanelTemplate {
                     }
                 }
             }
+            String[] types = {"string", "number", "boolean", "real", "null", "#", "void"};
+            for (int i = 0; i < ambit; i++) {
+                for (String type : types) {
+                    Statement statement = connection.createStatement();
+                    String query;
+                    if (type.equals("#")) {
+                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo LIKE '#%';" ;
+                    } else {
+                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo = '" + type + "';" ;
+                    }
+                    ResultSet resultSet = statement.executeQuery(query);
+                    if (resultSet.next()) {
+                        int count = resultSet.getInt(1);
+                        for (Ambit currentAmbit : ambits) {
+                            if (currentAmbit.getId() == i) {
+                                currentAmbit.incCounter(type, count);
+                            }
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -592,11 +613,6 @@ public class Code extends PanelTemplate {
                     case 2001, 2007, 2009 -> currentType = ElementType.NONE;
                     case 2003, 2005, 2011, 2013, 2019, 2021 -> {
                         Element lastMethod = elementsStack.get(tempPosition);
-                        if (topSyntaxStack != 2011) {
-                            if (lastMethod.getType().equals("void")) {
-                                incAmbitCounter("void");
-                            }
-                        }
                         lastMethod.setParQuantity(tempParameters);
                         tempParameters = 0;
                         decParameters = false;
@@ -610,7 +626,6 @@ public class Code extends PanelTemplate {
                             newElement.setType(tempType);
                             checkDuplicateElement(551, tempLet, line);
                             elementsStack.add(newElement);
-                            incAmbitCounter(tempType);
                             if (tempType.charAt(0) == '@') {
                                 Element typeElement = new Element(tempType, "@anónima", 0);
                                 typeElement.setParType("1");
@@ -804,37 +819,15 @@ public class Code extends PanelTemplate {
                     idType = false;
                 }
                 if (customType) {
-                    String type = "#" + lexeme;
-                    element.setType(type);
-                    if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
+                    element.setType("#" + lexeme);
                     customType = false;
                 }
             }
-            case -61 -> {
-                String type = "null";
-                element.setType(type);
-                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
-            }
-            case -71 -> {
-                String type = "real";
-                element.setType(type);
-                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
-            }
-            case -72 -> {
-                String type = "boolean";
-                element.setType(type);
-                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
-            }
-            case -90 -> {
-                String type = "number";
-                element.setType(type);
-                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
-            }
-            case -91 -> {
-                String type = "string";
-                element.setType(type);
-                if (currentType == ElementType.DEC_VAR) incAmbitCounter(type);
-            }
+            case -61 -> element.setType("null");
+            case -71 -> element.setType("real");
+            case -72 -> element.setType("boolean");
+            case -90 -> element.setType("number");
+            case -91 -> element.setType("string");
         }
     }
 
@@ -1011,21 +1004,12 @@ public class Code extends PanelTemplate {
         errorTypesPanel.addCounter(errorType);
         countersPanel.addCounter(error);
         if (errorType == ErrorType.AMBIT) {
-            incAmbitCounter("error");
-        }
-    }
-
-    private void incAmbitCounter(String type) {
-        int currentAmbit = ambitStack.peek().getId();
-        if (type.equals("void")) {
-            Ambit lastAmbit = ambitStack.pop();
-            currentAmbit = ambitStack.peek().getId();
-            ambitStack.push(lastAmbit);
-        }
-        for (Ambit tempAmbit : ambits) {
-            if (tempAmbit.getId() == currentAmbit) {
-                tempAmbit.incCounter(type);
-                break;
+            int currentAmbit = ambitStack.peek().getId();
+            for (Ambit tempAmbit : ambits) {
+                if (tempAmbit.getId() == currentAmbit) {
+                    tempAmbit.incErrors();
+                    break;
+                }
             }
         }
     }

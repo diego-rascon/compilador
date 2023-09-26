@@ -8,60 +8,42 @@ public class Ambit {
         this.id = id;
     }
 
-    public void incCounter(String type) {
+    public void incCounter(String type, int quantity) {
         switch (type) {
-            case "boolean" -> {
-                booleans++;
-                total++;
-            }
-            case "number" -> {
-                numbers++;
-                total++;
-            }
-            case "real" -> {
-                reals++;
-                total++;
-            }
-            case "string" -> {
-                strings++;
-                total++;
-            }
-            case "null" -> {
-                nulls++;
-                total++;
-            }
-            case "void" -> {
-                voids++;
-                total++;
-            }
-            case "error" -> errors++;
-            default -> {
-                if (type.charAt(0) == '#') {
-                    customs++;
-                    total++;
-                }
-            }
+            case "boolean" -> booleans = quantity;
+            case "number" -> numbers = quantity;
+            case "real" -> reals = quantity;
+            case "string" -> strings = quantity;
+            case "null" -> nulls = quantity;
+            case "#" -> customs = quantity;
+            case "void" -> voids = quantity;
+            case "errors" -> errors = quantity;
         }
+        total += quantity;
+    }
+
+    public void incErrors() {
+        errors++;
     }
 
     public int getId() {
         return id;
     }
 
-    public int getStrings() {
-        return strings;
+    public int getBooleans() {
+        return booleans;
     }
 
     public int getNumbers() {
         return numbers;
     }
 
-    public int getBooleans() {
-        return booleans;
-    }
-
     public int getReals() {
         return reals;
+    }
+
+    public int getStrings() {
+        return strings;
     }
 
     public int getNulls() {
