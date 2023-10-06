@@ -1,9 +1,6 @@
 package view;
 
-import model.Ambit;
-import model.Element;
-import model.ElementType;
-import model.ErrorType;
+import model.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -187,7 +184,7 @@ public class Code extends PanelTemplate {
             {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 273, -51, 254},                                              // 92
-            {273, -17},                                                             // 93
+            {273, 3001, -17},                                                       // 93
             {-78, 273, -17},                                                        // 94
             {-66, 254, -67, -50, 273, -51, -17},                                    // 95
             {-65, -50, 264, -51, 254},                                              // 96
@@ -261,7 +258,7 @@ public class Code extends PanelTemplate {
             {285, 284},                                                             // 164
             {-20, 285, 284},                                                        // 165
             {219},                                                                  // 166
-            {286, -58, 287},                                                        // 167
+            {286, 3000, -58, 287},                                                  // 167
             {292, -50, 273, -51},                                                   // 168
             {270},                                                                  // 169
             {-2},                                                                   // 170
@@ -290,6 +287,10 @@ public class Code extends PanelTemplate {
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final Connection connection;
     private final LinkedList<String> tempArraySize = new LinkedList<>();
+    private final LinkedList<Operation> assignations = new LinkedList<>();
+    private final Stack<String> operators = new Stack<>();
+    private final Stack<String> operandos = new Stack<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
     private boolean exeArea = false;
@@ -297,8 +298,10 @@ public class Code extends PanelTemplate {
     private boolean idType = false;
     private boolean decParameters = false;
     private boolean decLet = false;
+    private boolean assignating = false;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
+    private int[][][] semMatrix;
     private int ambit = 0;
     private int tempParameters = 0;
     private int tempPosition = 0;
@@ -339,12 +342,22 @@ public class Code extends PanelTemplate {
         add(scrollPane, BorderLayout.CENTER);
         loadLexicMatrix();
         loadSyntaxMatrix();
+        loadSemanticaMatrix();
+
+        for (int i = 0; i < semMatrix.length; i++) {
+            System.out.println("tabla " + i);
+            for (int j = 0; j < semMatrix[i].length; j++) {
+                for (int k = 0; k < semMatrix[i][j].length; k++) {
+                    System.out.print(semMatrix[i][j][k] + "\t");
+                }
+                System.out.println();
+            }
+        }
     }
 
     public void compile() {
         try {
-            Statement statement = connection.createStatement();
-            String deleteQuery = "DELETE FROM elementos WHERE id_element > 0";
+            Statement statement = connection.createStatement();            String deleteQuery = "DELETE FROM elementos WHERE id_element > 0";
             statement.executeUpdate(deleteQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -379,6 +392,11 @@ public class Code extends PanelTemplate {
         errorsPanel.emptyErrorsList();
         errorTypesPanel.restartCounter();
         currentType = ElementType.NONE;
+        assignating = false;
+        assignations.clear();
+        operators.clear();
+        operandos.clear();
+        tempAssignation.setLength(0);
 
         checkLexic();
         checkSyntax();
@@ -456,9 +474,9 @@ public class Code extends PanelTemplate {
                     Statement statement = connection.createStatement();
                     String query;
                     if (type.equals("#")) {
-                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo LIKE '#%';" ;
+                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo LIKE '#%';";
                     } else {
-                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo = '" + type + "';" ;
+                        query = "SELECT COUNT(*) FROM elementos WHERE ambito = " + i + " AND tipo = '" + type + "';";
                     }
                     ResultSet resultSet = statement.executeQuery(query);
                     if (resultSet.next()) {
@@ -671,12 +689,26 @@ public class Code extends PanelTemplate {
                             tempArraySize.clear();
                         }
                     }
+                    case 3000 -> {
+                        assignating = true;
+                        assignations.add(new Operation(line));
+                    }
+                    case 3001 -> {
+                        assignating = false;
+                        tempAssignation.deleteCharAt(tempAssignation.length() - 1);
+                        assignations.getLast().setAssignation(tempAssignation.toString());
+                        System.out.println(tempAssignation);
+                        tempAssignation.setLength(0);
+                    }
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
+                    if (assignating) {
+                        tempAssignation.append(lexeme).append(" ");
+                    }
                     if (decLet) {
                         if (topSyntaxStack == -58 && !idType) {
                             idType = true;
@@ -1061,6 +1093,35 @@ public class Code extends PanelTemplate {
                     Cell cell = row.getCell(j);
                     int cellValue = (int) cell.getNumericCellValue();
                     syntaxMatrix[i - 1][j - 2] = cellValue;
+                }
+            }
+        } catch (IOException e) {
+            final Object[] options = {"OK"};
+            final int selection = JOptionPane.showOptionDialog(JOptionPane.getFrameForComponent(this), "El archivo .xlsx de la matríz no pudo ser encontrado.", "Error", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+            if (selection == JOptionPane.OK_OPTION) System.exit(0);
+        }
+    }
+
+    final void loadSemanticaMatrix() {
+        try {
+            FileInputStream matrixFile = new FileInputStream("./src/main/resources/matrix-semantica.xlsx");
+
+            XSSFWorkbook workbook = new XSSFWorkbook(matrixFile);
+            int sheetCount = workbook.getNumberOfSheets();
+            for (int i = 0; i < sheetCount; i++) {
+                XSSFSheet sheet = workbook.getSheetAt(i);
+                int rowCount = sheet.getLastRowNum();
+                for (int j = 1; j <= rowCount; j++) {
+                    Row row = sheet.getRow(j);
+                    int columnCount = row.getLastCellNum();
+
+                    if (i == 0 && j == 1) semMatrix = new int[sheetCount][rowCount][columnCount - 1];
+
+                    for (int k = 1; k < columnCount; k++) {
+                        Cell cell = row.getCell(k);
+                        int cellValue = (int) cell.getNumericCellValue();
+                        semMatrix[i][j - 1][k - 1] = cellValue;
+                    }
                 }
             }
         } catch (IOException e) {
