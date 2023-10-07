@@ -184,7 +184,7 @@ public class Code extends PanelTemplate {
             {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 273, -51, 254},                                              // 92
-            {273, 3001, -17},                                                       // 93
+            {3000, 273, 3001, -17},                                                  // 93
             {-78, 273, -17},                                                        // 94
             {-66, 254, -67, -50, 273, -51, -17},                                    // 95
             {-65, -50, 264, -51, 254},                                              // 96
@@ -258,7 +258,7 @@ public class Code extends PanelTemplate {
             {285, 284},                                                             // 164
             {-20, 285, 284},                                                        // 165
             {219},                                                                  // 166
-            {286, 3000, -58, 287},                                                  // 167
+            {286, -58, 287},                                                  // 167
             {292, -50, 273, -51},                                                   // 168
             {270},                                                                  // 169
             {-2},                                                                   // 170
@@ -287,9 +287,9 @@ public class Code extends PanelTemplate {
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final Connection connection;
     private final LinkedList<String> tempArraySize = new LinkedList<>();
-    private final LinkedList<Operation> assignations = new LinkedList<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
     private final Stack<String> operators = new Stack<>();
-    private final Stack<String> operandos = new Stack<>();
+    private final Stack<Operand> operands = new Stack<>();
     private final StringBuilder tempAssignation = new StringBuilder();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
@@ -344,20 +344,21 @@ public class Code extends PanelTemplate {
         loadSyntaxMatrix();
         loadSemanticaMatrix();
 
-        for (int i = 0; i < semMatrix.length; i++) {
-            System.out.println("tabla " + i);
-            for (int j = 0; j < semMatrix[i].length; j++) {
-                for (int k = 0; k < semMatrix[i][j].length; k++) {
-                    System.out.print(semMatrix[i][j][k] + "\t");
-                }
-                System.out.println();
-            }
-        }
+//        for (int i = 0; i < semMatrix.length; i++) {
+//            System.out.println("tabla " + i);
+//            for (int j = 0; j < semMatrix[i].length; j++) {
+//                for (int k = 0; k < semMatrix[i][j].length; k++) {
+//                    System.out.print(semMatrix[i][j][k] + "\t");
+//                }
+//                System.out.println();
+//            }
+//        }
     }
 
     public void compile() {
         try {
-            Statement statement = connection.createStatement();            String deleteQuery = "DELETE FROM elementos WHERE id_element > 0";
+            Statement statement = connection.createStatement();
+            String deleteQuery = "DELETE FROM elementos WHERE id_element > 0";
             statement.executeUpdate(deleteQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -393,9 +394,9 @@ public class Code extends PanelTemplate {
         errorTypesPanel.restartCounter();
         currentType = ElementType.NONE;
         assignating = false;
-        assignations.clear();
+        operations.clear();
         operators.clear();
-        operandos.clear();
+        operands.clear();
         tempAssignation.setLength(0);
 
         checkLexic();
@@ -491,6 +492,10 @@ public class Code extends PanelTemplate {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+
+        for (Operand operand : operands) {
+            System.out.println(operand.toString());
         }
     }
 
@@ -691,12 +696,12 @@ public class Code extends PanelTemplate {
                     }
                     case 3000 -> {
                         assignating = true;
-                        assignations.add(new Operation(line));
+                        operations.add(new Operation(line));
                     }
                     case 3001 -> {
                         assignating = false;
                         tempAssignation.deleteCharAt(tempAssignation.length() - 1);
-                        assignations.getLast().setAssignation(tempAssignation.toString());
+                        operations.getLast().setAssignation(tempAssignation.toString());
                         System.out.println(tempAssignation);
                         tempAssignation.setLength(0);
                     }
@@ -707,7 +712,22 @@ public class Code extends PanelTemplate {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
                     if (assignating) {
-                        tempAssignation.append(lexeme).append(" ");
+                        switch (token) {
+                            // Asignaciones
+                            case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
+                                tempAssignation.append(operands.pop().lexeme()).append(" ").append(lexeme).append(" ")  ;
+                            }
+                            // Operandos
+                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
+                                Type operandType = getType(token, lexeme);
+                                operands.push(new Operand(token, lexeme, operandType));
+                            }
+                            // Operadores
+                            case -1, -2, -4, -5, -8, -9, -10, -11, -13, -19, -20, -22, -26, -28, -29, -31, -32, -33, -34, -37,
+                                    -39, -40, -43, -44 -> {
+
+                            }
+                        }
                     }
                     if (decLet) {
                         if (topSyntaxStack == -58 && !idType) {
@@ -759,6 +779,47 @@ public class Code extends PanelTemplate {
                 }
             }
         }
+    }
+
+    private Type getType(int token, String lexeme) {
+        return switch (token) {
+            case -52, -53 -> Type.STRING;
+            case -54 -> Type.REAL;
+            case -55, -56 -> Type.NUMBER;
+            case -59, -60 -> Type.BOOLEAN;
+            case -61 -> Type.NULL;
+            case -58 -> {
+                for (Element element : elementsStack) {
+                    if (element.getId().equals(lexeme)) {
+                        var elementAmbit = element.getAmbit();
+                        for (Ambit activeAmbit : ambitStack) {
+                            if (activeAmbit.getId() == elementAmbit) {
+                                String elementType;
+                                if (element.getType() == null) {
+                                    yield Type.VARIANT;
+                                } else {
+                                    elementType = element.getType();
+                                }
+                                yield switch (elementType) {
+                                    case "boolean" -> Type.BOOLEAN;
+                                    case "number" -> Type.NUMBER;
+                                    case "real" -> Type.REAL;
+                                    case "string" -> Type.STRING;
+                                    case "void" -> Type.VOID;
+                                    case "null" -> Type.NULL;
+                                    default -> {
+                                        if (elementType.charAt(0) == '#') yield Type.CUSTOM;
+                                        yield Type.VARIANT;
+                                    }
+                                };
+                            }
+                        }
+                    }
+                }
+                yield Type.VARIANT;
+            }
+            default -> Type.VARIANT;
+        };
     }
 
     private boolean elementExist(String lexeme) {
