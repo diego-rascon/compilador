@@ -184,7 +184,7 @@ public class Code extends PanelTemplate {
             {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 273, -51, 254},                                              // 92
-            {3000, 273, 3001, -17},                                                  // 93
+            {3000, 273, 3001, -17},                                                 // 93
             {-78, 273, -17},                                                        // 94
             {-66, 254, -67, -50, 273, -51, -17},                                    // 95
             {-65, -50, 264, -51, 254},                                              // 96
@@ -288,8 +288,8 @@ public class Code extends PanelTemplate {
     private final Connection connection;
     private final LinkedList<String> tempArraySize = new LinkedList<>();
     private final LinkedList<Operation> operations = new LinkedList<>();
-    private final Stack<String> operators = new Stack<>();
-    private final Stack<Operand> operands = new Stack<>();
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
     private final StringBuilder tempAssignation = new StringBuilder();
     private FileWriter txtResult;
     private ElementType currentType = ElementType.NONE;
@@ -395,8 +395,8 @@ public class Code extends PanelTemplate {
         currentType = ElementType.NONE;
         assignating = false;
         operations.clear();
-        operators.clear();
-        operands.clear();
+        operatorStack.clear();
+        operandStack.clear();
         tempAssignation.setLength(0);
 
         checkLexic();
@@ -494,7 +494,7 @@ public class Code extends PanelTemplate {
             throw new RuntimeException(e);
         }
 
-        for (Operand operand : operands) {
+        for (Operand operand : operandStack) {
             System.out.println(operand.toString());
         }
     }
@@ -704,6 +704,11 @@ public class Code extends PanelTemplate {
                         operations.getLast().setAssignation(tempAssignation.toString());
                         System.out.println(tempAssignation);
                         tempAssignation.setLength(0);
+                        // realizar operación
+                        while (!operatorStack.isEmpty()) {
+                            doOperation();
+                        }
+
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -714,18 +719,28 @@ public class Code extends PanelTemplate {
                     if (assignating) {
                         switch (token) {
                             // Asignaciones
-                            case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
-                                tempAssignation.append(operands.pop().lexeme()).append(" ").append(lexeme).append(" ")  ;
-                            }
+                            case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 ->
+                                    tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             // Operandos
-                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
-                                Type operandType = getType(token, lexeme);
-                                operands.push(new Operand(token, lexeme, operandType));
-                            }
+                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 ->
+                                    operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
                             // Operadores
                             case -1, -2, -4, -5, -8, -9, -10, -11, -13, -19, -20, -22, -26, -28, -29, -31, -32, -33, -34, -37,
                                     -39, -40, -43, -44 -> {
-
+                                if (operatorStack.isEmpty()) {
+                                    operatorStack.push(new Operator(token, lexeme, getPriority(token)));
+                                } else {
+                                    Operator topOperator = operatorStack.peek();
+                                    Operator currentOperator = new Operator(token, lexeme, getPriority(token));
+                                    if (currentOperator.priority() >= topOperator.priority()) {
+                                        operatorStack.push(currentOperator);
+                                    } else {
+                                        while (!operatorStack.isEmpty() && currentOperator.priority() < operatorStack.peek().priority()) {
+                                            doOperation();
+                                        }
+                                        operatorStack.push(new Operator(token, lexeme, getPriority(token)));
+                                    }
+                                }
                             }
                         }
                     }
@@ -781,6 +796,15 @@ public class Code extends PanelTemplate {
         }
     }
 
+    private void doOperation() {
+        int sheet = getSheet(operatorStack.pop().token());
+        int column = getPosition(operandStack.pop().type());
+        int row = getPosition(operandStack.pop().type());
+        int result = semMatrix[sheet][column][row];
+        operandStack.push(new Operand(result, "xd", Type.NUMBER));
+        System.out.println(result);
+    }
+
     private Type getType(int token, String lexeme) {
         return switch (token) {
             case -52, -53 -> Type.STRING;
@@ -819,6 +843,38 @@ public class Code extends PanelTemplate {
                 yield Type.VARIANT;
             }
             default -> Type.VARIANT;
+        };
+    }
+
+    private int getPriority(int token) {
+        return switch (token) {
+            case -10, -11, -13 -> 1;
+            case -28, -31, -39, -43, -37, -32, -40, -44 -> 2;
+            case -4, -1, -29, -33, -34 -> 3;
+            case -19, -22, -26 -> 4;
+            case -20 -> 5;
+            case -2, -5, -42, -7 -> 6;
+            default -> 0;
+        };
+    }
+
+    private int getPosition(Type type) {
+        return switch (type) {
+            case NUMBER -> 0;
+            case REAL -> 1;
+            case BOOLEAN -> 2;
+            case STRING -> 3;
+            case NULL -> 4;
+            case VARIANT, CUSTOM, VOID -> 5;
+        };
+    }
+
+    private int getSheet(int token) {
+        return switch (token) {
+            case -2 -> 1;
+            case -19 -> 2;
+            case -22 -> 3;
+            default -> 0;
         };
     }
 
