@@ -700,15 +700,15 @@ public class Code extends PanelTemplate {
                     }
                     case 3001 -> {
                         assignating = false;
-                        tempAssignation.deleteCharAt(tempAssignation.length() - 1);
-                        operations.getLast().setAssignation(tempAssignation.toString());
-                        System.out.println(tempAssignation);
-                        tempAssignation.setLength(0);
                         // realizar operación
                         while (!operatorStack.isEmpty()) {
                             doOperation();
                         }
-
+                        // hacer el string de asignación
+                        tempAssignation.append(operandStack.pop().lexeme());
+                        operations.getLast().setAssignation(tempAssignation.toString());
+                        System.out.println(tempAssignation);
+                        tempAssignation.setLength(0);
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -730,9 +730,8 @@ public class Code extends PanelTemplate {
                                 if (operatorStack.isEmpty()) {
                                     operatorStack.push(new Operator(token, lexeme, getPriority(token)));
                                 } else {
-                                    Operator topOperator = operatorStack.peek();
                                     Operator currentOperator = new Operator(token, lexeme, getPriority(token));
-                                    if (currentOperator.priority() >= topOperator.priority()) {
+                                    if (currentOperator.priority() >= operatorStack.peek().priority()) {
                                         operatorStack.push(currentOperator);
                                     } else {
                                         while (!operatorStack.isEmpty() && currentOperator.priority() < operatorStack.peek().priority()) {
@@ -797,11 +796,38 @@ public class Code extends PanelTemplate {
     }
 
     private void doOperation() {
+        Operation lastOperation = operations.getLast();
         int sheet = getSheet(operatorStack.pop().token());
         int column = getPosition(operandStack.pop().type());
         int row = getPosition(operandStack.pop().type());
         int result = semMatrix[sheet][column][row];
-        operandStack.push(new Operand(result, "xd", Type.NUMBER));
+        String resultLexeme = "temp variant";
+        Type resultType = Type.VARIANT;
+        switch (result) {
+            case -61 -> {
+                resultLexeme = "temp null";
+                resultType = Type.NULL;
+            }
+            case -71 -> {
+                resultLexeme = "temp real";
+                resultType = Type.REAL;
+            }
+            case -72 -> {
+                resultLexeme = "temp boolean";
+                resultType = Type.BOOLEAN;
+            }
+            case -90 -> {
+                resultLexeme = "temp number";
+                resultType = Type.NUMBER;
+            }
+            case -91 -> {
+                resultLexeme = "temp string";
+                resultType = Type.STRING;
+            }
+            case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> lastOperation.addError();
+        }
+        lastOperation.addCounter(resultType);
+        operandStack.push(new Operand(result, resultLexeme, resultType));
         System.out.println(result);
     }
 
@@ -871,9 +897,14 @@ public class Code extends PanelTemplate {
 
     private int getSheet(int token) {
         return switch (token) {
-            case -2 -> 1;
+            case -4 -> 1;
             case -19 -> 2;
             case -22 -> 3;
+            case -7, -8, -10, -13, -20, -26, -29, -33, -34 -> 4;
+            case -28, -31, -32, -37 -> 5;
+            case -39, -43 -> 6;
+            case -40, -44 -> 7;
+            case -9, -11 -> 8;
             default -> 0;
         };
     }
