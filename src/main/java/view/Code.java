@@ -346,16 +346,6 @@ public class Code extends PanelTemplate {
         loadLexicMatrix();
         loadSyntaxMatrix();
         loadSemanticaMatrix();
-
-//        for (int i = 0; i < semMatrix.length; i++) {
-//            System.out.println("tabla " + i);
-//            for (int j = 0; j < semMatrix[i].length; j++) {
-//                for (int k = 0; k < semMatrix[i][j].length; k++) {
-//                    System.out.print(semMatrix[i][j][k] + "\t");
-//                }
-//                System.out.println();
-//            }
-//        }
     }
 
     public void compile() {
