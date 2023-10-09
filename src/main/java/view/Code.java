@@ -299,6 +299,7 @@ public class Code extends PanelTemplate {
     private boolean decParameters = false;
     private boolean decLet = false;
     private boolean assignating = false;
+    private Operand tempOperand;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
     private int[][][] semMatrix;
@@ -704,9 +705,12 @@ public class Code extends PanelTemplate {
                         while (!operatorStack.isEmpty()) {
                             doOperation();
                         }
+                        // comparar con el operando que se está asignando
+                        Operation lastOperation = operations.getLast();
+                        if (tempOperand.type() != operandStack.peek().type()) lastOperation.addError();
                         // hacer el string de asignación
                         tempAssignation.append(operandStack.pop().lexeme());
-                        operations.getLast().setAssignation(tempAssignation.toString());
+                        lastOperation.setAssignation(tempAssignation.toString());
                         System.out.println(tempAssignation);
                         tempAssignation.setLength(0);
                     }
@@ -719,8 +723,10 @@ public class Code extends PanelTemplate {
                     if (assignating) {
                         switch (token) {
                             // Asignaciones
-                            case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 ->
-                                    tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
+                            case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
+                                tempOperand = operandStack.peek();
+                                tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
+                            }
                             // Operandos
                             case -52, -53, -54, -55, -56, -58, -59, -60, -61 ->
                                     operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
