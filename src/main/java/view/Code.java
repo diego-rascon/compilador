@@ -299,6 +299,8 @@ public class Code extends PanelTemplate {
     private boolean decParameters = false;
     private boolean decLet = false;
     private boolean assignating = false;
+    private boolean plusplus = false;
+    private boolean minusminus = false;
     private Operand tempOperand;
     private int[][] lexicMatrix;
     private int[][] syntaxMatrix;
@@ -495,9 +497,7 @@ public class Code extends PanelTemplate {
             throw new RuntimeException(e);
         }
 
-        for (Operand operand : operandStack) {
-            System.out.println(operand.toString());
-        }
+        for (Operation operation : operations) System.out.println(operation);
     }
 
     private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
@@ -708,10 +708,10 @@ public class Code extends PanelTemplate {
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
                         if (tempOperand.type() != operandStack.peek().type()) lastOperation.addError();
+                        tempOperand = null;
                         // hacer el string de asignación
                         tempAssignation.append(operandStack.pop().lexeme());
                         lastOperation.setAssignation(tempAssignation.toString());
-                        System.out.println(tempAssignation);
                         tempAssignation.setLength(0);
                     }
                 }
@@ -728,13 +728,48 @@ public class Code extends PanelTemplate {
                                 tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             }
                             // Operandos
-                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 ->
-                                    operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
+                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
+                                operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
+                                if (plusplus) {
+                                    operatorStack.push(new Operator(-1, "+", 6));
+                                    Operand newOperand;
+                                    if (token == -58) {
+                                        newOperand = new Operand(-54, "1", Type.REAL);
+                                    } else {
+                                        newOperand = new Operand(-600, "temp variant", Type.VARIANT);
+                                    }
+                                    if (tempOperand == null){
+                                        tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
+                                        tempOperand = newOperand;
+                                    }
+                                    operandStack.push(newOperand);
+                                    plusplus = false;
+                                }
+                                if (minusminus) {
+                                    operatorStack.push(new Operator(-4, "-", 6));
+                                    Operand newOperand;
+                                    if (token == -58) {
+                                        newOperand = new Operand(-54, "1", Type.REAL);
+                                    } else {
+                                        newOperand = new Operand(-601, "temp variant", Type.VARIANT);
+                                    }
+                                    if (tempOperand == null){
+                                        tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
+                                        tempOperand = newOperand;
+                                    }
+                                    operandStack.push(newOperand);
+                                    minusminus = false;
+                                }
+                            }
                             // Operadores
                             case -1, -2, -4, -5, -8, -9, -10, -11, -13, -19, -20, -22, -26, -28, -29, -31, -32, -33, -34, -37,
                                     -39, -40, -43, -44 -> {
                                 if (operatorStack.isEmpty()) {
-                                    operatorStack.push(new Operator(token, lexeme, getPriority(token)));
+                                    switch (token) {
+                                        case -2 -> plusplus = true;
+                                        case -5 -> minusminus = true;
+                                        default -> operatorStack.push(new Operator(token, lexeme, getPriority(token)));
+                                    }
                                 } else {
                                     Operator currentOperator = new Operator(token, lexeme, getPriority(token));
                                     if (currentOperator.priority() >= operatorStack.peek().priority()) {
@@ -834,7 +869,6 @@ public class Code extends PanelTemplate {
         }
         lastOperation.addCounter(resultType);
         operandStack.push(new Operand(result, resultLexeme, resultType));
-        System.out.println(result);
     }
 
     private Type getType(int token, String lexeme) {
