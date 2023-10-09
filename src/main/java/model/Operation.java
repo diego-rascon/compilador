@@ -69,4 +69,20 @@ public class Operation {
     public void setAssignation(String assignation) {
         this.assignation = assignation;
     }
+
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "line=" + line +
+                ", strings=" + strings +
+                ", numbers=" + numbers +
+                ", booleans=" + booleans +
+                ", reals=" + reals +
+                ", customs=" + customs +
+                ", voids=" + voids +
+                ", variants=" + variants +
+                ", errors=" + errors +
+                ", assignation='" + assignation + '\'' +
+                '}';
+    }
 }
