@@ -496,8 +496,6 @@ public class Code extends PanelTemplate {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        for (Operation operation : operations) System.out.println(operation);
     }
 
     private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
@@ -1325,5 +1323,9 @@ public class Code extends PanelTemplate {
 
     public LinkedList<Ambit> getAmbits() {
         return ambits;
+    }
+
+    public LinkedList<Operation> getOperations() {
+        return operations;
     }
 }
