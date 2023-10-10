@@ -722,7 +722,7 @@ public class Code extends PanelTemplate {
                                     operatorStack.push(new Operator(-1, "+", 6));
                                     Operand newOperand;
                                     if (token == -58) {
-                                        newOperand = new Operand(-54, "1", Type.REAL);
+                                        newOperand = new Operand(-54, "1", Type.NUMBER);
                                     } else {
                                         newOperand = new Operand(-600, "temp variant", Type.VARIANT);
                                     }
@@ -737,7 +737,7 @@ public class Code extends PanelTemplate {
                                     operatorStack.push(new Operator(-4, "-", 6));
                                     Operand newOperand;
                                     if (token == -58) {
-                                        newOperand = new Operand(-54, "1", Type.REAL);
+                                        newOperand = new Operand(-54, "1", Type.NUMBER);
                                     } else {
                                         newOperand = new Operand(-601, "temp variant", Type.VARIANT);
                                     }
@@ -862,8 +862,8 @@ public class Code extends PanelTemplate {
     private Type getType(int token, String lexeme) {
         return switch (token) {
             case -52, -53 -> Type.STRING;
-            case -54 -> Type.REAL;
-            case -55, -56 -> Type.NUMBER;
+            case -54 -> Type.NUMBER;
+            case -55, -56 -> Type.REAL;
             case -59, -60 -> Type.BOOLEAN;
             case -61 -> Type.NULL;
             case -58 -> {
