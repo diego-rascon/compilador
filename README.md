@@ -1,2 +1,3 @@
-# Compilador
-Ese repositorio está dedicado al proyecto del compilador de la clase de lenguajes y autómatas I y II, este proyecto consiste en crear todo el compilador de un lenguaje inspirado en TypeScript desde cero. Cada rama del repositorio representa una fase del proyecto. Elaborado por José Diego Rascón Amador.
+# Compiler
+
+Compiler written in Java for a language inspired by TypeScript, every phase of the project is inside its own branch.
