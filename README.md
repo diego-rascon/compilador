@@ -1,2 +1,3 @@
-# Sintaxis
-Segunda parte del proyecto del compilador de la clase de Lenguajes y Autómatas I, esta fase consiste en elaborar la sintaxis del lenguaje a elaborar. Hecho por José Diego Rascón Amador.
+# Ambit
+
+Third phase of the compiler, which establishes the declaration and execution areas, as well as finding errors with duplicate and out-of-scope variables.
