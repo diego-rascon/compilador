@@ -275,42 +275,55 @@ public class Code extends PanelTemplate {
             {253, 273, 289},                                                        // 181
             {-76, 273, -18, 268}                                                    // 182
     };
-    private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
+
+    private final Connection connection;
+    private FileWriter txtResult;
+
+    // UI Components
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
-    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
-    private final Stack<model.Element> elementsStack = new Stack<>();
-    private final Stack<Integer> syntaxStack = new Stack<>();
-    private final LinkedList<Ambit> ambits = new LinkedList<>();
-    private final Stack<Ambit> ambitStack = new Stack<>();
-    private final Connection connection;
-    private final LinkedList<String> tempArraySize = new LinkedList<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
-    private FileWriter txtResult;
-    private ElementType currentType = ElementType.NONE;
-    private boolean exeArea = false;
-    private boolean customType = false;
-    private boolean idType = false;
-    private boolean decParameters = false;
-    private boolean decLet = false;
-    private boolean assignating = false;
-    private boolean plusplus = false;
-    private boolean minusminus = false;
-    private Operand tempOperand;
+    private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
+
+    // Lexicon
     private int[][] lexicMatrix;
+
+    // Syntaxis
+    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
+    private final Stack<Integer> syntaxStack = new Stack<>();
     private int[][] syntaxMatrix;
-    private int[][][] semMatrix;
+
+    // Ambit
+    private final Stack<model.Element> elementsStack = new Stack<>();
+    private final Stack<Ambit> ambitStack = new Stack<>();
+    private final LinkedList<Ambit> ambits = new LinkedList<>();
+    private final LinkedList<String> tempArraySize = new LinkedList<>();
+    private ElementType currentType = ElementType.NONE;
+    private String tempLet = "";
+    private String tempType = "";
     private int ambit = 0;
     private int tempParameters = 0;
     private int tempPosition = 0;
     private int tempArrayDim = 0;
-    private String tempLet = "";
-    private String tempType = "";
+    private boolean exeArea = false;
+    private boolean decLet = false;
+    private boolean decParameters = false;
+    private boolean customType = false;
+    private boolean idType = false;
+
+    // Semantics I
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+    private Operand tempOperand;
+    private int[][][] semMatrix;
+    private boolean assignating = false;
+    private boolean plusplus = false;
+    private boolean minusminus = false;
+
+    // Semantics II
 
     {
         try {
