@@ -1386,4 +1386,8 @@ public class Code extends PanelTemplate {
     public LinkedList<Operation> getOperations() {
         return operations;
     }
+
+    public LinkedList<Semantics> getSemanticsList() {
+        return semanticsList;
+    }
 }
