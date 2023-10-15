@@ -318,6 +318,7 @@ public class Code extends PanelTemplate {
     private final LinkedList<Operation> operations = new LinkedList<>();
     private final StringBuilder tempAssignation = new StringBuilder();
     private Operand tempOperand;
+    private String assignationLexeme = "=";
     private int[][][] semMatrix;
     private boolean assignating = false;
     private boolean plusplus = false;
@@ -400,11 +401,15 @@ public class Code extends PanelTemplate {
         errorsPanel.emptyErrorsList();
         errorTypesPanel.restartCounter();
         currentType = ElementType.NONE;
+
+        // Semantics 1
         assignating = false;
         operations.clear();
         operatorStack.clear();
         operandStack.clear();
         tempAssignation.setLength(0);
+        assignationLexeme = "=";
+        semanticsList.clear();
 
         checkLexic();
         checkSyntax();
@@ -707,22 +712,53 @@ public class Code extends PanelTemplate {
                     }
                     case 3001 -> {
                         assignating = false;
+                        boolean validOperation = true;
+
                         // realizar operación
                         while (!operatorStack.isEmpty()) {
                             doOperation();
                         }
+
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
                         boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
                         if (tempOperand.type() != operandStack.peek().type() && !concat) {
+                            validOperation = false;
                             addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
                             lastOperation.addError();
                         }
-                        tempOperand = null;
+
+                        // Entrada de semántica 2
+                        int rule = switch (assignationLexeme) {
+                            case "=" -> 1020;
+                            case "+=" -> 1021;
+                            default -> 1022;
+                        };
+
+                        String topStack = switch (tempOperand.type()) {
+                            case BOOLEAN -> "boolean";
+                            case NUMBER -> "number";
+                            case REAL -> "real";
+                            case STRING -> "any";
+                            case NULL -> "null";
+                            case CUSTOM -> "custom";
+                            case VARIANT -> "variant";
+                            case VOID -> "void";
+                        };
+
+                        semanticsList.add(new Semantics(rule));
+                        Semantics lastSemantics = semanticsList.getLast();
+                        lastSemantics.setTopStack(topStack);
+                        lastSemantics.setRealValue(operandStack.peek().lexeme());
+                        lastSemantics.setAccepted(validOperation);
+                        lastSemantics.setLine(line);
+                        lastSemantics.setAmbit(ambitStack.peek().getId());
+
                         // hacer el string de asignación
                         tempAssignation.append(operandStack.pop().lexeme());
                         lastOperation.setAssignation(tempAssignation.toString());
                         tempAssignation.setLength(0);
+                        tempOperand = null;
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -735,6 +771,7 @@ public class Code extends PanelTemplate {
                             // Asignaciones
                             case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
                                 tempOperand = operandStack.peek();
+                                assignationLexeme = lexeme;
                                 tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             }
                             // Operandos
@@ -776,8 +813,14 @@ public class Code extends PanelTemplate {
                                     -39, -40, -43, -44 -> {
                                 if (operatorStack.isEmpty()) {
                                     switch (token) {
-                                        case -2 -> plusplus = true;
-                                        case -5 -> minusminus = true;
+                                        case -2 -> {
+                                            plusplus = true;
+                                            assignationLexeme = lexeme;
+                                        }
+                                        case -5 -> {
+                                            minusminus = true;
+                                            assignationLexeme = lexeme;
+                                        }
                                         default -> operatorStack.push(new Operator(token, lexeme, getPriority(token)));
                                     }
                                 } else {
