@@ -199,7 +199,7 @@ public class Code extends PanelTemplate {
             {-17, 254, 261},                                                        // 105
             {-17, 254, 262},                                                        // 106
             {-17, 254, 263},                                                        // 107
-            {273, 265, -17, 254, -17, 273, 266},                                    // 108
+            {273, 265, -17, 273, -17, 273, 266},                                    // 108
             {-88, -58, 267, -58},                                                   // 109
             {-15, 273, 265},                                                        // 110
             {-15, 273, 266},                                                        // 111
@@ -324,7 +324,7 @@ public class Code extends PanelTemplate {
     private boolean minusminus = false;
 
     // Semantics 2
-
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
 
     {
         try {
@@ -499,6 +499,10 @@ public class Code extends PanelTemplate {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+
+        for (Semantics semantics : semanticsList) {
+            System.out.println(semantics);
         }
     }
 
@@ -709,8 +713,8 @@ public class Code extends PanelTemplate {
                         }
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
-                        boolean isPlusEquals = tempAssignation.toString().contains("+=");
-                        if (tempOperand.type() != operandStack.peek().type() || isPlusEquals && tempOperand.type() == Type.STRING) {
+                        boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
+                        if (tempOperand.type() != operandStack.peek().type() && !concat) {
                             addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
                             lastOperation.addError();
                         }
