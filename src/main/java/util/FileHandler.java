@@ -2,12 +2,12 @@ package util;
 
 import model.Ambit;
 import model.Operation;
+import model.Semantics;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import view.*;
-import view.Errors;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -30,6 +30,7 @@ public class FileHandler {
     private final JFileChooser fileChooser = new JFileChooser();
     private final String[] ambitHeaders = {"Ámbito", "string", "number", "boolean", "real", "null", "#id", "void", "errores", "total"};
     private final String[] semHeaders = {"Linea", "Strings", "Numbers", "Booleans", "Reales", "Variables #", "Voids", "Variants", "Asignaciones", "Errores"};
+    private final String[] sem2Headers = {"Regla", "Tope de pila", "Valor real", "Linea", "Estado", "Ámbito"};
 
     public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
@@ -197,7 +198,7 @@ public class FileHandler {
                 totalCell.setCellValue(total);
             }
 
-            final XSSFSheet semSheet = workbook.createSheet("Semántica");
+            final XSSFSheet semSheet = workbook.createSheet("Semántica 1");
             rowNum = 0;
             sheetRow = semSheet.createRow(rowNum++);
             for (int i = 0; i < semHeaders.length; i++) {
@@ -269,6 +270,38 @@ public class FileHandler {
             for (int total : semTotals) {
                 final XSSFCell totalCell = semTotalsRow.createCell(totalsColumns++);
                 totalCell.setCellValue(total);
+            }
+
+            final XSSFSheet sem2Sheet = workbook.createSheet("Semántica 2");
+            rowNum = 0;
+            sheetRow = sem2Sheet.createRow(rowNum++);
+            for (int i = 0; i < sem2Headers.length; i++) {
+                final XSSFCell sheetCell = sheetRow.createCell(i);
+                sheetCell.setCellValue(sem2Headers[i]);
+            }
+
+            LinkedList<Semantics> semanticsList = codePanel.getSemanticsList();
+            for (Semantics semanticsElement : semanticsList) {
+                int columns = 0;
+                final XSSFRow row = sem2Sheet.createRow(rowNum++);
+
+                final XSSFCell ruleCell = row.createCell(columns++);
+                ruleCell.setCellValue(semanticsElement.getRule());
+
+                final XSSFCell topStackCell = row.createCell(columns++);
+                topStackCell.setCellValue(semanticsElement.getTopStack());
+
+                final XSSFCell valueCell = row.createCell(columns++);
+                valueCell.setCellValue(semanticsElement.getRealValue());
+
+                final XSSFCell lineCell = row.createCell(columns++);
+                lineCell.setCellValue(semanticsElement.getLine());
+
+                final XSSFCell stateCell = row.createCell(columns++);
+                stateCell.setCellValue(semanticsElement.isAccepted() ? "Aceptado" : "Error");
+
+                final XSSFCell ambitCell = row.createCell(columns);
+                ambitCell.setCellValue(semanticsElement.getAmbit());
             }
 
             File defaultFile = new File("Compilador - Diego Rascón (20130375)");
