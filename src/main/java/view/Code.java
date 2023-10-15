@@ -709,7 +709,8 @@ public class Code extends PanelTemplate {
                         }
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
-                        if (tempOperand.type() != operandStack.peek().type()) {
+                        boolean isPlusEquals = tempAssignation.toString().contains("+=");
+                        if (tempOperand.type() != operandStack.peek().type() || isPlusEquals && tempOperand.type() == Type.STRING) {
                             addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
                             lastOperation.addError();
                         }
