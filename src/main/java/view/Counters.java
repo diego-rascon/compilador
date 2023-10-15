@@ -174,11 +174,11 @@ public class Counters extends PanelTemplate {
                     int newValue = counterMap.get(rowLabel) + 1;
                     counterMap.put(rowLabel, newValue);
                 }
-            }
-            case 500, 501, 502, 503, 504, 505 -> {
-                String rowLabel = rowLabels[20];
-                int newValue = counterMap.get(rowLabel) + 1;
-                counterMap.put(rowLabel, newValue);
+                if (state >= 500) {
+                    String rowLabel = rowLabels[20];
+                    int newValue = counterMap.get(rowLabel) + 1;
+                    counterMap.put(rowLabel, newValue);
+                }
             }
         }
     }

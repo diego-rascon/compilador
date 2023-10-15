@@ -3,5 +3,6 @@ package model;
 public enum ErrorType {
     LEXIC,
     SINTAXIS,
-    AMBIT
+    AMBIT,
+    SEMANTICS
 }

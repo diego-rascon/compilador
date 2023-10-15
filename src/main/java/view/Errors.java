@@ -98,16 +98,26 @@ public class Errors extends PanelTemplate {
             case 555 -> description = "Método duplicado.";
             case 556 -> description = "Método anónimo duplicado.";
             case 557 -> description = "Clase duplicada.";
-            case 558 -> description = "Clase anónima duplicada";
+            case 558 -> description = "Clase anónima duplicada.";
             case 559 -> description = "Interfaz duplicada.";
             case 560 -> description = "Método get duplicado.";
             case 561 -> description = "Método set duplicado.";
+            case 600 -> description = "Suma de tipos no compatibles.";
+            case 601 -> description = "Resta de tipos no compatibles.";
+            case 602 -> description = "Multiplicación de tipos no compatibles.";
+            case 603 -> description = "División de tipos no compatibles.";
+            case 604 -> description = "División de tipos no compatibles.";
+            case 605 -> description = "Comparación de tipos no compatibles.";
+            case 606, 607 -> description = "Igualación de tipos no compatibles.";
+            case 608 -> description = "Operación lógica con tipos no compatibles.";
+            case 609 -> description = "Asignación de diferentes tipos.";
         }
         String type = "";
         switch (errorType) {
             case LEXIC -> type = "Léxico";
             case SINTAXIS -> type = "Sintaxis";
             case AMBIT -> type = "Ámbito";
+            case SEMANTICS -> type = "Semántica";
         }
         final model.Error newError = new model.Error(error, description, lexeme, type, line);
         errorList.add(newError);
