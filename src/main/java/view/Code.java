@@ -290,8 +290,8 @@ public class Code extends PanelTemplate {
     private int[][] lexicMatrix;
 
     // Syntaxis
-    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private final Stack<Integer> syntaxStack = new Stack<>();
+    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
     private int[][] syntaxMatrix;
 
     // Ambit
@@ -312,7 +312,7 @@ public class Code extends PanelTemplate {
     private boolean customType = false;
     private boolean idType = false;
 
-    // Semantics I
+    // Semantics 1
     private final Stack<Operator> operatorStack = new Stack<>();
     private final Stack<Operand> operandStack = new Stack<>();
     private final LinkedList<Operation> operations = new LinkedList<>();
@@ -323,7 +323,8 @@ public class Code extends PanelTemplate {
     private boolean plusplus = false;
     private boolean minusminus = false;
 
-    // Semantics II
+    // Semantics 2
+
 
     {
         try {
@@ -708,7 +709,10 @@ public class Code extends PanelTemplate {
                         }
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
-                        if (tempOperand.type() != operandStack.peek().type()) lastOperation.addError();
+                        if (tempOperand.type() != operandStack.peek().type()) {
+                            addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
+                            lastOperation.addError();
+                        }
                         tempOperand = null;
                         // hacer el string de asignación
                         tempAssignation.append(operandStack.pop().lexeme());
@@ -866,7 +870,10 @@ public class Code extends PanelTemplate {
                 resultLexeme = "temp string";
                 resultType = Type.STRING;
             }
-            case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> lastOperation.addError();
+            case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> {
+                addError(result, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
+                lastOperation.addError();
+            }
         }
         lastOperation.addCounter(resultType);
         operandStack.push(new Operand(result, resultLexeme, resultType));
