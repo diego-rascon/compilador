@@ -180,13 +180,13 @@ public class Code extends PanelTemplate {
             {-36},                                                                                                  // 86
             {-35},                                                                                                  // 87
             {-68, -16, 255},                                                                                        // 88
-            {-62, -50, 273, -51, 254, 257},                                                                         // 89
+            {-62, -50, 4000, 3000, 273, 3001, 4001, -51, 254, 257},                                                 // 89
             {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
-            {-67, -50, 273, -51, 254},                                              // 92
+            {-67, -50, 4002, 3000, 273, 3001, 4003, -51, 254},                                                      // 92
             {3000, 273, 3001, -17},                                                 // 93
             {-78, 273, -17},                                                        // 94
-            {-66, 254, -67, -50, 273, -51, -17},                                    // 95
+            {-66, 254, -67, -50, 4004, 3000, 273, 3001, 4005, -51, -17},            // 95
             {-65, -50, 264, -51, 254},                                              // 96
             {-75, -50, 273, 256, -51},                                              // 97
             {-69, -50, 273, -51},                                                   // 98
@@ -229,7 +229,7 @@ public class Code extends PanelTemplate {
             {269},                                                                  // 135
             {-48, 273, 272, -49},                                                   // 136
             {-15, 273, 272},                                                        // 137
-            {275, 274},                                                             // 138
+            {275, 274},                                                 // 138
             {-9, 275, 274},                                                         // 139
             {-8, 275, 274},                                                         // 140
             {277, 276},                                                             // 141
@@ -277,28 +277,31 @@ public class Code extends PanelTemplate {
     };
 
     private final Connection connection;
-    private FileWriter txtResult;
-
     // UI Components
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
-
-    // Lexicon
-    private int[][] lexicMatrix;
-
     // Syntaxis
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
-    private int[][] syntaxMatrix;
-
     // Ambit
     private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final LinkedList<Ambit> ambits = new LinkedList<>();
     private final LinkedList<String> tempArraySize = new LinkedList<>();
+    // Semantics 1
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+    // Semantics 2
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
+    private FileWriter txtResult;
+    // Lexicon
+    private int[][] lexicMatrix;
+    private int[][] syntaxMatrix;
     private ElementType currentType = ElementType.NONE;
     private String tempLet = "";
     private String tempType = "";
@@ -311,21 +314,14 @@ public class Code extends PanelTemplate {
     private boolean decParameters = false;
     private boolean customType = false;
     private boolean idType = false;
-
-    // Semantics 1
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
     private Operand tempOperand;
-    private String assignationLexeme = "=";
     private int[][][] semMatrix;
     private boolean assignating = false;
     private boolean plusplus = false;
     private boolean minusminus = false;
-
-    // Semantics 2
-    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
+    private boolean inIf = false;
+    private boolean inWhile = false;
+    private boolean inDoWhile = false;
 
     {
         try {
@@ -408,7 +404,6 @@ public class Code extends PanelTemplate {
         operatorStack.clear();
         operandStack.clear();
         tempAssignation.setLength(0);
-        assignationLexeme = "=";
         semanticsList.clear();
 
         checkLexic();
@@ -719,40 +714,45 @@ public class Code extends PanelTemplate {
                             doOperation();
                         }
 
+                        // Sacar el tope de pila y la regla de semántica 2
+                        String topStack = getString();
+
+                        String assigntationString = tempAssignation.toString();
+                        int rule;
+                        if (assigntationString.contains("=")) rule = 1020;
+                        else if (assigntationString.contains("+=")) rule = 1021;
+                        else rule = 1022;
+
+                        if (inIf) rule = 1010;
+                        if (inWhile) rule = 1011;
+                        if (inDoWhile) rule = 1012;
+
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
-                        boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
-                        if (tempOperand.type() != operandStack.peek().type() && !concat) {
-                            validOperation = false;
-                            addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
-                            lastOperation.addError();
+
+                        if (tempOperand != null) {
+                            if (rule == 1020 || rule == 1021 || rule == 1022) {
+                                boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
+                                if (tempOperand.type() != operandStack.peek().type() && !concat) {
+                                    validOperation = false;
+                                    addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
+                                    lastOperation.addError();
+                                }
+                            }
                         }
 
-                        // Entrada de semántica 2
-                        int rule = switch (assignationLexeme) {
-                            case "=" -> 1020;
-                            case "+=" -> 1021;
-                            default -> 1022;
-                        };
+                        // Revisar si es una condición o un ciclo
+                        if (inIf || inWhile || inDoWhile) {
+                            topStack = "boolean";
+                            validOperation = operandStack.peek().type() == Type.BOOLEAN;
+                        }
 
-                        String topStack = switch (tempOperand.type()) {
-                            case BOOLEAN -> "boolean";
-                            case NUMBER -> "number";
-                            case REAL -> "real";
-                            case STRING -> "any";
-                            case NULL -> "null";
-                            case CUSTOM -> "custom";
-                            case VARIANT -> "variant";
-                            case VOID -> "void";
-                        };
-
-                        semanticsList.add(new Semantics(rule));
+                        // Crear la entrada en la lista de semántica
+                        semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                         Semantics lastSemantics = semanticsList.getLast();
                         lastSemantics.setTopStack(topStack);
                         lastSemantics.setRealValue(operandStack.peek().lexeme());
                         lastSemantics.setAccepted(validOperation);
-                        lastSemantics.setLine(line);
-                        lastSemantics.setAmbit(ambitStack.peek().getId());
 
                         // hacer el string de asignación
                         tempAssignation.append(operandStack.pop().lexeme());
@@ -760,6 +760,12 @@ public class Code extends PanelTemplate {
                         tempAssignation.setLength(0);
                         tempOperand = null;
                     }
+                    case 4000 -> inIf = true;
+                    case 4001 -> inIf = false;
+                    case 4002 -> inWhile = true;
+                    case 4003 -> inWhile = false;
+                    case 4004 -> inDoWhile = true;
+                    case 4005 -> inDoWhile = false;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -771,7 +777,6 @@ public class Code extends PanelTemplate {
                             // Asignaciones
                             case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
                                 tempOperand = operandStack.peek();
-                                assignationLexeme = lexeme;
                                 tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             }
                             // Operandos
@@ -785,7 +790,7 @@ public class Code extends PanelTemplate {
                                     } else {
                                         newOperand = new Operand(-600, "temp variant", Type.VARIANT);
                                     }
-                                    if (tempOperand == null){
+                                    if (tempOperand == null) {
                                         tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
                                         tempOperand = newOperand;
                                     }
@@ -800,7 +805,7 @@ public class Code extends PanelTemplate {
                                     } else {
                                         newOperand = new Operand(-601, "temp variant", Type.VARIANT);
                                     }
-                                    if (tempOperand == null){
+                                    if (tempOperand == null) {
                                         tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
                                         tempOperand = newOperand;
                                     }
@@ -813,14 +818,8 @@ public class Code extends PanelTemplate {
                                     -39, -40, -43, -44 -> {
                                 if (operatorStack.isEmpty()) {
                                     switch (token) {
-                                        case -2 -> {
-                                            plusplus = true;
-                                            assignationLexeme = lexeme;
-                                        }
-                                        case -5 -> {
-                                            minusminus = true;
-                                            assignationLexeme = lexeme;
-                                        }
+                                        case -2 -> plusplus = true;
+                                        case -5 -> minusminus = true;
                                         default -> operatorStack.push(new Operator(token, lexeme, getPriority(token)));
                                     }
                                 } else {
@@ -887,6 +886,23 @@ public class Code extends PanelTemplate {
                 }
             }
         }
+    }
+
+    private String getString() {
+        String topStack = "boolean";
+        if (tempOperand != null) {
+            topStack = switch (tempOperand.type()) {
+                case BOOLEAN -> "boolean";
+                case NUMBER -> "number";
+                case REAL -> "real";
+                case STRING -> "any";
+                case NULL -> "null";
+                case CUSTOM -> "custom";
+                case VARIANT -> "variant";
+                case VOID -> "void";
+            };
+        }
+        return topStack;
     }
 
     private void doOperation() {
