@@ -181,7 +181,7 @@ public class Code extends PanelTemplate {
             {-35},                                                                                                  // 87
             {-68, -16, 255},                                                                                        // 88
             {-62, -50, 4000, 3000, 273, 3001, 4001, -51, 254, 257},                                                 // 89
-            {-64, -50, 273, -51, -46, -76, 273, -18, 258, 254, 259, -87, 260, -47},                                 // 90
+            {4006, -64, -50, 4008, 3000, 273, 3001, 4009, -51, -46, -76, 4010, 3000, 273, 3001, 4011, -18, 258, 254, 259, -87, 260, -47, 4007},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 4002, 3000, 273, 3001, 4003, -51, 254},                                                      // 92
             {3000, 273, 3001, -17},                                                 // 93
@@ -192,9 +192,9 @@ public class Code extends PanelTemplate {
             {-69, -50, 273, -51},                                                   // 98
             {-15, 273, 256},                                                        // 99
             {-63, 254},                                                             // 100
-            {-76, 273, -18, 258},                                                   // 101
+            {-76, 4010, 3000, 273, 3001, 4011, -18, 258},                           // 101
             {-17, 254, 259},                                                        // 102
-            {-76, 273, -18, 268, -87, 260},                                         // 103
+            {-76, 4010, 3000, 273, 3001, 4011, -18, 268, -87, 260},                                         // 103
             {-77, -18, 254, 262},                                                   // 104
             {-17, 254, 261},                                                        // 105
             {-17, 254, 262},                                                        // 106
@@ -277,32 +277,30 @@ public class Code extends PanelTemplate {
     };
 
     private final Connection connection;
+    private FileWriter txtResult;
+
     // UI Components
+    private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
-    private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
+
+    // Lexicon
+    private int[][] lexicMatrix;
+
     // Syntaxis
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
+    private int[][] syntaxMatrix;
+
     // Ambit
     private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final LinkedList<Ambit> ambits = new LinkedList<>();
     private final LinkedList<String> tempArraySize = new LinkedList<>();
-    // Semantics 1
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
-    // Semantics 2
-    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
-    private FileWriter txtResult;
-    // Lexicon
-    private int[][] lexicMatrix;
-    private int[][] syntaxMatrix;
     private ElementType currentType = ElementType.NONE;
+    private Operand tempOperand;
     private String tempLet = "";
     private String tempType = "";
     private int ambit = 0;
@@ -314,14 +312,33 @@ public class Code extends PanelTemplate {
     private boolean decParameters = false;
     private boolean customType = false;
     private boolean idType = false;
-    private Operand tempOperand;
+
+    // Semantics 1
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+
+    // Semantics 2
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
     private int[][][] semMatrix;
-    private boolean assignating = false;
-    private boolean plusplus = false;
-    private boolean minusminus = false;
+
+    // // Regla 1
     private boolean inIf = false;
     private boolean inWhile = false;
     private boolean inDoWhile = false;
+
+    // // Regla 2
+    private boolean assignating = false;
+    private boolean plusplus = false;
+    private boolean minusminus = false;
+
+    // // Regla 3
+    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
+    private boolean inSwitch = false;
+    private boolean inSwitchType = false;
+    private boolean inSwitchCase = false;
+    private boolean switchError = false;
 
     {
         try {
@@ -717,15 +734,7 @@ public class Code extends PanelTemplate {
                         // Sacar el tope de pila y la regla de semántica 2
                         String topStack = getString();
 
-                        String assigntationString = tempAssignation.toString();
-                        int rule;
-                        if (assigntationString.contains("=")) rule = 1020;
-                        else if (assigntationString.contains("+=")) rule = 1021;
-                        else rule = 1022;
-
-                        if (inIf) rule = 1010;
-                        if (inWhile) rule = 1011;
-                        if (inDoWhile) rule = 1012;
+                        int rule = getRule();
 
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
@@ -747,11 +756,55 @@ public class Code extends PanelTemplate {
                             validOperation = operandStack.peek().type() == Type.BOOLEAN;
                         }
 
+                        // Revisar si es un switch
+                        if (inSwitch) {
+                            if (!switchStack.isEmpty()) topStack = switchStack.peek() ? "number" : "string";
+
+                            if (inSwitchType) {
+                                topStack = "number/string";
+                                validOperation = operandStack.peek().type() == Type.NUMBER || operandStack.peek().type() == Type.STRING;
+                                if (validOperation) {
+                                    switchStack.push(operandStack.peek().type() == Type.NUMBER);
+                                } else {
+                                    switchError = true;
+                                }
+                            }
+                            if (inSwitchCase) {
+                                if (switchError) {
+                                    validOperation = operandStack.peek().type() == Type.NUMBER || operandStack.peek().type() == Type.STRING;
+                                    if (validOperation) {
+                                        switchStack.push(operandStack.peek().type() == Type.NUMBER);
+                                        topStack = "number/string";
+                                        switchError = false;
+                                    } else {
+                                        topStack = "switch error";
+                                    }
+                                } else {
+                                    boolean caseType = operandStack.peek().type() == Type.NUMBER;
+                                    validOperation = caseType == switchStack.peek();
+                                }
+                            }
+                        }
+
                         // Crear la entrada en la lista de semántica
+                        String realValue = operandStack.peek().lexeme();
+                        if (inSwitch) {
+                            realValue = switch (operandStack.peek().type()) {
+                                case STRING -> "string";
+                                case NUMBER -> "number";
+                                case BOOLEAN -> "boolean";
+                                case REAL -> "real";
+                                case CUSTOM -> "custom";
+                                case VOID -> "void";
+                                case VARIANT -> "variant";
+                                case NULL -> "null";
+                            };
+                        }
+
                         semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                         Semantics lastSemantics = semanticsList.getLast();
                         lastSemantics.setTopStack(topStack);
-                        lastSemantics.setRealValue(operandStack.peek().lexeme());
+                        lastSemantics.setRealValue(realValue);
                         lastSemantics.setAccepted(validOperation);
 
                         // hacer el string de asignación
@@ -766,6 +819,15 @@ public class Code extends PanelTemplate {
                     case 4003 -> inWhile = false;
                     case 4004 -> inDoWhile = true;
                     case 4005 -> inDoWhile = false;
+                    case 4006 -> inSwitch = true;
+                    case 4007 -> {
+                        switchStack.pop();
+                        if (switchStack.isEmpty()) inSwitch = false;
+                    }
+                    case 4008 -> inSwitchType = true;
+                    case 4009 -> inSwitchType = false;
+                    case 4010 -> inSwitchCase = true;
+                    case 4011 -> inSwitchCase = false;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -886,6 +948,22 @@ public class Code extends PanelTemplate {
                 }
             }
         }
+    }
+
+    private int getRule() {
+        String assigntationString = tempAssignation.toString();
+        int rule;
+        if (assigntationString.contains("=")) rule = 1020;
+        else if (assigntationString.contains("+=")) rule = 1021;
+        else rule = 1022;
+
+        if (inIf) rule = 1010;
+        else if (inWhile) rule = 1011;
+        else if (inDoWhile) rule = 1012;
+
+        if (inSwitchCase) rule = 1030;
+        else if (inSwitchType) rule = 1031;
+        return rule;
     }
 
     private String getString() {
