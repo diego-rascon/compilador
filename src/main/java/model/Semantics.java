@@ -2,11 +2,13 @@ package model;
 
 public class Semantics {
     String topStack, realValue;
-    int rule, line, ambit;
+    final int rule, line, ambit;
     boolean accepted;
 
-    public Semantics(int rule) {
+    public Semantics(int rule, int line, int ambit) {
         this.rule = rule;
+        this.line = line;
+        this.ambit = ambit;
     }
 
     public String getTopStack() {
@@ -29,24 +31,12 @@ public class Semantics {
         return rule;
     }
 
-    public void setRule(int rule) {
-        this.rule = rule;
-    }
-
     public int getLine() {
         return line;
     }
 
-    public void setLine(int line) {
-        this.line = line;
-    }
-
     public int getAmbit() {
         return ambit;
-    }
-
-    public void setAmbit(int ambit) {
-        this.ambit = ambit;
     }
 
     public boolean isAccepted() {
