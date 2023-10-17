@@ -200,11 +200,11 @@ public class Code extends PanelTemplate {
             {-17, 254, 262},                                                        // 106
             {-17, 254, 263},                                                        // 107
             {4014, 3000, 273, 3001, 4015, 265, -17, 4016, 3000, 273, 3001, 4017, -17, 4018, 3000, 273, 3001, 4019, 266},                                    // 108
-            {-88, -58, 267, -58},                                                   // 109
+            {4020, -88, 4022, -58, 4023, 267, 4024, -58, 4025, 4021},                                                   // 109
             {-15, 273, 265},                                                        // 110
             {-15, 273, 266},                                                        // 111
-            {-107},                                                                 // 112
-            {-108},                                                                 // 113
+            {4026, -107},                                                                 // 112
+            {4027, -108},                                                                 // 113
             {254, 261},                                                             // 114
             {-95, -50, -51},                                                        // 115
             {-96, -50, -51},                                                        // 116
@@ -344,7 +344,12 @@ public class Code extends PanelTemplate {
     private boolean inForInit = false;
     private boolean inForComp = false;
     private boolean inForInc = false;
-
+    private boolean inForString = false;
+    private boolean inForArray = false;
+    private boolean inForNewId = false;
+    private boolean inForId = false;
+    private String tempForNewId = "";
+    private String tempForId = "";
 
     {
         try {
@@ -614,7 +619,7 @@ public class Code extends PanelTemplate {
                 syntaxStack.pop();
                 int line = syntaxTokens.getFirst().line();
                 switch (topSyntaxStack) {
-                    case 1000 -> {
+                    case 1000, 4020 -> {
                         Ambit newAmbit = new Ambit(ambit);
                         ambits.add(newAmbit);
                         ambitStack.push(newAmbit);
@@ -757,7 +762,7 @@ public class Code extends PanelTemplate {
                         }
 
                         // Revisar si es una condición o un ciclo
-                        if (inIf || inWhile || inDoWhile) {
+                        if (inIf || inWhile || inDoWhile || inForComp) {
                             topStack = "boolean";
                             validOperation = operandStack.peek().type() == Type.BOOLEAN;
                         }
@@ -791,6 +796,13 @@ public class Code extends PanelTemplate {
                                 }
                             }
                         }
+
+                        if (inForInit) topStack = "asignación";
+                        else if (inForComp) topStack = "boolean";
+                        else if (inForInc) topStack = "++/--";
+
+                        if (inForInit) validOperation = tempAssignation.toString().contains("=");
+                        if (inForComp) validOperation = operandStack.peek().type() == Type.BOOLEAN;
 
                         // Crear la entrada en la lista de semántica
                         String realValue = operandStack.peek().lexeme();
@@ -842,12 +854,75 @@ public class Code extends PanelTemplate {
                     case 4017 -> inForComp      = false;
                     case 4018 -> inForInc       = true;
                     case 4019 -> inForInc       = false;
+                    case 4021 -> {
+                        int rule = 0;
+                        if (inForString) rule = 1083;
+                        else if (inForArray) rule = 1084;
+
+                        String topStack = "";
+                        if (inForString) topStack = "string";
+                        else if (inForArray) topStack = "arreglo";
+
+                        boolean isArray = false;
+                        System.out.println(tempForId);
+                        String realValue = "variable no encontrada";
+                        for (Element element : elementsStack) {
+                            if (element.getId().equals(tempForId)) {
+                                int elementAmbit = element.getAmbit();
+                                for (Ambit activeAmbit : ambitStack) {
+                                    if (activeAmbit.getId() == elementAmbit) {
+                                        System.out.println("variable encontrada");
+                                        isArray = (element.getClassType().equals("arreglo"));
+                                        if (element.getType() != null) {
+                                            realValue = element.getType();
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        int currentAmbit = ambitStack.peek().getId();
+
+                        elementsStack.push(new Element(tempForNewId, "variable let", currentAmbit));
+                        elementsStack.peek().setType(realValue);
+
+                        boolean validFor = true;
+                        if (inForString) validFor = realValue.equals("string");
+                        if (inForArray) validFor = isArray;
+
+                        semanticsList.add(new Semantics(rule, line, currentAmbit));
+                        Semantics lastSemantics = semanticsList.getLast();
+                        lastSemantics.setTopStack(topStack);
+                        lastSemantics.setRealValue(realValue);
+                        lastSemantics.setAccepted(validFor);
+
+                        int topAmbitLine = ambitStack.peek().getId();
+                        ambitStack.pop();
+                        printAmbitAction("eliminó", topAmbitLine, line);
+
+                        inForString = false;
+                        inForArray = false;
+                    }
+                    case 4022 -> inForNewId     = true;
+                    case 4023 -> inForNewId     = false;
+                    case 4024 -> inForId        = true;
+                    case 4025 -> inForId        = false;
+                    case 4026 -> inForString    = true;
+                    case 4027 -> inForArray     = true;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
+                    if (inForNewId && token == -58) {
+                        tempForNewId = lexeme;
+                    }
+                    if (inForId && token == -58) {
+                        System.out.println("blablaba");
+                        tempForId = lexeme;
+                    }
                     if (assignating) {
                         switch (token) {
                             // Asignaciones
@@ -943,7 +1018,7 @@ public class Code extends PanelTemplate {
                     }
                     if (topSyntaxStack == -58 && exeArea) {
                         var validCode = elementExist(lexeme);
-                        if (!validCode) {
+                        if (!validCode && !inForNewId) {
                             addError(549, lexeme, ErrorType.AMBIT, syntaxTokens.getFirst().line());
                         }
                     }
@@ -984,6 +1059,8 @@ public class Code extends PanelTemplate {
             if (inForInit) rule = 1080;
             else if (inForComp) rule = 1081;
             else if (inForInc) rule = 1082;
+            else if (inForString) rule = 1083;
+            else if (inForArray) rule = 1084;
         }
         return rule;
     }
