@@ -187,7 +187,7 @@ public class Code extends PanelTemplate {
             {3000, 273, 3001, -17},                                                 // 93
             {-78, 273, -17},                                                        // 94
             {-66, 254, -67, -50, 4004, 3000, 273, 3001, 4005, -51, -17},            // 95
-            {-65, -50, 264, -51, 254},                                              // 96
+            {4012, -65, -50, 264, -51, 4013, 254},                                              // 96
             {-75, -50, 273, 256, -51},                                              // 97
             {-69, -50, 273, -51},                                                   // 98
             {-15, 273, 256},                                                        // 99
@@ -199,7 +199,7 @@ public class Code extends PanelTemplate {
             {-17, 254, 261},                                                        // 105
             {-17, 254, 262},                                                        // 106
             {-17, 254, 263},                                                        // 107
-            {273, 265, -17, 273, -17, 273, 266},                                    // 108
+            {4014, 3000, 273, 3001, 4015, 265, -17, 4016, 3000, 273, 3001, 4017, -17, 4018, 3000, 273, 3001, 4019, 266},                                    // 108
             {-88, -58, 267, -58},                                                   // 109
             {-15, 273, 265},                                                        // 110
             {-15, 273, 266},                                                        // 111
@@ -339,6 +339,12 @@ public class Code extends PanelTemplate {
     private boolean inSwitchType = false;
     private boolean inSwitchCase = false;
     private boolean switchError = false;
+    // // Regla 8
+    private boolean inFor = false;
+    private boolean inForInit = false;
+    private boolean inForComp = false;
+    private boolean inForInc = false;
+
 
     {
         try {
@@ -813,21 +819,29 @@ public class Code extends PanelTemplate {
                         tempAssignation.setLength(0);
                         tempOperand = null;
                     }
-                    case 4000 -> inIf = true;
-                    case 4001 -> inIf = false;
-                    case 4002 -> inWhile = true;
-                    case 4003 -> inWhile = false;
-                    case 4004 -> inDoWhile = true;
-                    case 4005 -> inDoWhile = false;
-                    case 4006 -> inSwitch = true;
+                    case 4000 -> inIf       = true;
+                    case 4001 -> inIf       = false;
+                    case 4002 -> inWhile    = true;
+                    case 4003 -> inWhile    = false;
+                    case 4004 -> inDoWhile  = true;
+                    case 4005 -> inDoWhile  = false;
+                    case 4006 -> inSwitch   = true;
                     case 4007 -> {
                         switchStack.pop();
                         if (switchStack.isEmpty()) inSwitch = false;
                     }
-                    case 4008 -> inSwitchType = true;
-                    case 4009 -> inSwitchType = false;
-                    case 4010 -> inSwitchCase = true;
-                    case 4011 -> inSwitchCase = false;
+                    case 4008 -> inSwitchType   = true;
+                    case 4009 -> inSwitchType   = false;
+                    case 4010 -> inSwitchCase   = true;
+                    case 4011 -> inSwitchCase   = false;
+                    case 4012 -> inFor          = true;
+                    case 4013 -> inFor          = false;
+                    case 4014 -> inForInit      = true;
+                    case 4015 -> inForInit      = false;
+                    case 4016 -> inForComp      = true;
+                    case 4017 -> inForComp      = false;
+                    case 4018 -> inForInc       = true;
+                    case 4019 -> inForInc       = false;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -961,8 +975,16 @@ public class Code extends PanelTemplate {
         else if (inWhile) rule = 1011;
         else if (inDoWhile) rule = 1012;
 
-        if (inSwitchCase) rule = 1030;
-        else if (inSwitchType) rule = 1031;
+        if (inSwitch) {
+            if (inSwitchCase) rule = 1030;
+            else if (inSwitchType) rule = 1031;
+        }
+
+        if (inFor) {
+            if (inForInit) rule = 1080;
+            else if (inForComp) rule = 1081;
+            else if (inForInc) rule = 1082;
+        }
         return rule;
     }
 
