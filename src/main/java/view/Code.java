@@ -747,6 +747,8 @@ public class Code extends PanelTemplate {
 
                         int rule = getRule();
 
+                        if (rule == 1021 && topStack.equals("string")) topStack = "any";
+
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
 
@@ -1041,10 +1043,9 @@ public class Code extends PanelTemplate {
 
     private int getRule() {
         String assigntationString = tempAssignation.toString();
-        int rule;
+        int rule = 1022;
         if (assigntationString.contains("=")) rule = 1020;
-        else if (assigntationString.contains("+=")) rule = 1021;
-        else rule = 1022;
+        if (assigntationString.contains("+=")) rule = 1021;
 
         if (inIf) rule = 1010;
         else if (inWhile) rule = 1011;
@@ -1072,7 +1073,7 @@ public class Code extends PanelTemplate {
                 case BOOLEAN -> "boolean";
                 case NUMBER -> "number";
                 case REAL -> "real";
-                case STRING -> "any";
+                case STRING -> "string";
                 case NULL -> "null";
                 case CUSTOM -> "custom";
                 case VARIANT -> "variant";
