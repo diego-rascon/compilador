@@ -137,20 +137,20 @@ public class Code extends PanelTemplate {
             {-73, -28, 228, -32, -38, 229},                                                                                 // 43
             {218},                                                                                                          // 44
             {-58},                                                                                                          // 45
-            {-46, 230, -47, 2017},                                                                                                // 46
-            {273, 231},                                                                                                     // 47
-            {-15, 273, 231},                                                                                                // 48
+            {4029, -46, 230, -47, 4030, 2017},                                                                                                // 46
+            {3000, 273, 3001, 231},                                                                                                     // 47
+            {-15, 3000, 273, 3001, 231},                                                                                                // 48
             {-74, -73, -50, -51, 2017},                                                                                           // 49
             {218, 2015, 232},                                                                                               // 50
             {-38, 233},                                                                                                     // 51
-            {219, 2015},                                                                                                    // 52
+            {219, 2015, 4028},                                                                                                    // 52
             {2016, -46, 1004, 1000, 246, -15, 234, 214, 235, 249, 236, 1005, 1001, -47},                                    // 53   A   DE
             {246, -15},                                                                                                     // 54
             {-15, 214},                                                                                                     // 55
             {-15, 249},                                                                                                     // 56
             {-58, 237},                                                                                                     // 57
             {-38, 238},                                                                                                     // 58
-            {219, 2015},                                                                                                    // 59
+            {219, 2015, 4028},                                                                                                    // 59
             {2016, -46, 1004, 1000, 246, -15, 239, 214, 240, 249, 241, 1005, 1001, -47},                                          // 60   A   DE
             {246, -15},                                                                                                     // 61
             {-15, 214},                                                                                                     // 62
@@ -227,8 +227,8 @@ public class Code extends PanelTemplate {
             {-85, -50, 273, -51},                                                   // 133
             {-86, -50, 273, -51},                                                   // 134
             {269},                                                                  // 135
-            {-48, 273, 272, -49},                                                   // 136
-            {-15, 273, 272},                                                        // 137
+            {4031, -48, 3000, 273, 3001, 272, -49, 4032},                                                   // 136
+            {-15, 3000, 273, 3001, 272},                                                        // 137
             {275, 274},                                                 // 138
             {-9, 275, 274},                                                         // 139
             {-8, 275, 274},                                                         // 140
@@ -277,28 +277,33 @@ public class Code extends PanelTemplate {
     };
 
     private final Connection connection;
-    private FileWriter txtResult;
-
     // UI Components
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
-
-    // Lexicon
-    private int[][] lexicMatrix;
-
     // Syntaxis
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
-    private int[][] syntaxMatrix;
-
     // Ambit
     private final Stack<model.Element> elementsStack = new Stack<>();
     private final Stack<Ambit> ambitStack = new Stack<>();
     private final LinkedList<Ambit> ambits = new LinkedList<>();
     private final LinkedList<String> tempArraySize = new LinkedList<>();
+    // Semantics 1
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+    // Semantics 2
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
+    // // Regla 3
+    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
+    private FileWriter txtResult;
+    // Lexicon
+    private int[][] lexicMatrix;
+    private int[][] syntaxMatrix;
     private ElementType currentType = ElementType.NONE;
     private Operand tempOperand;
     private String tempLet = "";
@@ -306,39 +311,32 @@ public class Code extends PanelTemplate {
     private int ambit = 0;
     private int tempParameters = 0;
     private int tempPosition = 0;
-    private int tempArrayDim = 0;
+    private int tempArrayDimDec = 0;
     private boolean exeArea = false;
     private boolean decLet = false;
     private boolean decParameters = false;
     private boolean customType = false;
     private boolean idType = false;
-
-    // Semantics 1
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
-
-    // Semantics 2
-    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
     private int[][][] semMatrix;
-
     // // Regla 1
     private boolean inIf = false;
     private boolean inWhile = false;
     private boolean inDoWhile = false;
-
     // // Regla 2
     private boolean assignating = false;
+    private boolean assignation = false;
     private boolean plusplus = false;
     private boolean minusminus = false;
-
-    // // Regla 3
-    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
     private boolean inSwitch = false;
     private boolean inSwitchType = false;
     private boolean inSwitchCase = false;
     private boolean switchError = false;
+
+    // // Regla 4, 5 & 6
+    private int tempArrayDim = 1;
+    private boolean inArrDec = false;
+    private boolean inArr = false;
+
     // // Regla 8
     private boolean inFor = false;
     private boolean inForInit = false;
@@ -402,45 +400,10 @@ public class Code extends PanelTemplate {
             System.out.println("Ocurrió un error creando el archivo de resultados");
         }
 
-        exeArea = false;
-        customType = false;
-        idType = false;
-        decParameters = false;
-        decLet = false;
-        ambit = 0;
-        tempParameters = 0;
-        tempPosition = 0;
-        tempArrayDim = 0;
-        tempLet = "";
-        tempType = "";
-        syntaxTokens.clear();
-        syntaxStack.clear();
-        syntaxStack.push(200);
-        ambits.clear();
-        ambitStack.clear();
-        elementsStack.clear();
-        tempArraySize.clear();
-        tokenPanel.emptyTokensList();
-        countersPanel.restartCounter();
-        errorsPanel.emptyErrorsList();
-        errorTypesPanel.restartCounter();
-        currentType = ElementType.NONE;
-
-        // Semantics 1
-        assignating = false;
-        operations.clear();
-        operatorStack.clear();
-        operandStack.clear();
-        tempAssignation.setLength(0);
-        semanticsList.clear();
-
+        resetVariables();
         checkLexic();
         checkSyntax();
-
-        tokenPanel.updateTable();
-        countersPanel.updateTable();
-        errorsPanel.updateTable();
-        errorTypesPanel.updateTable();
+        updateTables();
         try {
             txtResult.close();
         } catch (IOException e) {
@@ -458,7 +421,7 @@ public class Code extends PanelTemplate {
                 String parQuantity = String.valueOf(element.getParQuantity());
                 String parType = element.getParType();
                 switch (element.getClassType()) {
-                    case "variable", "variable let", "@anónima", "función", "función anónima", "método", "método anónimo", "get", "set" -> {
+                    case "variable", "variable let", "constante", "@anónima", "función", "función anónima", "método", "método anónimo", "get", "set" -> {
                         if (parType == null) {
                             String query = "INSERT INTO elementos (id_variable, tipo, clase, ambito) VALUES (?, ?, ?, ?)";
                             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -532,6 +495,88 @@ public class Code extends PanelTemplate {
         for (Semantics semantics : semanticsList) {
             System.out.println(semantics);
         }
+    }
+
+    private void resetVariables() {
+
+        // UI Componentes
+        tokenPanel.emptyTokensList();
+        countersPanel.restartCounter();
+        errorsPanel.emptyErrorsList();
+        errorTypesPanel.restartCounter();
+
+        // Syntaxis
+        syntaxStack.clear();
+        syntaxStack.push(200);
+        syntaxTokens.clear();
+
+        // Ambit
+        elementsStack.clear();
+        ambitStack.clear();
+        ambits.clear();
+        tempArraySize.clear();
+        currentType = ElementType.NONE;
+        tempOperand = null;
+        tempLet = "";
+        tempType = "";
+        ambit = 0;
+        tempParameters = 0;
+        tempPosition = 0;
+        tempArrayDimDec = 0;
+        exeArea = false;
+        decLet = false;
+        decParameters = false;
+        customType = false;
+        idType = false;
+
+        // Semantics 1
+        operatorStack.clear();
+        operandStack.clear();
+        operations.clear();
+        tempAssignation.setLength(0);
+
+        // Smeantics 2
+        semanticsList.clear();
+
+        // // Regla 1
+        inIf = false;
+        inWhile = false;
+        inDoWhile = false;
+
+        // // Regla 2
+        assignating = false;
+        assignation = false;
+        plusplus = false;
+        minusminus = false;
+
+        // // Regla 3
+        switchStack.clear();
+        inSwitch = false;
+        inSwitchType = false;
+        inSwitchCase = false;
+        switchError = false;
+
+        // // Regla 4
+        inArr = false;
+
+        // // Regla 8
+        inFor = false;
+        inForInit = false;
+        inForComp = false;
+        inForInc = false;
+        inForString = false;
+        inForArray = false;
+        inForNewId = false;
+        inForId = false;
+        tempForNewId = "";
+        tempForId = "";
+    }
+
+    private void updateTables() {
+        tokenPanel.updateTable();
+        countersPanel.updateTable();
+        errorsPanel.updateTable();
+        errorTypesPanel.updateTable();
     }
 
     private void prepareStatement(String id, String type, String classType, String ambit, String parType, String query) throws SQLException {
@@ -715,7 +760,7 @@ public class Code extends PanelTemplate {
                                 tempType = tempType.substring(1);
                             }
                             newElement.setType(tempType);
-                            newElement.setArrayDim(tempArrayDim == 0 ? 0 : tempArrayDim + 1);
+                            newElement.setArrayDim(tempArrayDimDec == 0 ? 0 : tempArrayDimDec + 1);
                             if (!tempArraySize.isEmpty()) {
                                 String[] arraySize = new String[tempArraySize.size()];
                                 for (int i = 0; i < tempArraySize.size(); i++) {
@@ -725,7 +770,7 @@ public class Code extends PanelTemplate {
                             }
                             checkDuplicateElement(552, tempLet, line);
                             elementsStack.add(newElement);
-                            tempArrayDim = 0;
+                            tempArrayDimDec = 0;
                             tempArraySize.clear();
                         }
                     }
@@ -735,6 +780,7 @@ public class Code extends PanelTemplate {
                     }
                     case 3001 -> {
                         assignating = false;
+
                         boolean validOperation = true;
 
                         // realizar operación
@@ -742,12 +788,34 @@ public class Code extends PanelTemplate {
                             doOperation();
                         }
 
-                        // Sacar el tope de pila y la regla de semántica 2
-                        String topStack = getString();
+                        if (inArr) {
+                            boolean isArray = false;
+                            int arrayDim = 1;
+                            for (Element element : elementsStack) {
+                                if (element.getId().equals(operandStack.get(operandStack.size() - 2).lexeme())) {
+                                    for (Ambit activeAmbit : ambitStack) {
+                                        if (activeAmbit.getId() == element.getAmbit()) {
+                                            isArray = (element.getClassType().equals("arreglo"));
+                                            arrayDim = element.getArrayDim();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            boolean accepted = isArray && tempArrayDim <= arrayDim;
+                            String arrRealValue = isArray ? "dimensión = " + arrayDim : "arreglo";
+                            semanticsList.add(new Semantics(1040, line, ambitStack.peek().getId()));
+                            Semantics arraySemantics = semanticsList.getLast();
+                            arraySemantics.setTopStack("dimensión = " + tempArrayDim);
+                            arraySemantics.setRealValue(arrRealValue);
+                            arraySemantics.setAccepted(accepted);
+                        }
+
+                        // Sacar el valor real y la regla de semántica 2
+                        String realValue = getString();
 
                         int rule = getRule();
-
-                        if (rule == 1021 && topStack.equals("string")) topStack = "any";
+                        if (rule == 1021 && realValue.equals("string")) realValue = "any";
 
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
@@ -765,16 +833,17 @@ public class Code extends PanelTemplate {
 
                         // Revisar si es una condición o un ciclo
                         if (inIf || inWhile || inDoWhile || inForComp) {
-                            topStack = "boolean";
+                            realValue = "boolean";
                             validOperation = operandStack.peek().type() == Type.BOOLEAN;
                         }
 
                         // Revisar si es un switch
                         if (inSwitch) {
-                            if (!switchStack.isEmpty()) topStack = switchStack.peek() ? "number" : "string";
+                            if (inSwitchCase && !switchStack.isEmpty())
+                                realValue = switchStack.peek() ? "number" : "string";
 
                             if (inSwitchType) {
-                                topStack = "number/string";
+                                realValue = "number/string";
                                 validOperation = operandStack.peek().type() == Type.NUMBER || operandStack.peek().type() == Type.STRING;
                                 if (validOperation) {
                                     switchStack.push(operandStack.peek().type() == Type.NUMBER);
@@ -787,10 +856,10 @@ public class Code extends PanelTemplate {
                                     validOperation = operandStack.peek().type() == Type.NUMBER || operandStack.peek().type() == Type.STRING;
                                     if (validOperation) {
                                         switchStack.push(operandStack.peek().type() == Type.NUMBER);
-                                        topStack = "number/string";
+                                        realValue = "number/string";
                                         switchError = false;
                                     } else {
-                                        topStack = "switch error";
+                                        realValue = "switch error";
                                     }
                                 } else {
                                     boolean caseType = operandStack.peek().type() == Type.NUMBER;
@@ -799,63 +868,104 @@ public class Code extends PanelTemplate {
                             }
                         }
 
-                        if (inForInit) topStack = "asignación";
-                        else if (inForComp) topStack = "boolean";
-                        else if (inForInc) topStack = "++/--";
+                        if (inForInit) realValue = "asignación";
+                        else if (inForComp) realValue = "boolean";
+                        else if (inForInc) realValue = "++/--";
 
-                        if (inForInit) validOperation = tempAssignation.toString().contains("=");
+                        if (inForInit) validOperation = assignation;
                         if (inForComp) validOperation = operandStack.peek().type() == Type.BOOLEAN;
 
                         // Crear la entrada en la lista de semántica
-                        String realValue = operandStack.peek().lexeme();
-                        if (inSwitch) {
-                            realValue = switch (operandStack.peek().type()) {
-                                case STRING -> "string";
-                                case NUMBER -> "number";
-                                case BOOLEAN -> "boolean";
-                                case REAL -> "real";
-                                case CUSTOM -> "custom";
-                                case VOID -> "void";
-                                case VARIANT -> "variant";
-                                case NULL -> "null";
-                            };
+                        String topStack = switch (operandStack.peek().type()) {
+                            case STRING -> "string";
+                            case NUMBER -> "number";
+                            case BOOLEAN -> "boolean";
+                            case REAL -> "real";
+                            case CUSTOM -> "custom";
+                            case VOID -> "void";
+                            case VARIANT -> "variant";
+                            case NULL -> "null";
+                        };
+
+                        if (inArr) {
+                            Semantics acceptedSemantics = semanticsList.getLast();
+                            if (acceptedSemantics.getRule() == 1040 && acceptedSemantics.isAccepted()) {
+                                rule = 1050;
+                                realValue = "number";
+                                validOperation = operandStack.peek().type() == Type.NUMBER;
+                            }
                         }
 
-                        semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
-                        Semantics lastSemantics = semanticsList.getLast();
-                        lastSemantics.setTopStack(topStack);
-                        lastSemantics.setRealValue(realValue);
-                        lastSemantics.setAccepted(validOperation);
+                        if (!inArr || rule == 1050) {
+                            semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
+                            Semantics lastSemantics = semanticsList.getLast();
+                            lastSemantics.setTopStack(topStack);
+                            lastSemantics.setRealValue(realValue);
+                            lastSemantics.setAccepted(validOperation);
+
+                            if (rule == 1020 || rule == 1021 || rule == 1022) {
+                                semanticsList.add(new Semantics(1090, line, ambitStack.peek().getId()));
+                                lastSemantics = semanticsList.getLast();
+
+                                String classType = "";
+                                boolean accepted = false;
+
+                                if (tempOperand == null) tempOperand = operandStack.peek();
+                                for (Element element : elementsStack) {
+                                    if (element.getId().equals(tempOperand.lexeme())) {
+                                        for (Ambit activeAmbit : ambitStack) {
+                                            if (activeAmbit.getId() == element.getAmbit()) {
+                                                classType = element.getClassType();
+                                                accepted = switch (element.getClassType()) {
+                                                    case "variable", "variable let", "arreglo" -> true;
+                                                    default -> false;
+                                                };
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                lastSemantics.setTopStack(classType);
+                                lastSemantics.setRealValue("variable/arreglo");
+                                lastSemantics.setAccepted(accepted);
+                            }
+                        }
 
                         // hacer el string de asignación
-                        tempAssignation.append(operandStack.pop().lexeme());
-                        lastOperation.setAssignation(tempAssignation.toString());
-                        tempAssignation.setLength(0);
-                        tempOperand = null;
+                        if (!inArrDec && !inArr) {
+                            tempAssignation.append(operandStack.pop().lexeme());
+                            lastOperation.setAssignation(tempAssignation.toString());
+                            tempAssignation.setLength(0);
+                            tempOperand = null;
+                        } else {
+                            operandStack.pop();
+                        }
+                        assignation = false;
                     }
-                    case 4000 -> inIf       = true;
-                    case 4001 -> inIf       = false;
-                    case 4002 -> inWhile    = true;
-                    case 4003 -> inWhile    = false;
-                    case 4004 -> inDoWhile  = true;
-                    case 4005 -> inDoWhile  = false;
-                    case 4006 -> inSwitch   = true;
+                    case 4000 -> inIf = true;
+                    case 4001 -> inIf = false;
+                    case 4002 -> inWhile = true;
+                    case 4003 -> inWhile = false;
+                    case 4004 -> inDoWhile = true;
+                    case 4005 -> inDoWhile = false;
+                    case 4006 -> inSwitch = true;
                     case 4007 -> {
                         switchStack.pop();
                         if (switchStack.isEmpty()) inSwitch = false;
                     }
-                    case 4008 -> inSwitchType   = true;
-                    case 4009 -> inSwitchType   = false;
-                    case 4010 -> inSwitchCase   = true;
-                    case 4011 -> inSwitchCase   = false;
-                    case 4012 -> inFor          = true;
-                    case 4013 -> inFor          = false;
-                    case 4014 -> inForInit      = true;
-                    case 4015 -> inForInit      = false;
-                    case 4016 -> inForComp      = true;
-                    case 4017 -> inForComp      = false;
-                    case 4018 -> inForInc       = true;
-                    case 4019 -> inForInc       = false;
+                    case 4008 -> inSwitchType = true;
+                    case 4009 -> inSwitchType = false;
+                    case 4010 -> inSwitchCase = true;
+                    case 4011 -> inSwitchCase = false;
+                    case 4012 -> inFor = true;
+                    case 4013 -> inFor = false;
+                    case 4014 -> inForInit = true;
+                    case 4015 -> inForInit = false;
+                    case 4016 -> inForComp = true;
+                    case 4017 -> inForComp = false;
+                    case 4018 -> inForInc = true;
+                    case 4019 -> inForInc = false;
                     case 4021 -> {
                         int rule = 0;
                         if (inForString) rule = 1083;
@@ -866,14 +976,12 @@ public class Code extends PanelTemplate {
                         else if (inForArray) topStack = "arreglo";
 
                         boolean isArray = false;
-                        System.out.println(tempForId);
                         String realValue = "variable no encontrada";
                         for (Element element : elementsStack) {
                             if (element.getId().equals(tempForId)) {
                                 int elementAmbit = element.getAmbit();
                                 for (Ambit activeAmbit : ambitStack) {
                                     if (activeAmbit.getId() == elementAmbit) {
-                                        System.out.println("variable encontrada");
                                         isArray = (element.getClassType().equals("arreglo"));
                                         if (element.getType() != null) {
                                             realValue = element.getType();
@@ -895,8 +1003,8 @@ public class Code extends PanelTemplate {
 
                         semanticsList.add(new Semantics(rule, line, currentAmbit));
                         Semantics lastSemantics = semanticsList.getLast();
-                        lastSemantics.setTopStack(topStack);
-                        lastSemantics.setRealValue(realValue);
+                        lastSemantics.setTopStack(realValue);
+                        lastSemantics.setRealValue(topStack);
                         lastSemantics.setAccepted(validFor);
 
                         int topAmbitLine = ambitStack.peek().getId();
@@ -906,12 +1014,21 @@ public class Code extends PanelTemplate {
                         inForString = false;
                         inForArray = false;
                     }
-                    case 4022 -> inForNewId     = true;
-                    case 4023 -> inForNewId     = false;
-                    case 4024 -> inForId        = true;
-                    case 4025 -> inForId        = false;
-                    case 4026 -> inForString    = true;
-                    case 4027 -> inForArray     = true;
+                    case 4022 -> inForNewId = true;
+                    case 4023 -> inForNewId = false;
+                    case 4024 -> inForId = true;
+                    case 4025 -> inForId = false;
+                    case 4026 -> inForString = true;
+                    case 4027 -> inForArray = true;
+                    case 4028 -> elementsStack.peek().setClassType("constante");
+                    case 4029 -> inArrDec = true;
+                    case 4030 -> inArrDec = false;
+                    case 4031 -> inArr = true;
+                    case 4032 -> {
+                        tempArrayDim = 1;
+                        assignating = true;
+                        inArr = false;
+                    }
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -922,13 +1039,13 @@ public class Code extends PanelTemplate {
                         tempForNewId = lexeme;
                     }
                     if (inForId && token == -58) {
-                        System.out.println("blablaba");
                         tempForId = lexeme;
                     }
                     if (assignating) {
                         switch (token) {
                             // Asignaciones
                             case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
+                                assignation = true;
                                 tempOperand = operandStack.peek();
                                 tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             }
@@ -989,13 +1106,14 @@ public class Code extends PanelTemplate {
                             }
                         }
                     }
+                    if (inArr && topSyntaxStack == -15) tempArrayDim++;
                     if (decLet) {
                         if (topSyntaxStack == -58 && !idType) {
                             idType = true;
                             tempLet = lexeme;
                         } else {
                             switch (topSyntaxStack) {
-                                case -15 -> tempArrayDim++;
+                                case -15 -> tempArrayDimDec++;
                                 case -52, -53, -54, -55, -56 -> tempArraySize.add(lexeme);
                                 case -57 -> customType = true;
                                 case -58 -> {
@@ -1067,9 +1185,20 @@ public class Code extends PanelTemplate {
     }
 
     private String getString() {
-        String topStack = "boolean";
+        String topStack;
         if (tempOperand != null) {
             topStack = switch (tempOperand.type()) {
+                case BOOLEAN -> "boolean";
+                case NUMBER -> "number";
+                case REAL -> "real";
+                case STRING -> "string";
+                case NULL -> "null";
+                case CUSTOM -> "custom";
+                case VARIANT -> "variant";
+                case VOID -> "void";
+            };
+        } else {
+            topStack = switch (operandStack.peek().type()) {
                 case BOOLEAN -> "boolean";
                 case NUMBER -> "number";
                 case REAL -> "real";
