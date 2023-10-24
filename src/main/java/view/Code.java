@@ -138,8 +138,8 @@ public class Code extends PanelTemplate {
             {218},                                                                                                          // 44
             {-58},                                                                                                          // 45
             {4029, -46, 230, -47, 4030, 2017},                                                                                                // 46
-            {3000, 273, 3001, 231},                                                                                                     // 47
-            {-15, 3000, 273, 3001, 231},                                                                                                // 48
+            {273, 231},                                                                                                     // 47
+            {-15, 273, 231},                                                                                                // 48
             {-74, -73, -50, -51, 2017},                                                                                           // 49
             {218, 2015, 232},                                                                                               // 50
             {-38, 233},                                                                                                     // 51
@@ -896,7 +896,7 @@ public class Code extends PanelTemplate {
                             }
                         }
 
-                        if (!inArr || rule == 1050) {
+                        if (inArrDec || !inArr || rule == 1050) {
                             semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                             Semantics lastSemantics = semanticsList.getLast();
                             lastSemantics.setTopStack(topStack);
@@ -928,6 +928,30 @@ public class Code extends PanelTemplate {
 
                                 lastSemantics.setTopStack(classType);
                                 lastSemantics.setRealValue("variable/arreglo");
+                                lastSemantics.setAccepted(accepted);
+                            }
+                        }
+
+                        if (inArr) {
+                            Semantics acceptedSemantics = semanticsList.getLast();
+                            if (acceptedSemantics.getRule() == 1050 && acceptedSemantics.isAccepted()) {
+                                int position = Integer.parseInt(operandStack.peek().lexeme());
+                                int decPosition = 0;
+                                for (Element element : elementsStack) {
+                                    if (element.getId().equals(operandStack.get(operandStack.size() - 2).lexeme())) {
+                                        for (Ambit activeAmbit : ambitStack) {
+                                            if (activeAmbit.getId() == element.getAmbit()) {
+                                                decPosition = Integer.parseInt(element.getArraySize()[tempArrayDim - 1]);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                boolean accepted = position < decPosition;
+                                semanticsList.add(new Semantics(1060, line, ambitStack.peek().getId()));
+                                Semantics lastSemantics = semanticsList.getLast();
+                                lastSemantics.setTopStack("posición = " + position);
+                                lastSemantics.setRealValue("posición menor a " + decPosition);
                                 lastSemantics.setAccepted(accepted);
                             }
                         }
