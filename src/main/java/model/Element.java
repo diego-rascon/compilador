@@ -5,8 +5,7 @@ import java.util.Arrays;
 public class Element {
 
     private final String id;
-    private String type;
-    private final String classType;
+    private String type, classType;
     private final int ambit;
     private String[] arraySize;
     private int arrayDim;
@@ -33,6 +32,10 @@ public class Element {
 
     public String getClassType() {
         return classType;
+    }
+
+    public void setClassType(String classType) {
+        this.classType = classType;
     }
 
     public int getAmbit() {
