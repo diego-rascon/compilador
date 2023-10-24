@@ -289,10 +289,10 @@ public class FileHandler {
                 ruleCell.setCellValue(semanticsElement.getRule());
 
                 final XSSFCell topStackCell = row.createCell(columns++);
-                topStackCell.setCellValue(semanticsElement.getTopStack());
+                topStackCell.setCellValue(semanticsElement.getRealValue());
 
                 final XSSFCell valueCell = row.createCell(columns++);
-                valueCell.setCellValue(semanticsElement.getRealValue());
+                valueCell.setCellValue(semanticsElement.getTopStack());
 
                 final XSSFCell lineCell = row.createCell(columns++);
                 lineCell.setCellValue(semanticsElement.getLine());
