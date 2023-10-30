@@ -105,14 +105,14 @@ public class Code extends PanelTemplate {
             {2006, -94, -58, -46, 2007, 1004, 1000, 246, 208, 249, 209, 1005, 1001, -47},                                   // 11   A   DE
             {-17, 246, 208},                                                                                                // 12
             {249, 209},                                                                                                     // 13
-            {2004, -70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 2004, 212, 2005, -46, 1002, 254, 213, 1003, 1001, -47},  // 14   A   DE  EJ
+            {4036, 2004, -70, -58, -50, 1004, 1000, 246, 211, 1005, -51, 4035, 2004, 212, 2005, -46, 1002, 254, 213, 1003, 1001, -47, 4037},  // 14   A   DE  EJ
             {-15, 246, 211},                                                                                                // 15
             {-18, 218},                                                                                                     // 16
             {-17, 254, 213},                                                                                                // 17
-            {2012, -92, -58, -50, 1004, 1000, 246, 215, 1005, -51, 2013, -46, 1002, 254, 216, 1003, 1001, -47},             // 18   A   DE  EJ
+            {4036, 2012, -92, -58, -50, 1004, 1000, 246, 215, 1005, -51, 4035, 2013, -46, 1002, 254, 216, 1003, 1001, -47, 4037},             // 18   A   DE  EJ
             {-15, 246, 215},                                                                                                // 19
             {-17, 254, 216},                                                                                                // 20
-            {2010, -93, -58, -50, 1004, 1000, 1005, -51, -18, 218, 2011, -46, 1002, 254, 217, 1003, 1001, -47},             // 21   A   DE  EJ
+            {4036, 2010, -93, -58, -50, 1004, 1000, 1005, -51, 4035 -18, 218, 2011, -46, 1002, 254, 217, 1003, 1001, -47, 4037},             // 21   A   DE  EJ
             {-17, 254, 217},                                                                                                // 22
             {-91},                                                                                                          // 23
             {-90},                                                                                                          // 24
@@ -127,11 +127,11 @@ public class Code extends PanelTemplate {
             {-61},                                                                                                          // 33
             {-88, 2014, -58, 221},                                                                                          // 34
             {-38, 222},                                                                                                     // 35
-            {2018, -70, -50, 1004, 1000, 246, 223, 1005, -51, 2018, 224, 2019, -46, 1002, 254, 225, 1003, 1001, -47},       // 36   A   DE  EJ
+            {4036, 2018, -70, -50, 1004, 1000, 246, 223, 1005, -51, 4035, 2018, 224, 2019, -46, 1002, 254, 225, 1003, 1001, -47, 4037},       // 36   A   DE  EJ
             {-15, 246, 223},                                                                                                // 37
             {-18, 218},                                                                                                     // 38
             {-17, 254, 226},                                                                                                // 39
-            {2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, -41, 1002, 254, 1003, 1001},                           // 40   A   DE  EJ
+            {4036, 2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, 4035, -41, 1002, 254, 1003, 1001, 4037},                           // 40   A   DE  EJ
             {-15, 246, 226},                                                                                                // 41
             {-18, 227},                                                                                                     // 42
             {-73, -28, 228, -32, -38, 229},                                                                                 // 43
@@ -164,7 +164,7 @@ public class Code extends PanelTemplate {
             {2000, -58, -18, 218, 2001},                                                                                    // 70               VA
             {2008, -89, -58, 2009, -46, 1004, 1000, 246, 248, 1005, 1001, -47},                                             // 71   A   DE
             {-17, 246, 248},                                                                                                // 72
-            {2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47},       // 73   A   DE  EJ
+            {4036, 2002, -58, -50, 1004, 1000, 246, 250, 1005, -51, 4035, 2002, 251, 2003, -46, 1002, 254, 252, 1003, 1001, -47, 4037},       // 73   A   DE  EJ
             {-15, 246, 250},                                                                                                // 74
             {-18, 218},                                                                                                     // 75
             {-17, 254, 252},                                                                                                // 76
@@ -350,11 +350,20 @@ public class Code extends PanelTemplate {
     private String tempForId = "";
 
     // // Regla 10, 11
-    private boolean inCustomFun = false;
+    private boolean funCall = false;
+    private boolean usingCustomFun = false;
     private int tempParCount = 0;
 
     // // Regla 12
     final private LinkedList<Operand> tempParametersList = new LinkedList<>();
+
+    // // Regla 13 y 14
+    boolean declaringFunType = false;
+
+    // // Regla 16 y 17
+    boolean inCustomFun = false;
+    boolean isFun = false;
+    boolean returned = false;
 
     {
         try {
@@ -576,7 +585,7 @@ public class Code extends PanelTemplate {
         tempForId = "";
 
         // // Regla 10, 11
-        inCustomFun = false;
+        usingCustomFun = false;
         tempParCount = 0;
 
         // // Regla 12
@@ -811,7 +820,7 @@ public class Code extends PanelTemplate {
                             doOperation();
                         }
 
-                        if (inCustomFun) {
+                        if (usingCustomFun) {
                             tempParCount++;
                             tempParametersList.add(operandStack.peek());
                         }
@@ -848,12 +857,10 @@ public class Code extends PanelTemplate {
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
 
-                        if (tempOperand != null && !inCustomFun) {
+                        if (tempOperand != null && !usingCustomFun) {
                             if (rule == 1020 || rule == 1021 || rule == 1022) {
                                 boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
                                 if (tempOperand.type() != operandStack.peek().type() && !concat) {
-                                    System.out.println("temp operand: " + tempOperand);
-                                    System.out.println("operand stack peek: " + operandStack.peek());
                                     validOperation = false;
                                     addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
                                     lastOperation.addError();
@@ -926,7 +933,7 @@ public class Code extends PanelTemplate {
                             }
                         }
 
-                        if (!inArr && !inCustomFun || rule == 1050) {
+                        if (!inArr && !usingCustomFun && rule != 0 || rule == 1050) {
                             semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                             Semantics lastSemantics = semanticsList.getLast();
                             lastSemantics.setTopStack(topStack);
@@ -988,7 +995,7 @@ public class Code extends PanelTemplate {
                         }
 
                         // hacer el string de asignación
-                        if (!inArrDec && !inArr && !inCustomFun) {
+                        if (!inArrDec && !inArr && !usingCustomFun) {
                             tempAssignation.append(operandStack.pop().lexeme());
                             lastOperation.setAssignation(tempAssignation.toString());
                             tempAssignation.setLength(0);
@@ -1084,7 +1091,9 @@ public class Code extends PanelTemplate {
                         assignating = true;
                         inArr = false;
                     }
-                    case 4033 -> inCustomFun = true;
+                    case 4033 -> {
+                        usingCustomFun = true;
+                    }
                     case 4034 -> {
                         boolean isFunction = false;
                         int parCount = 0;
@@ -1094,8 +1103,9 @@ public class Code extends PanelTemplate {
                                 for (Ambit activeAmbit : ambitStack) {
                                     if (activeAmbit.getId() == element.getAmbit()) {
                                         isFunction = element.getClassType().equals("función")
+                                                || element.getClassType().equals("función anónima")
                                                 || element.getClassType().equals("método anónimo")
-                                                || element.getClassType().equals("función anónima");
+                                                || element.getClassType().equals("método");
                                         parCount = element.getParQuantity();
                                         break;
                                     }
@@ -1142,7 +1152,30 @@ public class Code extends PanelTemplate {
                         }
                         tempParCount = 0;
                         assignating = true;
+                        usingCustomFun = false;
+                        funCall = false;
+                        tempParametersList.clear();
+                    }
+                    case 4035 -> declaringFunType = true;
+                    case 4036 -> inCustomFun = true;
+                    case 4037 -> {
+                        Semantics newSemantics;
+                        String topStack = returned ? "returned type" : "return void";
+                        if (isFun) {
+                            newSemantics = new Semantics(1160, line, ambitStack.peek().getId());
+                            newSemantics.setTopStack(topStack);
+                            newSemantics.setRealValue("return type");
+                            newSemantics.setAccepted(returned);
+                        } else {
+                            newSemantics = new Semantics(1170, line, ambitStack.peek().getId());
+                            newSemantics.setTopStack(topStack);
+                            newSemantics.setRealValue("return void");
+                            newSemantics.setAccepted(!returned);
+                        }
+                        semanticsList.add(newSemantics);
                         inCustomFun = false;
+                        isFun = false;
+                        returned = false;
                     }
                 }
             } else if (topSyntaxStack < 0) {
@@ -1150,12 +1183,30 @@ public class Code extends PanelTemplate {
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
-                    if (inForNewId && token == -58) {
-                        tempForNewId = lexeme;
+                    if (inCustomFun && topSyntaxStack == -78) returned = true;
+                    if (declaringFunType) {
+                        switch (topSyntaxStack) {
+                            case -57, -61, -71, -72, -90, -91 -> {
+                                Semantics newSemantics = new Semantics(1140, line, ambitStack.peek().getId());
+                                newSemantics.setTopStack("función");
+                                newSemantics.setRealValue("función");
+                                newSemantics.setAccepted(true);
+                                semanticsList.add(newSemantics);
+                                declaringFunType = false;
+                                isFun = true;
+                            }
+                            case -41, -46 -> {
+                                Semantics newSemantics = new Semantics(1130, line, ambitStack.peek().getId());
+                                newSemantics.setTopStack("procedimiento");
+                                newSemantics.setRealValue("procedimiento");
+                                newSemantics.setAccepted(true);
+                                semanticsList.add(newSemantics);
+                                declaringFunType = false;
+                            }
+                        }
                     }
-                    if (inForId && token == -58) {
-                        tempForId = lexeme;
-                    }
+                    if (inForNewId && token == -58) tempForNewId = lexeme;
+                    if (inForId && token == -58) tempForId = lexeme;
                     if (assignating) {
                         switch (token) {
                             // Asignaciones
@@ -1166,6 +1217,21 @@ public class Code extends PanelTemplate {
                             }
                             // Operandos
                             case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
+                                if (topSyntaxStack == -58) {
+                                    for (Element element : elementsStack) {
+                                        if (element.getId().equals(lexeme) && element.getClassType().equals("función")
+                                                || element.getClassType().equals("función anónima")
+                                                || element.getClassType().equals("método anónimo")
+                                                || element.getClassType().equals("método")) {
+                                            for (Ambit activeAmbit : ambitStack) {
+                                                if (activeAmbit.getId() == element.getAmbit()) {
+                                                    funCall = tempOperand == null;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
                                 if (plusplus) {
                                     operatorStack.push(new Operator(-1, "+", 6));
@@ -1278,9 +1344,18 @@ public class Code extends PanelTemplate {
 
     private int getRule() {
         String assigntationString = tempAssignation.toString();
-        int rule = 1022;
-        if (assigntationString.contains("=")) rule = 1020;
-        if (assigntationString.contains("+=")) rule = 1021;
+        int rule = 0;
+        if (assigntationString.contains(" = ")) rule = 1020;
+        if (assigntationString.contains(" += ")) rule = 1021;
+        if (assigntationString.contains(" /= ")
+                || assigntationString.contains(" *= ")
+                || assigntationString.contains(" -= ")
+                || assigntationString.contains(" %= ")
+                || assigntationString.contains(" &= ")
+                || assigntationString.contains(" ^= ")
+                || assigntationString.contains(" <<= ")
+                || assigntationString.contains(" >>= ")
+                || assigntationString.contains(" >>>= ")) rule = 1022;
 
         if (inIf) rule = 1010;
         else if (inWhile) rule = 1011;

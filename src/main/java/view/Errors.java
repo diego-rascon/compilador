@@ -125,7 +125,9 @@ public class Errors extends PanelTemplate {
             case 1090 -> description = "Se esperaba una variable o un array.";
             case 1100 -> description = "Se enviaron menos parámetros de los requeridos.";
             case 1110 -> description = "Se enviaron más parámetros de los requeridos.";
-            case 1120 -> description = "Parámetro de tipo incorrecto";
+            case 1120 -> description = "Parámetro de tipo incorrecto.";
+            case 1160 -> description = "La función debe regresar un valor.";
+            case 1170 -> description = "El procedimiento no puede regresar un valor.";
         }
         String type = "";
         switch (errorType) {
