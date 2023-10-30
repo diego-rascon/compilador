@@ -4,5 +4,6 @@ public enum ErrorType {
     LEXIC,
     SINTAXIS,
     AMBIT,
-    SEMANTICS
+    SEMANTICS_1,
+    SEMANTICS_2
 }

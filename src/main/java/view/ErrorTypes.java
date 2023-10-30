@@ -12,7 +12,7 @@ public class ErrorTypes extends PanelTemplate {
 
     private final LinkedHashMap<String, Integer> counterMap = new LinkedHashMap<>();
     private final String[] columns = {"Tipo", "Cantidad"};
-    private final String[] rowLabels = {"Léxico", "Sintaxis", "Ámbito", "Semántica"};
+    private final String[] rowLabels = {"Léxico", "Sintaxis", "Ámbito", "Semántica 1", "Semántica 2"};
     private final DefaultTableModel errorTypesTableModel = new DefaultTableModel(columns, 0);
     private final JTable errorTypesTable = new JTable(errorTypesTableModel) {
         public boolean isCellEditable(int row, int column) {
@@ -57,7 +57,8 @@ public class ErrorTypes extends PanelTemplate {
             case LEXIC -> rowLabel = rowLabels[0];
             case SINTAXIS -> rowLabel = rowLabels[1];
             case AMBIT -> rowLabel = rowLabels[2];
-            case SEMANTICS -> rowLabel = rowLabels[3];
+            case SEMANTICS_1 -> rowLabel = rowLabels[3];
+            case SEMANTICS_2 -> rowLabel = rowLabels[4];
         }
         int newValue = counterMap.get(rowLabel) + 1;
         counterMap.put(rowLabel, newValue);

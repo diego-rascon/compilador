@@ -111,13 +111,29 @@ public class Errors extends PanelTemplate {
             case 606, 607 -> description = "Igualación de tipos no compatibles.";
             case 608 -> description = "Operación lógica con tipos no compatibles.";
             case 609 -> description = "Asignación de diferentes tipos.";
+            case 1010, 1011, 1012 -> description = "Se esperaba un boolean.";
+            case 1020, 1021, 1022 -> description = "Operación aritmética no válida.";
+            case 1030 -> description = "Se esperaba un number o un string.";
+            case 1031 -> description = "Se esperaba un number o un string.";
+            case 1040, 1060 -> description = "Se esperaba una dimensión correcta.";
+            case 1050 -> description = "Se esperaba un number.";
+            case 1080 -> description = "Se esperaba una asignación.";
+            case 1081 -> description = "Se esperaba una comparación.";
+            case 1082 -> description = "Se esperaba un incremento/decremento.";
+            case 1083 -> description = "Se esperaba un string.";
+            case 1084 -> description = "Se esperaba un array.";
+            case 1090 -> description = "Se esperaba una variable o un array.";
+            case 1100 -> description = "Se enviaron menos parámetros de los requeridos.";
+            case 1110 -> description = "Se enviaron más parámetros de los requeridos.";
+            case 1120 -> description = "Parámetro de tipo incorrecto";
         }
         String type = "";
         switch (errorType) {
             case LEXIC -> type = "Léxico";
             case SINTAXIS -> type = "Sintaxis";
             case AMBIT -> type = "Ámbito";
-            case SEMANTICS -> type = "Semántica";
+            case SEMANTICS_1 -> type = "Semántica 1";
+            case SEMANTICS_2 -> type = "Semántica 2";
         }
         final model.Error newError = new model.Error(error, description, lexeme, type, line);
         errorList.add(newError);
