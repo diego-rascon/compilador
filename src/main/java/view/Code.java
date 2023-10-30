@@ -350,7 +350,6 @@ public class Code extends PanelTemplate {
     private String tempForId = "";
 
     // // Regla 10, 11
-    private boolean funCall = false;
     private boolean usingCustomFun = false;
     private int tempParCount = 0;
 
@@ -1091,9 +1090,7 @@ public class Code extends PanelTemplate {
                         assignating = true;
                         inArr = false;
                     }
-                    case 4033 -> {
-                        usingCustomFun = true;
-                    }
+                    case 4033 -> usingCustomFun = true;
                     case 4034 -> {
                         boolean isFunction = false;
                         int parCount = 0;
@@ -1153,7 +1150,6 @@ public class Code extends PanelTemplate {
                         tempParCount = 0;
                         assignating = true;
                         usingCustomFun = false;
-                        funCall = false;
                         tempParametersList.clear();
                     }
                     case 4035 -> declaringFunType = true;
@@ -1217,21 +1213,6 @@ public class Code extends PanelTemplate {
                             }
                             // Operandos
                             case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
-                                if (topSyntaxStack == -58) {
-                                    for (Element element : elementsStack) {
-                                        if (element.getId().equals(lexeme) && element.getClassType().equals("función")
-                                                || element.getClassType().equals("función anónima")
-                                                || element.getClassType().equals("método anónimo")
-                                                || element.getClassType().equals("método")) {
-                                            for (Ambit activeAmbit : ambitStack) {
-                                                if (activeAmbit.getId() == element.getAmbit()) {
-                                                    funCall = tempOperand == null;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
                                 operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
                                 if (plusplus) {
                                     operatorStack.push(new Operator(-1, "+", 6));
