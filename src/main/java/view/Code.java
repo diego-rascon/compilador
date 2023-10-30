@@ -264,11 +264,11 @@ public class Code extends PanelTemplate {
             {-2},                                                                   // 170
             {-5},                                                                   // 171
             {271, 288},                                                             // 172
-            {-50, 290, -51},                                                        // 173
+            {4033, -50, 290, -51, 4034},                                            // 173
             {253, 273, 289},                                                        // 174
             {-45, 273, -18, 273},                                                   // 175
-            {273, 291},                                                             // 176
-            {-15, 273, 291},                                                        // 177
+            {3000, 273, 3001, 291},                                                             // 176
+            {-15, 3000, 273, 3001, 291},                                                        // 177
             {-42},                                                                  // 178
             {-7},                                                                   // 179
             {-57, -58},                                                             // 180
@@ -349,6 +349,13 @@ public class Code extends PanelTemplate {
     private String tempForNewId = "";
     private String tempForId = "";
 
+    // // Regla 10, 11
+    private boolean inCustomFun = false;
+    private int tempParCount = 0;
+
+    // // Regla 12
+    final private LinkedList<Operand> tempParametersList = new LinkedList<>();
+
     {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/a20130375", "root", "root");
@@ -403,6 +410,7 @@ public class Code extends PanelTemplate {
         resetVariables();
         checkLexic();
         checkSyntax();
+        addSemanticsError();
         updateTables();
         try {
             txtResult.close();
@@ -491,10 +499,6 @@ public class Code extends PanelTemplate {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        for (Semantics semantics : semanticsList) {
-            System.out.println(semantics);
-        }
     }
 
     private void resetVariables() {
@@ -570,6 +574,25 @@ public class Code extends PanelTemplate {
         inForId = false;
         tempForNewId = "";
         tempForId = "";
+
+        // // Regla 10, 11
+        inCustomFun = false;
+        tempParCount = 0;
+
+        // // Regla 12
+        tempParametersList.clear();
+    }
+
+    private void addSemanticsError() {
+        for (Semantics semantics : semanticsList) {
+            System.out.println(semantics);
+            if (!semantics.isAccepted()) {
+                int error = semantics.getRule();
+                String lexeme = semantics.getTopStack();
+                int lineNum = semantics.getLine();
+                addError(error, lexeme, ErrorType.SEMANTICS_2, lineNum);
+            }
+        }
     }
 
     private void updateTables() {
@@ -788,6 +811,11 @@ public class Code extends PanelTemplate {
                             doOperation();
                         }
 
+                        if (inCustomFun) {
+                            tempParCount++;
+                            tempParametersList.add(operandStack.peek());
+                        }
+
                         if (inArr) {
                             boolean isArray = false;
                             int arrayDim = 1;
@@ -820,12 +848,14 @@ public class Code extends PanelTemplate {
                         // comparar con el operando que se está asignando
                         Operation lastOperation = operations.getLast();
 
-                        if (tempOperand != null) {
+                        if (tempOperand != null && !inCustomFun) {
                             if (rule == 1020 || rule == 1021 || rule == 1022) {
                                 boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
                                 if (tempOperand.type() != operandStack.peek().type() && !concat) {
+                                    System.out.println("temp operand: " + tempOperand);
+                                    System.out.println("operand stack peek: " + operandStack.peek());
                                     validOperation = false;
-                                    addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
+                                    addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
                                     lastOperation.addError();
                                 }
                             }
@@ -896,7 +926,7 @@ public class Code extends PanelTemplate {
                             }
                         }
 
-                        if (inArrDec || !inArr || rule == 1050) {
+                        if (!inArr && !inCustomFun || rule == 1050) {
                             semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                             Semantics lastSemantics = semanticsList.getLast();
                             lastSemantics.setTopStack(topStack);
@@ -912,7 +942,9 @@ public class Code extends PanelTemplate {
 
                                 if (tempOperand == null) tempOperand = operandStack.peek();
                                 for (Element element : elementsStack) {
-                                    if (element.getId().equals(tempOperand.lexeme())) {
+                                    if (element.getId().equals(tempOperand.lexeme())
+                                            && !element.getClassType().equals("set")
+                                            && !element.getClassType().equals("get")) {
                                         for (Ambit activeAmbit : ambitStack) {
                                             if (activeAmbit.getId() == element.getAmbit()) {
                                                 classType = element.getClassType();
@@ -925,7 +957,6 @@ public class Code extends PanelTemplate {
                                         }
                                     }
                                 }
-
                                 lastSemantics.setTopStack(classType);
                                 lastSemantics.setRealValue("variable/arreglo");
                                 lastSemantics.setAccepted(accepted);
@@ -957,7 +988,7 @@ public class Code extends PanelTemplate {
                         }
 
                         // hacer el string de asignación
-                        if (!inArrDec && !inArr) {
+                        if (!inArrDec && !inArr && !inCustomFun) {
                             tempAssignation.append(operandStack.pop().lexeme());
                             lastOperation.setAssignation(tempAssignation.toString());
                             tempAssignation.setLength(0);
@@ -1053,6 +1084,66 @@ public class Code extends PanelTemplate {
                         assignating = true;
                         inArr = false;
                     }
+                    case 4033 -> inCustomFun = true;
+                    case 4034 -> {
+                        boolean isFunction = false;
+                        int parCount = 0;
+                        String functionName = operandStack.peek().lexeme();
+                        for (Element element : elementsStack) {
+                            if (element.getId().equals(functionName)) {
+                                for (Ambit activeAmbit : ambitStack) {
+                                    if (activeAmbit.getId() == element.getAmbit()) {
+                                        isFunction = element.getClassType().equals("función")
+                                                || element.getClassType().equals("método anónimo")
+                                                || element.getClassType().equals("función anónima");
+                                        parCount = element.getParQuantity();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        Semantics newSemantics;
+                        boolean functionAccepted = isFunction && tempParCount == parCount;
+                        if (functionAccepted) {
+                            newSemantics = new Semantics(1100, line, ambitStack.peek().getId());
+                            newSemantics.setTopStack(tempParCount + " parámetros");
+                            newSemantics.setRealValue(parCount + " parámetros");
+                            newSemantics.setAccepted(true);
+                        } else {
+                            int rule = tempParCount > parCount ? 1110 : 1100;
+                            newSemantics = new Semantics(rule, line, ambitStack.peek().getId());
+                            newSemantics.setTopStack(tempParCount + " parámetros");
+                            newSemantics.setRealValue(parCount + " parámetros");
+                            newSemantics.setAccepted(false);
+                        }
+                        semanticsList.add(newSemantics);
+
+                        if (functionAccepted) {
+                            for (Element element : elementsStack) {
+                                if (element.getParType() != null && element.getParType().equals(functionName)) {
+                                    String parameterType = switch (tempParametersList.get(element.getParQuantity() - 1).type()) {
+                                        case BOOLEAN -> "boolean";
+                                        case NUMBER -> "number";
+                                        case REAL -> "real";
+                                        case STRING -> "string";
+                                        case CUSTOM -> "#";
+                                        case VARIANT -> "variant";
+                                        case NULL -> "null";
+                                        case VOID -> "void";
+                                    };
+                                    boolean sameType = parameterType.equals(element.getType());
+                                    newSemantics = new Semantics(1120, line, ambitStack.peek().getId());
+                                    newSemantics.setTopStack(parameterType);
+                                    newSemantics.setRealValue(element.getType());
+                                    newSemantics.setAccepted(sameType);
+                                    semanticsList.add(newSemantics);
+                                }
+                            }
+                        }
+                        tempParCount = 0;
+                        assignating = true;
+                        inCustomFun = false;
+                    }
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -1085,8 +1176,9 @@ public class Code extends PanelTemplate {
                                         newOperand = new Operand(-600, "temp variant", Type.VARIANT);
                                     }
                                     if (tempOperand == null) {
+                                        assignation = true;
                                         tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
-                                        tempOperand = newOperand;
+                                        tempOperand = new Operand(token, lexeme, getType(token, lexeme));
                                     }
                                     operandStack.push(newOperand);
                                     plusplus = false;
@@ -1100,8 +1192,9 @@ public class Code extends PanelTemplate {
                                         newOperand = new Operand(-601, "temp variant", Type.VARIANT);
                                     }
                                     if (tempOperand == null) {
+                                        assignation = true;
                                         tempAssignation.append(operandStack.peek().lexeme()).append(" = ");
-                                        tempOperand = newOperand;
+                                        tempOperand = new Operand(token, lexeme, getType(token, lexeme));
                                     }
                                     operandStack.push(newOperand);
                                     minusminus = false;
@@ -1266,7 +1359,7 @@ public class Code extends PanelTemplate {
                 resultType = Type.STRING;
             }
             case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> {
-                addError(result, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS, syntaxTokens.getFirst().line());
+                addError(result, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
                 lastOperation.addError();
             }
         }
