@@ -112,7 +112,7 @@ public class Code extends PanelTemplate {
             {4036, 2012, -92, -58, -50, 1004, 1000, 246, 215, 1005, -51, 4035, 2013, -46, 1002, 254, 216, 1003, 1001, -47, 4037},             // 18   A   DE  EJ
             {-15, 246, 215},                                                                                                // 19
             {-17, 254, 216},                                                                                                // 20
-            {4036, 2010, -93, -58, -50, 1004, 1000, 1005, -51, 4035 -18, 218, 2011, -46, 1002, 254, 217, 1003, 1001, -47, 4037},             // 21   A   DE  EJ
+            {4036, 2010, -93, -58, -50, 1004, 1000, 1005, -51, 4035, -18, 218, 2011, -46, 1002, 254, 217, 1003, 1001, -47, 4037},             // 21   A   DE  EJ
             {-17, 254, 217},                                                                                                // 22
             {-91},                                                                                                          // 23
             {-90},                                                                                                          // 24
@@ -593,7 +593,7 @@ public class Code extends PanelTemplate {
 
     private void addSemanticsError() {
         for (Semantics semantics : semanticsList) {
-            System.out.println(semantics);
+            //System.out.println(semantics);
             if (!semantics.isAccepted()) {
                 int error = semantics.getRule();
                 String lexeme = semantics.getTopStack();
@@ -932,6 +932,33 @@ public class Code extends PanelTemplate {
                             }
                         }
 
+                        for (Element element : elementsStack) {
+                            if (element.getId().equals(operandStack.peek().lexeme())) {
+                                for (Ambit activeAmbit : ambitStack) {
+                                    if (activeAmbit.getId() == element.getAmbit()) {
+                                        String classType = element.getClassType();
+                                        boolean isTempFun = classType.equals("función")
+                                                || classType.equals("función anónima")
+                                                || classType.equals("método anónimo")
+                                                || classType.equals("método");
+                                        if (isTempFun) {
+                                            boolean isVoid = element.getType().equals("void");
+                                            int funRule = rule == 0 ? 1130 : 1140;
+                                            String funTopStack = isVoid ? "procedimiento" : "función";
+                                            String funRealValue = funRule == 1130 ? "procedimiento" : "función";
+                                            boolean accepted = funRule == 1130 && isVoid || funRule == 1140 && !isVoid;
+                                            Semantics newSemantics = new Semantics(funRule, line, ambitStack.peek().getId());
+                                            newSemantics.setTopStack(funTopStack);
+                                            newSemantics.setRealValue(funRealValue);
+                                            newSemantics.setAccepted(accepted);
+                                            semanticsList.add(newSemantics);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         if (!inArr && !usingCustomFun && rule != 0 || rule == 1050) {
                             semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                             Semantics lastSemantics = semanticsList.getLast();
@@ -1183,22 +1210,10 @@ public class Code extends PanelTemplate {
                     if (declaringFunType) {
                         switch (topSyntaxStack) {
                             case -57, -61, -71, -72, -90, -91 -> {
-                                Semantics newSemantics = new Semantics(1140, line, ambitStack.peek().getId());
-                                newSemantics.setTopStack("función");
-                                newSemantics.setRealValue("función");
-                                newSemantics.setAccepted(true);
-                                semanticsList.add(newSemantics);
                                 declaringFunType = false;
                                 isFun = true;
                             }
-                            case -41, -46 -> {
-                                Semantics newSemantics = new Semantics(1130, line, ambitStack.peek().getId());
-                                newSemantics.setTopStack("procedimiento");
-                                newSemantics.setRealValue("procedimiento");
-                                newSemantics.setAccepted(true);
-                                semanticsList.add(newSemantics);
-                                declaringFunType = false;
-                            }
+                            case -41, -46 -> declaringFunType = false;
                         }
                     }
                     if (inForNewId && token == -58) tempForNewId = lexeme;
@@ -1315,6 +1330,7 @@ public class Code extends PanelTemplate {
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
                 } else {
+                    System.out.println(topSyntaxStack);
                     System.out.println("Error de fuerza bruta, linea: " + syntaxTokens.getFirst().line() + " lexema: " + syntaxTokens.getFirst().lexeme());
                     syntaxStack.pop();
                     syntaxTokens.removeFirst();
