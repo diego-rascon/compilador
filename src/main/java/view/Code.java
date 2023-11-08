@@ -277,65 +277,74 @@ public class Code extends PanelTemplate {
     };
 
     private final Connection connection;
+    private FileWriter txtResult;
+
     // UI Components
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
-    // Syntaxis
-    private final Stack<Integer> syntaxStack = new Stack<>();
-    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
-    // Ambit
-    private final Stack<model.Element> elementsStack = new Stack<>();
-    private final Stack<Ambit> ambitStack = new Stack<>();
-    private final LinkedList<Ambit> ambits = new LinkedList<>();
-    private final LinkedList<String> tempArraySize = new LinkedList<>();
-    // Semantics 1
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
-    // Semantics 2
-    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
-    // // Regla 3
-    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
-    private FileWriter txtResult;
+
     // Lexicon
     private int[][] lexicMatrix;
+
+    // Syntaxis
     private int[][] syntaxMatrix;
-    private ElementType currentType = ElementType.NONE;
-    private Operand tempOperand;
-    private String tempLet = "";
-    private String tempType = "";
-    private int ambit = 0;
-    private int tempParameters = 0;
-    private int tempPosition = 0;
-    private int tempArrayDimDec = 0;
+    private final Stack<Integer> syntaxStack = new Stack<>();
+    private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
+
+    // Ambit
     private boolean exeArea = false;
     private boolean decLet = false;
     private boolean decParameters = false;
     private boolean customType = false;
     private boolean idType = false;
+    private int ambit = 0;
+    private int tempParameters = 0;
+    private int tempPosition = 0;
+    private int tempArrayDimDec = 0;
+    private String tempLet = "";
+    private String tempType = "";
+    private ElementType currentType = ElementType.NONE;
+    private Operand tempOperand;
+    private final Stack<model.Element> elementsStack = new Stack<>();
+    private final Stack<Ambit> ambitStack = new Stack<>();
+    private final LinkedList<Ambit> ambits = new LinkedList<>();
+    private final LinkedList<String> tempArraySize = new LinkedList<>();
+
+    // Semantics 1
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+
+    // Semantics 2
     private int[][][] semMatrix;
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
+
     // // Regla 1
     private boolean inIf = false;
     private boolean inWhile = false;
     private boolean inDoWhile = false;
+
     // // Regla 2
     private boolean assignating = false;
     private boolean assignation = false;
     private boolean plusplus = false;
     private boolean minusminus = false;
+
+    // // Regla 3
     private boolean inSwitch = false;
     private boolean inSwitchType = false;
     private boolean inSwitchCase = false;
     private boolean switchError = false;
+    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
 
     // // Regla 4, 5 & 6
-    private int tempArrayDim = 1;
     private boolean inArrDec = false;
     private boolean inArr = false;
+    private int tempArrayDim = 1;
 
     // // Regla 8
     private boolean inFor = false;
@@ -356,10 +365,10 @@ public class Code extends PanelTemplate {
     // // Regla 12
     final private LinkedList<Operand> tempParametersList = new LinkedList<>();
 
-    // // Regla 13 y 14
+    // // Regla 13 & 14
     boolean declaringFunType = false;
 
-    // // Regla 16 y 17
+    // // Regla 16 & 17
     boolean inCustomFun = false;
     boolean isFun = false;
     boolean returned = false;
@@ -510,7 +519,6 @@ public class Code extends PanelTemplate {
     }
 
     private void resetVariables() {
-
         // UI Componentes
         tokenPanel.emptyTokensList();
         countersPanel.restartCounter();
@@ -523,23 +531,23 @@ public class Code extends PanelTemplate {
         syntaxTokens.clear();
 
         // Ambit
-        elementsStack.clear();
-        ambitStack.clear();
-        ambits.clear();
-        tempArraySize.clear();
-        currentType = ElementType.NONE;
-        tempOperand = null;
-        tempLet = "";
-        tempType = "";
-        ambit = 0;
-        tempParameters = 0;
-        tempPosition = 0;
-        tempArrayDimDec = 0;
         exeArea = false;
         decLet = false;
         decParameters = false;
         customType = false;
         idType = false;
+        ambit = 0;
+        tempParameters = 0;
+        tempPosition = 0;
+        tempArrayDimDec = 0;
+        tempLet = "";
+        tempType = "";
+        currentType = ElementType.NONE;
+        tempOperand = null;
+        elementsStack.clear();
+        ambitStack.clear();
+        ambits.clear();
+        tempArraySize.clear();
 
         // Semantics 1
         operatorStack.clear();
@@ -562,14 +570,16 @@ public class Code extends PanelTemplate {
         minusminus = false;
 
         // // Regla 3
-        switchStack.clear();
         inSwitch = false;
         inSwitchType = false;
         inSwitchCase = false;
         switchError = false;
+        switchStack.clear();
 
-        // // Regla 4
+        // // Regla 4, 5 & 6
+        inArrDec = false;
         inArr = false;
+        tempArrayDim = 1;
 
         // // Regla 8
         inFor = false;
@@ -589,6 +599,14 @@ public class Code extends PanelTemplate {
 
         // // Regla 12
         tempParametersList.clear();
+
+        // // Regla 13 & 14
+        declaringFunType = false;
+
+        // // Regla 16 & 17
+        inCustomFun = false;
+        isFun = false;
+        returned = false;
     }
 
     private void addSemanticsError() {
@@ -1317,6 +1335,11 @@ public class Code extends PanelTemplate {
                     }
                     if (topSyntaxStack == -58 && exeArea) {
                         var validCode = elementExist(lexeme);
+                        Semantics newSemantics = new Semantics(1150, line, ambitStack.peek().getId());
+                        newSemantics.setTopStack(validCode ? "variable" : "variable no declarada");
+                        newSemantics.setRealValue("variable");
+                        newSemantics.setAccepted(validCode);
+                        semanticsList.add(newSemantics);
                         if (!validCode && !inForNewId) {
                             addError(549, lexeme, ErrorType.AMBIT, syntaxTokens.getFirst().line());
                         }
