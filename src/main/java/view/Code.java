@@ -359,11 +359,11 @@ public class Code extends PanelTemplate {
     private String tempForId = "";
 
     // // Regla 10, 11
+    final private Stack<Integer> parCountStack = new Stack<>();
     private boolean usingCustomFun = false;
-    private int tempParCount = 0;
 
     // // Regla 12
-    final private LinkedList<Operand> tempParametersList = new LinkedList<>();
+    final private Stack<LinkedList<Operand>> tempParametersStack = new Stack<>();
 
     // // Regla 13 & 14
     boolean declaringFunType = false;
@@ -595,10 +595,10 @@ public class Code extends PanelTemplate {
 
         // // Regla 10, 11
         usingCustomFun = false;
-        tempParCount = 0;
+        parCountStack.clear();
 
         // // Regla 12
-        tempParametersList.clear();
+        tempParametersStack.clear();
 
         // // Regla 13 & 14
         declaringFunType = false;
@@ -838,8 +838,9 @@ public class Code extends PanelTemplate {
                         }
 
                         if (usingCustomFun) {
-                            tempParCount++;
-                            tempParametersList.add(operandStack.peek());
+                            int parCount = parCountStack.pop() + 1;
+                            parCountStack.push(parCount);
+                            tempParametersStack.peek().add(operandStack.peek());
                         }
 
                         if (inArr) {
@@ -1135,7 +1136,11 @@ public class Code extends PanelTemplate {
                         assignating = true;
                         inArr = false;
                     }
-                    case 4033 -> usingCustomFun = true;
+                    case 4033 -> {
+                        tempParametersStack.push(new LinkedList<>());
+                        parCountStack.push(0);
+                        usingCustomFun = true;
+                    }
                     case 4034 -> {
                         boolean isFunction = false;
                         int parCount = 0;
@@ -1155,16 +1160,16 @@ public class Code extends PanelTemplate {
                             }
                         }
                         Semantics newSemantics;
-                        boolean functionAccepted = isFunction && tempParCount == parCount;
+                        boolean functionAccepted = isFunction && parCountStack.peek() == parCount;
                         if (functionAccepted) {
                             newSemantics = new Semantics(1100, line, ambitStack.peek().getId());
-                            newSemantics.setTopStack(tempParCount + " parámetros");
+                            newSemantics.setTopStack(parCountStack.peek() + " parámetros");
                             newSemantics.setRealValue(parCount + " parámetros");
                             newSemantics.setAccepted(true);
                         } else {
-                            int rule = tempParCount > parCount ? 1110 : 1100;
+                            int rule = parCountStack.peek() > parCount ? 1110 : 1100;
                             newSemantics = new Semantics(rule, line, ambitStack.peek().getId());
-                            newSemantics.setTopStack(tempParCount + " parámetros");
+                            newSemantics.setTopStack(parCountStack.peek() + " parámetros");
                             newSemantics.setRealValue(parCount + " parámetros");
                             newSemantics.setAccepted(false);
                         }
@@ -1173,7 +1178,7 @@ public class Code extends PanelTemplate {
                         if (functionAccepted) {
                             for (Element element : elementsStack) {
                                 if (element.getParType() != null && element.getParType().equals(functionName)) {
-                                    String parameterType = switch (tempParametersList.get(element.getParQuantity() - 1).type()) {
+                                    String parameterType = switch (tempParametersStack.peek().get(element.getParQuantity() - 1).type()) {
                                         case BOOLEAN -> "boolean";
                                         case NUMBER -> "number";
                                         case REAL -> "real";
@@ -1192,10 +1197,10 @@ public class Code extends PanelTemplate {
                                 }
                             }
                         }
-                        tempParCount = 0;
+                        parCountStack.pop();
+                        tempParametersStack.pop();
                         assignating = true;
-                        usingCustomFun = false;
-                        tempParametersList.clear();
+                        if (parCountStack.isEmpty()) usingCustomFun = false;
                     }
                     case 4035 -> declaringFunType = true;
                     case 4036 -> inCustomFun = true;
