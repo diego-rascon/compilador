@@ -2,6 +2,7 @@ package util;
 
 import model.Ambit;
 import model.Operation;
+import model.Quadruple;
 import model.Semantics;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -31,6 +32,12 @@ public class FileHandler {
     private final String[] ambitHeaders = {"Ámbito", "string", "number", "boolean", "real", "null", "#id", "void", "errores", "total"};
     private final String[] semHeaders = {"Linea", "Strings", "Numbers", "Booleans", "Reales", "Variables #", "Voids", "Variants", "Asignaciones", "Errores"};
     private final String[] sem2Headers = {"Regla", "Tope de pila", "Valor real", "Linea", "Estado", "Ámbito"};
+    private final String[] quadruplesHeaders = {
+            "temp booleans", "temp numbers", "temp reals", "temp strings", "temp nulls", "temp variants",
+            "calls", "assignaciones", "op relacional", "op lógicas", "op aritméticas", "op unarias",
+            "jf", "jt", "jmp",
+            "e if", "e for", "e while", "e switch", "e función", "main"
+    };
 
     public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
@@ -302,6 +309,148 @@ public class FileHandler {
 
                 final XSSFCell ambitCell = row.createCell(columns);
                 ambitCell.setCellValue(semanticsElement.getAmbit());
+            }
+
+            // Quadruples
+
+            final XSSFSheet quadSheet = workbook.createSheet("Cuádruplos");
+            rowNum = 0;
+            sheetRow = quadSheet.createRow(rowNum++);
+            for (int i = 0; i < quadruplesHeaders.length; i++) {
+                final XSSFCell sheetCell = sheetRow.createCell(i + 1);
+                if (i == 0) {
+                    final XSSFCell ambitCell = sheetRow.createCell(i);
+                    ambitCell.setCellValue("ámbito");
+                }
+                sheetCell.setCellValue(quadruplesHeaders[i]);
+            }
+
+            int[] quadTotals = new int[quadruplesHeaders.length];
+            for (int total : quadTotals) total = 0;
+
+            LinkedList<Quadruple> quadruples = codePanel.getQuadruples();
+
+            for (Quadruple quadruple : quadruples) {
+                int columns = 0;
+                final XSSFRow row = quadSheet.createRow(rowNum++);
+
+                final XSSFCell ambitCell = row.createCell(columns++);
+                ambitCell.setCellValue(quadruple.getAmbit());
+
+                final XSSFCell boolCell = row.createCell(columns++);
+                int tempBools = quadruple.getTempBooleans();
+                quadTotals[0] += tempBools;
+                boolCell.setCellValue(tempBools);
+
+                final XSSFCell numCell = row.createCell(columns++);
+                int tempNums = quadruple.getTempNumbers();
+                quadTotals[1] += tempNums;
+                numCell.setCellValue(tempNums);
+
+                final XSSFCell realCell = row.createCell(columns++);
+                int tempReals = quadruple.getTempReals();
+                quadTotals[2] += tempReals;
+                realCell.setCellValue(tempReals);
+
+                final XSSFCell stringCell = row.createCell(columns++);
+                int tempStrings = quadruple.getTempStrings();
+                quadTotals[3] += tempStrings;
+                stringCell.setCellValue(tempStrings);
+
+                final XSSFCell nullCell = row.createCell(columns++);
+                int tempNulls = quadruple.getTempNulls();
+                quadTotals[4] += tempNulls;
+                nullCell.setCellValue(tempNulls);
+
+                final XSSFCell variantCell = row.createCell(columns++);
+                int tempVariants = quadruple.getTempVariants();
+                quadTotals[5] += tempVariants;
+                variantCell.setCellValue(tempVariants);
+
+                final XSSFCell callsCell = row.createCell(columns++);
+                int tempCalls = quadruple.getCalls();
+                quadTotals[6] += tempCalls;
+                callsCell.setCellValue(tempCalls);
+
+                final XSSFCell assignationsCell = row.createCell(columns++);
+                int assignations = quadruple.getAssignations();
+                quadTotals[7] += assignations;
+                assignationsCell.setCellValue(assignations);
+
+                final XSSFCell relOpCell = row.createCell(columns++);
+                int relOps = quadruple.getRelationalOperators();
+                quadTotals[8] += relOps;
+                relOpCell.setCellValue(relOps);
+
+                final XSSFCell logOpCell = row.createCell(columns++);
+                int logOps = quadruple.getLogicalOperators();
+                quadTotals[9] += logOps;
+                logOpCell.setCellValue(logOps);
+
+                final XSSFCell aritOpCell = row.createCell(columns++);
+                int aritOps = quadruple.getArithmeticOperators();
+                quadTotals[10] += aritOps;
+                aritOpCell.setCellValue(aritOps);
+
+                final XSSFCell unarOpCell = row.createCell(columns++);
+                int unarOps = quadruple.getUnaryOperation();
+                quadTotals[11] += unarOps;
+                unarOpCell.setCellValue(unarOps);
+
+                final XSSFCell jfCell = row.createCell(columns++);
+                int jf = quadruple.getJumpFalses();
+                quadTotals[12] += jf;
+                jfCell.setCellValue(jf);
+
+                final XSSFCell jtCell = row.createCell(columns++);
+                int jt = quadruple.getJumpTrues();
+                quadTotals[13] += jt;
+                jtCell.setCellValue(jt);
+
+                final XSSFCell jumpsCell = row.createCell(columns++);
+                int jumps = quadruple.getJumps();
+                quadTotals[14] += jumps;
+                jumpsCell.setCellValue(jumps);
+
+                final XSSFCell ifCell = row.createCell(columns++);
+                int ifs = quadruple.getIfLabels();
+                quadTotals[15] += ifs;
+                ifCell.setCellValue(ifs);
+
+                final XSSFCell forCell = row.createCell(columns++);
+                int fors = quadruple.getForLabels();
+                quadTotals[16] += fors;
+                forCell.setCellValue(fors);
+
+                final XSSFCell whileCell = row.createCell(columns++);
+                int whiles = quadruple.getWhileLabels();
+                quadTotals[17] += whiles;
+                whileCell.setCellValue(whiles);
+
+                final XSSFCell switchCell = row.createCell(columns++);
+                int switches = quadruple.getSwitchLabels();
+                quadTotals[18] += switches;
+                switchCell.setCellValue(switches);
+
+                final XSSFCell functionCell = row.createCell(columns++);
+                int functions = quadruple.getFunctionLabels();
+                quadTotals[19] += functions;
+                functionCell.setCellValue(functions);
+
+                final XSSFCell mainCell = row.createCell(columns++);
+                int mains = quadruple.getMainLabels();
+                quadTotals[20] += mains;
+                mainCell.setCellValue(mains);
+            }
+
+            int quadTotalsColumns = 0;
+            final XSSFRow quadTotalsRow = quadSheet.createRow(rowNum);
+            final XSSFCell quadLabelCell = quadTotalsRow.createCell(quadTotalsColumns++);
+            quadLabelCell.setCellValue("total");
+
+            for (int total : quadTotals) {
+                final XSSFCell totalCell = quadTotalsRow.createCell(quadTotalsColumns++);
+                totalCell.setCellValue(total);
             }
 
             File defaultFile = new File("Compilador - Diego Rascón (20130375)");

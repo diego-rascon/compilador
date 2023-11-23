@@ -300,6 +300,8 @@ public class Code extends PanelTemplate {
     final private Stack<Integer> parCountStack = new Stack<>();
     // // Regla 12
     final private Stack<LinkedList<Operand>> tempParametersStack = new Stack<>();
+    // Quadruples
+    private final LinkedList<Quadruple> quadruples = new LinkedList<>();
     // // Regla 13 & 14
     boolean declaringFunType = false;
     // // Regla 16 & 17
@@ -417,6 +419,11 @@ public class Code extends PanelTemplate {
         checkSyntax();
         addSemanticsError();
         updateTables();
+
+        for (Quadruple quadruple : quadruples) {
+            System.out.println(quadruple);
+        }
+
         try {
             txtResult.close();
         } catch (IOException e) {
@@ -599,6 +606,9 @@ public class Code extends PanelTemplate {
 
         // Semántica 3
         inExpo = false;
+
+        // Quadruples
+        quadruples.clear();
 
         // Built-in functions
 
@@ -1054,6 +1064,9 @@ public class Code extends PanelTemplate {
                         Ambit newAmbit = new Ambit(ambit);
                         ambits.add(newAmbit);
                         ambitStack.push(newAmbit);
+                        Quadruple newQuadruple = new Quadruple(ambit);
+                        if (ambit == 0) newQuadruple.increaseMainLabels();
+                        quadruples.add(newQuadruple);
                         printAmbitAction("creó", ambit, line);
                         ambit++;
                     }
@@ -1222,9 +1235,11 @@ public class Code extends PanelTemplate {
                             if (rule == 1020 || rule == 1021 || rule == 1022) {
                                 boolean concat = tempAssignation.toString().contains("+=") && tempOperand.type() == Type.STRING;
                                 if (tempOperand.type() != operandStack.peek().type() && !concat) {
-                                    validOperation = false;
-                                    addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
-                                    lastOperation.addError();
+                                    validOperation = tempOperand.type() == Type.REAL && operandStack.peek().type() == Type.NUMBER;
+                                    if (!validOperation) {
+                                        addError(609, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
+                                        lastOperation.addError();
+                                    }
                                 }
                             }
                         }
@@ -1233,6 +1248,17 @@ public class Code extends PanelTemplate {
                         if (inIf || inWhile || inDoWhile || inForComp) {
                             realValue = "boolean";
                             validOperation = operandStack.peek().type() == Type.BOOLEAN;
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    if (inIf) quadruple.increaseIfLabels();
+                                    else if (inWhile) quadruple.increaseWhileLabels();
+                                    else if (inDoWhile) quadruple.increaseDoWhileLabels();
+                                    else if (inForComp) {
+                                        quadruple.increaseJumpFalses();
+                                        quadruple.increaseJumps();
+                                    }
+                                }
+                            }
                         }
 
                         // Revisar si es un switch
@@ -1243,6 +1269,11 @@ public class Code extends PanelTemplate {
                             if (inSwitchType) {
                                 realValue = "number/string";
                                 validOperation = operandStack.peek().type() == Type.NUMBER || operandStack.peek().type() == Type.STRING;
+                                for (Quadruple quadruple : quadruples) {
+                                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                        quadruple.increaseSwitchLabels();
+                                    }
+                                }
                                 if (validOperation) {
                                     switchStack.push(operandStack.peek().type() == Type.NUMBER);
                                 } else {
@@ -1322,6 +1353,11 @@ public class Code extends PanelTemplate {
                         }
 
                         if (!inArr && !usingCustomFun && rule != 0 || rule == 1050) {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseAssignations();
+                                }
+                            }
                             semanticsList.add(new Semantics(rule, line, ambitStack.peek().getId()));
                             Semantics lastSemantics = semanticsList.getLast();
                             lastSemantics.setTopStack(topStack);
@@ -1409,13 +1445,27 @@ public class Code extends PanelTemplate {
                     case 4010 -> inSwitchCase = true;
                     case 4011 -> inSwitchCase = false;
                     case 4012 -> inFor = true;
-                    case 4013 -> inFor = false;
+                    case 4013 -> {
+                        inFor = false;
+                        for (Quadruple quadruple : quadruples) {
+                            if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                quadruple.increaseForLabels();
+                            }
+                        }
+                    }
                     case 4014 -> inForInit = true;
                     case 4015 -> inForInit = false;
                     case 4016 -> inForComp = true;
                     case 4017 -> inForComp = false;
                     case 4018 -> inForInc = true;
-                    case 4019 -> inForInc = false;
+                    case 4019 -> {
+                        inForInc = false;
+                        for (Quadruple quadruple : quadruples) {
+                            if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                quadruple.increaseJumps();
+                            }
+                        }
+                    }
                     case 4021 -> {
                         int rule = 0;
                         if (inForString) rule = 1083;
@@ -1480,6 +1530,20 @@ public class Code extends PanelTemplate {
                         inArr = false;
                     }
                     case 4033 -> {
+                        for (Quadruple quadruple : quadruples) {
+                            if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                quadruple.increaseCalls();
+                                switch (operandStack.peek().type()) {
+                                    case BOOLEAN -> quadruple.increaseTempBooleans();
+                                    case NUMBER -> quadruple.increaseTempNumbers();
+                                    case REAL -> quadruple.increasetempReals();
+                                    case STRING -> quadruple.increaseTempStrings();
+                                    case NULL -> quadruple.increaseTempNulls();
+                                    default -> quadruple.increaseTempVariants();
+                                }
+                            }
+                        }
+                        System.out.println(operandStack);
                         tempParametersStack.push(new LinkedList<>());
                         parCountStack.push(0);
                         usingCustomFun = true;
@@ -1551,6 +1615,11 @@ public class Code extends PanelTemplate {
                     case 4035 -> declaringFunType = true;
                     case 4036 -> inCustomFun = true;
                     case 4037 -> {
+                        for (Quadruple quadruple : quadruples) {
+                            if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                quadruple.increaseFunctionLabels();
+                            }
+                        }
                         Semantics newSemantics;
                         String topStack = returned ? "returned type" : "return void";
                         if (isFun) {
@@ -1578,6 +1647,54 @@ public class Code extends PanelTemplate {
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
+
+                    // Cuádruplos
+                    switch(token) {
+                        case -68, -78 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseCalls();
+                                }
+                            }
+                        }
+                        case -28, -31, -32, -37, -39, -43 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseRelationalOperators();
+                                }
+                            }
+                        }
+                        case -9, -11, -42 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseLogicalOperators();
+                                }
+                            }
+                        }
+                        case -1, -4, -19, -22, -26 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseArithmeticOperators();
+                                }
+                            }
+                        }
+                        case -2, -5 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseUnaryOperations();
+                                }
+                            }
+                        }
+                        case -63, -87 -> {
+                            for (Quadruple quadruple : quadruples) {
+                                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                                    quadruple.increaseJumps();
+                                    if (token == -87) quadruple.increaseJumpFalses();
+                                }
+                            }
+                        }
+                    }
+                    // stuff
                     if (inCustomFun && topSyntaxStack == -78) returned = true;
                     if (declaringFunType) {
                         switch (topSyntaxStack) {
@@ -1604,10 +1721,13 @@ public class Code extends PanelTemplate {
                                     -95, -96, -97, -98, -99, -100, -101, -102, -103, -104, -105, -106 -> {
                                 switch (token) {
                                     case -81 -> operandStack.push(new Operand(token, lexeme, Type.VOID));
-                                    case -100, -101, -103 -> operandStack.push(new Operand(token, lexeme, Type.BOOLEAN));
-                                    case -79, -84, -97, -102 -> operandStack.push(new Operand(token, lexeme, Type.NUMBER));
+                                    case -100, -101, -103 ->
+                                            operandStack.push(new Operand(token, lexeme, Type.BOOLEAN));
+                                    case -79, -84, -97, -102 ->
+                                            operandStack.push(new Operand(token, lexeme, Type.NUMBER));
                                     case -80, -83, -85, -86 -> operandStack.push(new Operand(token, lexeme, Type.REAL));
-                                    case -82, -95, -96, -98, -99, -104, -105, -106 -> operandStack.push(new Operand(token, lexeme, Type.STRING));
+                                    case -82, -95, -96, -98, -99, -104, -105, -106 ->
+                                            operandStack.push(new Operand(token, lexeme, Type.STRING));
                                     default -> operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
                                 }
                                 if (plusplus) {
@@ -1799,26 +1919,58 @@ public class Code extends PanelTemplate {
             case -61 -> {
                 resultLexeme = "temp null";
                 resultType = Type.NULL;
+                for (Quadruple quadruple : quadruples) {
+                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                        quadruple.increaseTempNulls();
+                    }
+                }
             }
             case -71 -> {
                 resultLexeme = "temp real";
                 resultType = Type.REAL;
+                for (Quadruple quadruple : quadruples) {
+                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                        quadruple.increasetempReals();
+                    }
+                }
             }
             case -72 -> {
                 resultLexeme = "temp boolean";
                 resultType = Type.BOOLEAN;
+                for (Quadruple quadruple : quadruples) {
+                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                        quadruple.increaseTempBooleans();
+                    }
+                }
             }
             case -90 -> {
                 resultLexeme = "temp number";
                 resultType = Type.NUMBER;
+                for (Quadruple quadruple : quadruples) {
+                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                        quadruple.increaseTempNumbers();
+                    }
+                }
             }
             case -91 -> {
                 resultLexeme = "temp string";
                 resultType = Type.STRING;
+                for (Quadruple quadruple : quadruples) {
+                    if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                        quadruple.increaseTempStrings();
+                    }
+                }
             }
             case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> {
                 addError(result, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
                 lastOperation.addError();
+            }
+        }
+        if (resultLexeme.equals("temp variant")) {
+            for (Quadruple quadruple : quadruples) {
+                if (quadruple.getAmbit() == ambitStack.peek().getId()) {
+                    quadruple.increaseTempVariants();
+                }
             }
         }
         lastOperation.addCounter(resultType);
@@ -2287,5 +2439,9 @@ public class Code extends PanelTemplate {
 
     public LinkedList<Semantics> getSemanticsList() {
         return semanticsList;
+    }
+
+    public LinkedList<Quadruple> getQuadruples() {
+        return quadruples;
     }
 }
