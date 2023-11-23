@@ -1397,7 +1397,13 @@ public class Code extends PanelTemplate {
                         if (inArr) {
                             Semantics acceptedSemantics = semanticsList.getLast();
                             if (acceptedSemantics.getRule() == 1050 && acceptedSemantics.isAccepted()) {
-                                int position = Integer.parseInt(operandStack.peek().lexeme());
+                                boolean casted = true;
+                                int position = 0;
+                                try {
+                                    position = Integer.parseInt(operandStack.peek().lexeme());
+                                } catch (Exception ignored) {
+                                    casted = false;
+                                }
                                 int decPosition = 0;
                                 for (Element element : elementsStack) {
                                     if (element.getId().equals(operandStack.get(operandStack.size() - 2).lexeme())) {
@@ -1409,12 +1415,14 @@ public class Code extends PanelTemplate {
                                         }
                                     }
                                 }
-                                boolean accepted = position < decPosition;
-                                semanticsList.add(new Semantics(1060, line, ambitStack.peek().getId()));
-                                Semantics lastSemantics = semanticsList.getLast();
-                                lastSemantics.setTopStack("posición = " + position);
-                                lastSemantics.setRealValue("posición menor a " + decPosition);
-                                lastSemantics.setAccepted(accepted);
+                                if (casted) {
+                                    boolean accepted = position < decPosition;
+                                    semanticsList.add(new Semantics(1060, line, ambitStack.peek().getId()));
+                                    Semantics lastSemantics = semanticsList.getLast();
+                                    lastSemantics.setTopStack("posición = " + position);
+                                    lastSemantics.setRealValue("posición menor a " + decPosition);
+                                    lastSemantics.setAccepted(accepted);
+                                }
                             }
                         }
 
