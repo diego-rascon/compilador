@@ -206,28 +206,28 @@ public class Code extends PanelTemplate {
             {4026, -107},                                                                 // 112
             {4027, -108},                                                                 // 113
             {254, 261},                                                             // 114
-            {-95, -50, -51},                                                        // 115
-            {-96, -50, -51},                                                        // 116
-            {-97},                                                                  // 117
-            {-98, -50, -51},                                                        // 118
-            {-99, -50, 273, -51},                                                   // 119
-            {-100, -50, 273, -51},                                                  // 120
-            {-101, -50, 273, -51},                                                  // 121
-            {-102, -50, 273, -51},                                                  // 122
-            {-103, -50, 273, -51},                                                  // 123
-            {-104, -50, 273, -15, 273, -51},                                        // 124
-            {-105, -50, 273, -15, 273, -51},                                        // 125
-            {-106, -50, 273, -51},                                                  // 126
-            {-79, -50, 273, -15, 273, -51},                                         // 127
-            {-80, -50, 273, -15, 273, -51},                                         // 128
-            {-81, -50, 273, -15, 273, -15, -51},                                    // 129
-            {-82, -50, 273, -51},                                                   // 130
-            {-83, -50, 273, -51},                                                   // 131
-            {-84, -50, 273, -51},                                                   // 132
-            {-85, -50, 273, -51},                                                   // 133
-            {-86, -50, 273, -51},                                                   // 134
+            {-95, 4033, -50, 3000, 273, 3001, -51, 4034},                                                        // 115
+            {-96, 4033, -50, 3000, 273, 3001, -51, 4034},                                                        // 116
+            {-97, 4033, -50, 3000, 273, 3001, -51, 4034},                                                                  // 117
+            {-98, 4033, -50, 3000, 273, 3001, -51, 4034},                                                        // 118
+            {-99, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                   // 119
+            {-100, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                  // 120
+            {-101, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                  // 121
+            {-102, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                  // 122
+            {-103, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                  // 123
+            {-104, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                        // 124
+            {-105, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                        // 125
+            {-106, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                                  // 126
+            {-79, 4033, -50, 3000, 4038, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                         // 127
+            {-80, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                         // 128
+            {-81, 4033, -50, 3000, 273, 3001, -15, 3000, 273, 3001, -15, 3000, 273, 3001, -51, 4034},                                    // 129
+            {-82, 4033, -50, 3000, 273, 3001, -51, 4034},                                                   // 130
+            {-83, 4033, -50, 3000, 273, 3001, -51, 4034},                                                   // 131
+            {-84, 4033, -50, 3000, 273, 3001, -51, 4034},                                                   // 132
+            {-85, 4033, -50, 3000, 273, 3001, -51, 4034},                                                   // 133
+            {-86, 4033, -50, 3000, 273, 3001, -51, 4034},                                                   // 134
             {269},                                                                  // 135
-            {4031, -48, 3000, 273, 3001, 272, -49, 4032},                                                   // 136
+            {4031, 4039, -48, 3000, 273, 3001, 272, -49, 4040, 4032},                                                   // 136
             {-15, 3000, 273, 3001, 272},                                                        // 137
             {275, 274},                                                 // 138
             {-9, 275, 274},                                                         // 139
@@ -277,23 +277,42 @@ public class Code extends PanelTemplate {
     };
 
     private final Connection connection;
-    private FileWriter txtResult;
-
     // UI Components
     private final RSyntaxTextArea codeArea = new RSyntaxTextArea();
     private final Tokens tokenPanel;
     private final Counters countersPanel;
     private final Errors errorsPanel;
     private final ErrorTypes errorTypesPanel;
-
-    // Lexicon
-    private int[][] lexicMatrix;
-
-    // Syntaxis
-    private int[][] syntaxMatrix;
     private final Stack<Integer> syntaxStack = new Stack<>();
     private final LinkedList<model.Token> syntaxTokens = new LinkedList<>();
-
+    private final Stack<model.Element> elementsStack = new Stack<>();
+    private final Stack<Ambit> ambitStack = new Stack<>();
+    private final LinkedList<Ambit> ambits = new LinkedList<>();
+    private final LinkedList<String> tempArraySize = new LinkedList<>();
+    // Semantics 1
+    private final Stack<Operator> operatorStack = new Stack<>();
+    private final Stack<Operand> operandStack = new Stack<>();
+    private final LinkedList<Operation> operations = new LinkedList<>();
+    private final StringBuilder tempAssignation = new StringBuilder();
+    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
+    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
+    // // Regla 10, 11
+    final private Stack<Integer> parCountStack = new Stack<>();
+    // // Regla 12
+    final private Stack<LinkedList<Operand>> tempParametersStack = new Stack<>();
+    // // Regla 13 & 14
+    boolean declaringFunType = false;
+    // // Regla 16 & 17
+    boolean inCustomFun = false;
+    boolean isFun = false;
+    boolean returned = false;
+    // Semántica 3
+    boolean inExpo = false;
+    private FileWriter txtResult;
+    // Lexicon
+    private int[][] lexicMatrix;
+    // Syntaxis
+    private int[][] syntaxMatrix;
     // Ambit
     private boolean exeArea = false;
     private boolean decLet = false;
@@ -308,44 +327,27 @@ public class Code extends PanelTemplate {
     private String tempType = "";
     private ElementType currentType = ElementType.NONE;
     private Operand tempOperand;
-    private final Stack<model.Element> elementsStack = new Stack<>();
-    private final Stack<Ambit> ambitStack = new Stack<>();
-    private final LinkedList<Ambit> ambits = new LinkedList<>();
-    private final LinkedList<String> tempArraySize = new LinkedList<>();
-
-    // Semantics 1
-    private final Stack<Operator> operatorStack = new Stack<>();
-    private final Stack<Operand> operandStack = new Stack<>();
-    private final LinkedList<Operation> operations = new LinkedList<>();
-    private final StringBuilder tempAssignation = new StringBuilder();
-
     // Semantics 2
     private int[][][] semMatrix;
-    private final LinkedList<Semantics> semanticsList = new LinkedList<>();
-
     // // Regla 1
     private boolean inIf = false;
     private boolean inWhile = false;
     private boolean inDoWhile = false;
-
     // // Regla 2
     private boolean assignating = false;
     private boolean assignation = false;
     private boolean plusplus = false;
     private boolean minusminus = false;
-
     // // Regla 3
     private boolean inSwitch = false;
     private boolean inSwitchType = false;
     private boolean inSwitchCase = false;
     private boolean switchError = false;
-    private final Stack<Boolean> switchStack = new Stack<>(); // true = number, false = string
-
     // // Regla 4, 5 & 6
     private boolean inArrDec = false;
     private boolean inArr = false;
+    private boolean inArrPos = false;
     private int tempArrayDim = 1;
-
     // // Regla 8
     private boolean inFor = false;
     private boolean inForInit = false;
@@ -357,21 +359,7 @@ public class Code extends PanelTemplate {
     private boolean inForId = false;
     private String tempForNewId = "";
     private String tempForId = "";
-
-    // // Regla 10, 11
-    final private Stack<Integer> parCountStack = new Stack<>();
     private boolean usingCustomFun = false;
-
-    // // Regla 12
-    final private Stack<LinkedList<Operand>> tempParametersStack = new Stack<>();
-
-    // // Regla 13 & 14
-    boolean declaringFunType = false;
-
-    // // Regla 16 & 17
-    boolean inCustomFun = false;
-    boolean isFun = false;
-    boolean returned = false;
 
     {
         try {
@@ -579,6 +567,7 @@ public class Code extends PanelTemplate {
         // // Regla 4, 5 & 6
         inArrDec = false;
         inArr = false;
+        inArrPos = false;
         tempArrayDim = 1;
 
         // // Regla 8
@@ -607,11 +596,359 @@ public class Code extends PanelTemplate {
         inCustomFun = false;
         isFun = false;
         returned = false;
+
+        // Semántica 3
+        inExpo = false;
+
+        // Built-in functions
+
+        // // expo
+        Element expo = new Element("expo", "función", 0);
+        expo.setType("number/real");
+        expo.setParQuantity(2);
+        expo.setParType("-1");
+        elementsStack.add(expo);
+
+        Element expoPar1 = new Element("par1", "variable", -1);
+        expoPar1.setType("number/real");
+        expoPar1.setParQuantity(1);
+        expoPar1.setParType("expo");
+        elementsStack.add(expoPar1);
+
+        Element expoPar2 = new Element("par2", "variable", -1);
+        expoPar2.setType("number");
+        expoPar2.setParQuantity(2);
+        expoPar2.setParType("expo");
+        elementsStack.add(expoPar2);
+
+        // // sqrtv
+        Element sqrtv = new Element("sqrtv", "función", 0);
+        sqrtv.setType("real");
+        sqrtv.setParQuantity(2);
+        sqrtv.setParType("-2");
+        elementsStack.add(sqrtv);
+
+        Element sqrtvPar1 = new Element("par1", "variable", -2);
+        sqrtvPar1.setType("number/real");
+        sqrtvPar1.setParQuantity(1);
+        sqrtvPar1.setParType("sqrtv");
+        elementsStack.add(sqrtvPar1);
+
+        Element sqrtvPar2 = new Element("par2", "variable", -2);
+        sqrtvPar2.setType("number");
+        sqrtvPar2.setParQuantity(2);
+        sqrtvPar2.setParType("sqrtv");
+        elementsStack.add(sqrtvPar2);
+
+        // // ConvBase
+        Element convBase = new Element("ConvBase", "función", 0);
+        convBase.setType("void");
+        convBase.setParQuantity(3);
+        convBase.setParType("-3");
+        elementsStack.add(convBase);
+
+        Element convBasePar1 = new Element("par1", "variable", -3);
+        convBasePar1.setType("string");
+        convBasePar1.setParQuantity(1);
+        convBasePar1.setParType("ConvBase");
+        elementsStack.add(convBasePar1);
+
+        Element convBasePar2 = new Element("par2", "variable", -3);
+        convBasePar2.setType("number");
+        convBasePar2.setParQuantity(2);
+        convBasePar2.setParType("ConvBase");
+        elementsStack.add(convBasePar2);
+
+        Element convBasePar3 = new Element("par3", "variable", -3);
+        convBasePar3.setType("number");
+        convBasePar3.setParQuantity(3);
+        convBasePar3.setParType("ConvBase");
+        elementsStack.add(convBasePar3);
+
+        // // asc
+        Element asc = new Element("asc", "función", 0);
+        asc.setType("string");
+        asc.setParQuantity(1);
+        asc.setParType("-4");
+        elementsStack.add(asc);
+
+        Element ascPar1 = new Element("par1", "variable", -4);
+        ascPar1.setType("number");
+        ascPar1.setParQuantity(1);
+        ascPar1.setParType("asc");
+        elementsStack.add(ascPar1);
+
+        // // sen
+        Element sen = new Element("sen", "función", 0);
+        sen.setType("real");
+        sen.setParQuantity(1);
+        sen.setParType("-5");
+        elementsStack.add(sen);
+
+        Element senPar1 = new Element("par1", "variable", -5);
+        senPar1.setType("number/real");
+        senPar1.setParQuantity(1);
+        senPar1.setParType("sen");
+        elementsStack.add(senPar1);
+
+        // // val
+        Element val = new Element("val", "función", 0);
+        val.setType("number");
+        val.setParQuantity(1);
+        val.setParType("-6");
+        elementsStack.add(val);
+
+        Element valPar1 = new Element("par1", "variable", -6);
+        valPar1.setType("string");
+        valPar1.setParQuantity(1);
+        valPar1.setParType("val");
+        elementsStack.add(valPar1);
+
+        // // cos
+        Element cos = new Element("cos", "función", 0);
+        cos.setType("real");
+        cos.setParQuantity(1);
+        cos.setParType("-7");
+        elementsStack.add(cos);
+
+        Element cosPar1 = new Element("par1", "variable", -7);
+        cosPar1.setType("number/real");
+        cosPar1.setParQuantity(1);
+        cosPar1.setParType("cos");
+        elementsStack.add(cosPar1);
+
+        // // tan
+        Element tan = new Element("tan", "función", 0);
+        tan.setType("real");
+        tan.setParQuantity(1);
+        tan.setParType("-8");
+        elementsStack.add(tan);
+
+        Element tanPar1 = new Element("par1", "variable", -8);
+        tanPar1.setType("number/real");
+        tanPar1.setParQuantity(1);
+        tanPar1.setParType("tan");
+
+        // // toLowerCase
+        Element toLowerCase = new Element("toLowerCase", "función", 0);
+        toLowerCase.setType("string");
+        toLowerCase.setParQuantity(1);
+        toLowerCase.setParType("-9");
+        elementsStack.add(toLowerCase);
+
+        Element toLowerCasePar1 = new Element("par1", "variable", -9);
+        toLowerCasePar1.setType("string");
+        toLowerCasePar1.setParQuantity(1);
+        toLowerCasePar1.setParType("toLowerCase");
+        elementsStack.add(toLowerCasePar1);
+
+        // // toUpperCase
+        Element toUpperCase = new Element("toUpperCase", "función", 0);
+        toUpperCase.setType("string");
+        toUpperCase.setParQuantity(1);
+        toUpperCase.setParType("-10");
+        elementsStack.add(toUpperCase);
+
+        Element toUpperCasePar1 = new Element("par1", "variable", -10);
+        toUpperCasePar1.setType("string");
+        toUpperCasePar1.setParQuantity(1);
+        toUpperCasePar1.setParType("toUpperCase");
+        elementsStack.add(toUpperCasePar1);
+
+        // // legth
+        Element legth = new Element("legth", "función", 0);
+        legth.setType("number");
+        legth.setParQuantity(1);
+        legth.setParType("-11");
+        elementsStack.add(legth);
+
+        Element legthPar1 = new Element("par1", "variable", -11);
+        legthPar1.setType("string");
+        legthPar1.setParQuantity(1);
+        legthPar1.setParType("legth");
+        elementsStack.add(legthPar1);
+
+        // // trim
+        Element trim = new Element("trim", "función", 0);
+        trim.setType("string");
+        trim.setParQuantity(1);
+        trim.setParType("-12");
+        elementsStack.add(trim);
+
+        Element trimPar1 = new Element("par1", "variable", -12);
+        trimPar1.setType("string");
+        trimPar1.setParQuantity(1);
+        trimPar1.setParType("trim");
+        elementsStack.add(trimPar1);
+
+        // // charAt
+        Element charAt = new Element("charAt", "función", 0);
+        charAt.setType("string");
+        charAt.setParQuantity(2);
+        charAt.setParType("-13");
+        elementsStack.add(charAt);
+
+        Element charAtPar1 = new Element("par1", "variable", -13);
+        charAtPar1.setType("string");
+        charAtPar1.setParQuantity(1);
+        charAtPar1.setParType("charAt");
+        elementsStack.add(charAtPar1);
+
+        Element charAtPar2 = new Element("par2", "variable", -13);
+        charAtPar2.setType("number");
+        charAtPar2.setParQuantity(2);
+        charAtPar2.setParType("charAt");
+        elementsStack.add(charAtPar2);
+
+        // // startsWith
+        Element startsWith = new Element("startsWith", "función", 0);
+        startsWith.setType("boolean");
+        startsWith.setParQuantity(2);
+        startsWith.setParType("-14");
+        elementsStack.add(startsWith);
+
+        Element startsWithPar1 = new Element("par1", "variable", -14);
+        startsWithPar1.setType("string");
+        startsWithPar1.setParQuantity(1);
+        startsWithPar1.setParType("startsWith");
+        elementsStack.add(startsWithPar1);
+
+        Element startsWithPar2 = new Element("par2", "variable", -14);
+        startsWithPar2.setType("string");
+        startsWithPar2.setParQuantity(2);
+        startsWithPar2.setParType("startsWith");
+        elementsStack.add(startsWithPar2);
+
+        // // endsWith
+        Element endsWith = new Element("endsWith", "función", 0);
+        endsWith.setType("boolean");
+        endsWith.setParQuantity(2);
+        endsWith.setParType("-15");
+        elementsStack.add(endsWith);
+
+        Element endsWithPar1 = new Element("par1", "variable", -15);
+        endsWithPar1.setType("string");
+        endsWithPar1.setParQuantity(1);
+        endsWithPar1.setParType("endsWith");
+        elementsStack.add(endsWithPar1);
+
+        Element endsWithPar2 = new Element("par2", "variable", -15);
+        endsWithPar2.setType("string");
+        endsWithPar2.setParQuantity(2);
+        endsWithPar2.setParType("endsWith");
+        elementsStack.add(endsWithPar2);
+
+        // // indexOf
+        Element indexOf = new Element("indexOf", "función", 0);
+        indexOf.setType("number");
+        indexOf.setParQuantity(2);
+        indexOf.setParType("-16");
+        elementsStack.add(indexOf);
+
+        Element indexOfPar1 = new Element("par1", "variable", -16);
+        indexOfPar1.setType("string");
+        indexOfPar1.setParQuantity(1);
+        indexOfPar1.setParType("indexOf");
+        elementsStack.add(indexOfPar1);
+
+        Element indexOfPar2 = new Element("par2", "variable", -16);
+        indexOfPar2.setType("string");
+        indexOfPar2.setParQuantity(2);
+        indexOfPar2.setParType("indexOf");
+        elementsStack.add(indexOfPar2);
+
+        // // includes
+        Element includes = new Element("includes", "función", 0);
+        includes.setType("boolean");
+        includes.setParQuantity(2);
+        includes.setParType("-17");
+        elementsStack.add(includes);
+
+        Element includesPar1 = new Element("par1", "variable", -17);
+        includesPar1.setType("string");
+        includesPar1.setParQuantity(1);
+        includesPar1.setParType("includes");
+        elementsStack.add(includesPar1);
+
+        Element includesPar2 = new Element("par2", "variable", -17);
+        includesPar2.setType("string");
+        includesPar2.setParQuantity(2);
+        includesPar2.setParType("includes");
+        elementsStack.add(includesPar2);
+
+        // // slice
+        Element slice = new Element("slice", "función", 0);
+        slice.setType("string");
+        slice.setParQuantity(3);
+        slice.setParType("-18");
+        elementsStack.add(slice);
+
+        Element slicePar1 = new Element("par1", "variable", -18);
+        slicePar1.setType("string");
+        slicePar1.setParQuantity(1);
+        slicePar1.setParType("slice");
+        elementsStack.add(slicePar1);
+
+        Element slicePar2 = new Element("par2", "variable", -18);
+        slicePar2.setType("number");
+        slicePar2.setParQuantity(2);
+        slicePar2.setParType("slice");
+        elementsStack.add(slicePar2);
+
+        Element slicePar3 = new Element("par3", "variable", -18);
+        slicePar3.setType("number");
+        slicePar3.setParQuantity(3);
+        slicePar3.setParType("slice");
+        elementsStack.add(slicePar3);
+
+        // // replace
+        Element replace = new Element("replace", "función", 0);
+        replace.setType("string");
+        replace.setParQuantity(3);
+        replace.setParType("-19");
+        elementsStack.add(replace);
+
+        Element replacePar1 = new Element("par1", "variable", -19);
+        replacePar1.setType("string");
+        replacePar1.setParQuantity(1);
+        replacePar1.setParType("replace");
+        elementsStack.add(replacePar1);
+
+        Element replacePar2 = new Element("par2", "variable", -19);
+        replacePar2.setType("string");
+        replacePar2.setParQuantity(2);
+        replacePar2.setParType("replace");
+        elementsStack.add(replacePar2);
+
+        Element replacePar3 = new Element("par3", "variable", -19);
+        replacePar3.setType("string");
+        replacePar3.setParQuantity(3);
+        replacePar3.setParType("replace");
+        elementsStack.add(replacePar3);
+
+        // // split
+        Element split = new Element("split", "función", 0);
+        split.setType("string");
+        split.setParQuantity(2);
+        split.setParType("-20");
+        elementsStack.add(split);
+
+        Element splitPar1 = new Element("par1", "variable", -20);
+        splitPar1.setType("string");
+        splitPar1.setParQuantity(1);
+        splitPar1.setParType("split");
+        elementsStack.add(splitPar1);
+
+        Element splitPar2 = new Element("par2", "variable", -20);
+        splitPar2.setType("string");
+        splitPar2.setParQuantity(2);
+        splitPar2.setParType("split");
+        elementsStack.add(splitPar2);
     }
 
     private void addSemanticsError() {
         for (Semantics semantics : semanticsList) {
-            //System.out.println(semantics);
+            System.out.println(semantics);
             if (!semantics.isAccepted()) {
                 int error = semantics.getRule();
                 String lexeme = semantics.getTopStack();
@@ -829,11 +1166,17 @@ public class Code extends PanelTemplate {
                     }
                     case 3001 -> {
                         assignating = false;
-
                         boolean validOperation = true;
 
+                        // Cambiar el tipo de expo
+                        if (inExpo) {
+                            inExpo = false;
+                            // TODO arreglar el tipo
+                            //operandStack.get(operandStack.size() - 2).setType(operandStack.peek().type());
+                        }
+
                         // realizar operación
-                        while (!operatorStack.isEmpty()) {
+                        while (!operatorStack.isEmpty() && !inArrPos) {
                             doOperation();
                         }
 
@@ -1189,6 +1532,9 @@ public class Code extends PanelTemplate {
                                         case VOID -> "void";
                                     };
                                     boolean sameType = parameterType.equals(element.getType());
+                                    if (element.getType().equals("number/real")) {
+                                        sameType = parameterType.equals("number") || parameterType.equals("real");
+                                    }
                                     newSemantics = new Semantics(1120, line, ambitStack.peek().getId());
                                     newSemantics.setTopStack(parameterType);
                                     newSemantics.setRealValue(element.getType());
@@ -1223,6 +1569,9 @@ public class Code extends PanelTemplate {
                         isFun = false;
                         returned = false;
                     }
+                    case 4038 -> inExpo = true;
+                    case 4039 -> inArrPos = true;
+                    case 4040 -> inArrPos = false;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -1247,11 +1596,20 @@ public class Code extends PanelTemplate {
                             case -3, -6, -12, -14, -21, -24, -27, -30, -35, -36, -38 -> {
                                 assignation = true;
                                 tempOperand = operandStack.peek();
+                                // TODO meter los parentesis y parametros a la asignación
                                 tempAssignation.append(operandStack.pop().lexeme()).append(" ").append(lexeme).append(" ");
                             }
                             // Operandos
-                            case -52, -53, -54, -55, -56, -58, -59, -60, -61 -> {
-                                operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
+                            case -52, -53, -54, -55, -56, -58, -59, -60, -61, -79, -80, -81, -82, -83, -84, -85, -86,
+                                    -95, -96, -97, -98, -99, -100, -101, -102, -103, -104, -105, -106 -> {
+                                switch (token) {
+                                    case -81 -> operandStack.push(new Operand(token, lexeme, Type.VOID));
+                                    case -100, -101, -103 -> operandStack.push(new Operand(token, lexeme, Type.BOOLEAN));
+                                    case -79, -84, -97, -102 -> operandStack.push(new Operand(token, lexeme, Type.NUMBER));
+                                    case -80, -83, -85, -86 -> operandStack.push(new Operand(token, lexeme, Type.REAL));
+                                    case -82, -95, -96, -98, -99, -104, -105, -106 -> operandStack.push(new Operand(token, lexeme, Type.STRING));
+                                    default -> operandStack.push(new Operand(token, lexeme, getType(token, lexeme)));
+                                }
                                 if (plusplus) {
                                     operatorStack.push(new Operator(-1, "+", 6));
                                     Operand newOperand;
