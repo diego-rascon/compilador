@@ -131,7 +131,7 @@ public class Code extends PanelTemplate {
             {-15, 246, 223},                                                                                                // 37
             {-18, 218},                                                                                                     // 38
             {-17, 254, 225},                                                                                                // 39
-            {4036, 2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, 4035, -41, 1002, 254, 1003, 1001, 4037},                           // 40   A   DE  EJ
+            {4036, 2020, -50, 1004, 1000, 246, 226, 1005, -51, 2020, 2021, 4035, -41, 4041, 1002, 254, 1003, 1001, 4037},                           // 40   A   DE  EJ
             {-15, 246, 226},                                                                                                // 41
             {-18, 227},                                                                                                     // 42
             {-73, -28, 228, -32, -38, 229},                                                                                 // 43
@@ -300,6 +300,7 @@ public class Code extends PanelTemplate {
     final private Stack<Integer> parCountStack = new Stack<>();
     // // Regla 12
     final private Stack<LinkedList<Operand>> tempParametersStack = new Stack<>();
+    final private Stack<Operand> functionStack = new Stack<>();
     // Quadruples
     private final LinkedList<Quadruple> quadruples = new LinkedList<>();
     // // Regla 13 & 14
@@ -362,6 +363,7 @@ public class Code extends PanelTemplate {
     private String tempForNewId = "";
     private String tempForId = "";
     private boolean usingCustomFun = false;
+    private boolean arrowFunction = false;
 
     {
         try {
@@ -595,9 +597,12 @@ public class Code extends PanelTemplate {
 
         // // Regla 12
         tempParametersStack.clear();
+        functionStack.clear();
 
         // // Regla 13 & 14
+        arrowFunction = false;
         declaringFunType = false;
+        functionStack.clear();
 
         // // Regla 16 & 17
         inCustomFun = false;
@@ -958,7 +963,6 @@ public class Code extends PanelTemplate {
 
     private void addSemanticsError() {
         for (Semantics semantics : semanticsList) {
-            System.out.println(semantics);
             if (!semantics.isAccepted()) {
                 int error = semantics.getRule();
                 String lexeme = semantics.getTopStack();
@@ -1159,7 +1163,7 @@ public class Code extends PanelTemplate {
                                 tempType = tempType.substring(1);
                             }
                             newElement.setType(tempType);
-                            newElement.setArrayDim(tempArrayDimDec == 0 ? 0 : tempArrayDimDec + 1);
+                            newElement.setArrayDim(tempArrayDimDec == 0 ? 1 : tempArrayDimDec + 1);
                             if (!tempArraySize.isEmpty()) {
                                 String[] arraySize = new String[tempArraySize.size()];
                                 for (int i = 0; i < tempArraySize.size(); i++) {
@@ -1199,17 +1203,11 @@ public class Code extends PanelTemplate {
                             tempParametersStack.peek().add(operandStack.peek());
                         }
 
-                        System.out.println();
                         if (inArr) {
                             boolean isArray = false;
                             int arrayDim = 1;
                             for (Element element : elementsStack) {
-                                System.out.println();
-                                for (Operand operand : operandStack) {
-                                    System.out.println(operand);
-                                }
                                 if (element.getId().equals(operandStack.get(operandStack.size() - 2).lexeme())) {
-                                    System.out.println(element);
                                     for (Ambit activeAmbit : ambitStack) {
                                         if (activeAmbit.getId() == element.getAmbit()) {
                                             isArray = (element.getClassType().equals("arreglo"));
@@ -1544,6 +1542,7 @@ public class Code extends PanelTemplate {
                         inArr = false;
                     }
                     case 4033 -> {
+                        functionStack.push(operandStack.peek());
                         for (Quadruple quadruple : quadruples) {
                             if (quadruple.getAmbit() == ambitStack.peek().getId()) {
                                 quadruple.increaseCalls();
@@ -1557,7 +1556,6 @@ public class Code extends PanelTemplate {
                                 }
                             }
                         }
-                        System.out.println(operandStack);
                         tempParametersStack.push(new LinkedList<>());
                         parCountStack.push(0);
                         usingCustomFun = true;
@@ -1565,7 +1563,7 @@ public class Code extends PanelTemplate {
                     case 4034 -> {
                         boolean isFunction = false;
                         int parCount = 0;
-                        String functionName = operandStack.peek().lexeme();
+                        String functionName = functionStack.peek().lexeme();
                         for (Element element : elementsStack) {
                             if (element.getId().equals(functionName)) {
                                 for (Ambit activeAmbit : ambitStack) {
@@ -1625,6 +1623,7 @@ public class Code extends PanelTemplate {
                         tempParametersStack.pop();
                         assignating = true;
                         if (parCountStack.isEmpty()) usingCustomFun = false;
+                        functionStack.pop();
                     }
                     case 4035 -> declaringFunType = true;
                     case 4036 -> inCustomFun = true;
@@ -1636,7 +1635,7 @@ public class Code extends PanelTemplate {
                         }
                         Semantics newSemantics;
                         String topStack = returned ? "returned type" : "return void";
-                        if (isFun) {
+                        if (isFun || arrowFunction) {
                             newSemantics = new Semantics(1160, line, ambitStack.peek().getId());
                             newSemantics.setTopStack(topStack);
                             newSemantics.setRealValue("return type");
@@ -1651,10 +1650,12 @@ public class Code extends PanelTemplate {
                         inCustomFun = false;
                         isFun = false;
                         returned = false;
+                        arrowFunction = false;
                     }
                     case 4038 -> inExpo = true;
                     case 4039 -> inArrPos = true;
                     case 4040 -> inArrPos = false;
+                    case 4041 -> arrowFunction = true;
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
