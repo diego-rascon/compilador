@@ -1,9 +1,6 @@
 package util;
 
-import model.Ambit;
-import model.Operation;
-import model.Quadruple;
-import model.Semantics;
+import model.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -38,6 +35,7 @@ public class FileHandler {
             "jf", "jt", "jmp",
             "e if", "e for", "e while", "e switch", "e función", "main"
     };
+    private final String[] instructionsHeaders = {"regla", "Acción", "variable 1", "variable 2", "resultado"};
 
     public FileHandler(JFrame mainFrame, Code codePanel, Tokens tokenPanel, Counters countersPanel, Errors errorsPanel, ErrorTypes errorTypesPanel) {
         this.mainFrame = mainFrame;
@@ -451,6 +449,35 @@ public class FileHandler {
             for (int total : quadTotals) {
                 final XSSFCell totalCell = quadTotalsRow.createCell(quadTotalsColumns++);
                 totalCell.setCellValue(total);
+            }
+
+            final XSSFSheet instructionsSheet = workbook.createSheet("Instrucciones");
+            rowNum = 0;
+            sheetRow = instructionsSheet.createRow(rowNum++);
+            for (int i = 0; i < instructionsHeaders.length; i++) {
+                final XSSFCell sheetCell = sheetRow.createCell(i);
+                sheetCell.setCellValue(instructionsHeaders[i]);
+            }
+
+            LinkedList<Instruction> instructions = codePanel.getInstructions();
+            for (Instruction instruction : instructions) {
+                int columns = 0;
+                final XSSFRow row = instructionsSheet.createRow(rowNum++);
+
+                final XSSFCell labelCell = row.createCell(columns++);
+                labelCell.setCellValue(instruction.label());
+
+                final XSSFCell actionCell = row.createCell(columns++);
+                actionCell.setCellValue(instruction.action());
+
+                final XSSFCell var1Cell = row.createCell(columns++);
+                var1Cell.setCellValue(instruction.var1());
+
+                final XSSFCell var2Cell = row.createCell(columns++);
+                var2Cell.setCellValue(instruction.var2());
+
+                final XSSFCell resultCell = row.createCell(columns);
+                resultCell.setCellValue(instruction.result());
             }
 
             File defaultFile = new File("Compilador - Diego Rascón (20130375)");

@@ -91,7 +91,7 @@ public class Code extends PanelTemplate {
             "undefined"
     };
     private final int[][] productions = {
-            {1004, 1000, 201, 1005, -46, 1002, 254, 206, 1003, 1001, -47},                                                  // 0    A   DE  EJ
+            {1004, 1000, 201, 1005, -46, 4042, 1002, 254, 206, 1003, 1001, -47},                                                  // 0    A   DE  EJ
             {247, 201},                                                                                                     // 1
             {207, 201},                                                                                                     // 2
             {220, 202, 203},                                                                                                // 3
@@ -180,7 +180,7 @@ public class Code extends PanelTemplate {
             {-36},                                                                                                  // 86
             {-35},                                                                                                  // 87
             {-68, -16, 255},                                                                                        // 88
-            {-62, -50, 4000, 3000, 273, 3001, 4001, -51, 254, 257},                                                 // 89
+            {-62, -50, 4000, 3000, 273, 3001, 4001, -51, 4043, 254, 257},                                                 // 89
             {4006, -64, -50, 4008, 3000, 273, 3001, 4009, -51, -46, -76, 4010, 3000, 273, 3001, 4011, -18, 258, 254, 259, -87, 260, -47, 4007},                                 // 90
             {-46, 254, 263, -47},                                                                                   // 91
             {-67, -50, 4002, 3000, 273, 3001, 4003, -51, 254},                                                      // 92
@@ -365,6 +365,18 @@ public class Code extends PanelTemplate {
     private boolean usingCustomFun = false;
     private boolean arrowFunction = false;
 
+    // Instrucciones
+    private final LinkedList<Instruction> instructions = new LinkedList<>();
+    private int labels = 1;
+    private int tempBooleans = 1;
+    private int tempNumbers = 1;
+    private int tempReals = 1;
+    private int tempStrings = 1;
+    private int tempNulls = 1;
+    private int tempVariants = 1;
+    private boolean functionBegin = false;
+    private Stack<String> labelStack = new Stack<>();
+
     {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/a20130375", "root", "root");
@@ -422,6 +434,8 @@ public class Code extends PanelTemplate {
         addSemanticsError();
         updateTables();
 
+        instructions.add(new Instruction("end", "main", "", "", ""));
+
         /*
         for (Quadruple quadruple : quadruples) {
             System.out.println(quadruple);
@@ -431,6 +445,9 @@ public class Code extends PanelTemplate {
             System.out.println(semantics);
         }
          */
+        for (Instruction instruction : instructions) {
+            System.out.println(instruction);
+        }
 
         try {
             txtResult.close();
@@ -1437,6 +1454,35 @@ public class Code extends PanelTemplate {
 
                         // hacer el string de asignación
                         if (!inArrDec && !inArr && !usingCustomFun) {
+                            String topOpeandLexeme = operandStack.peek().lexeme();
+                            boolean isTemp = topOpeandLexeme.contains("temp");
+                            String resultString = switch (operandStack.peek().type()) {
+                                case BOOLEAN -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempBooleans++;
+                                    else yield topOpeandLexeme;
+                                }
+                                case NUMBER -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempNumbers++;
+                                    else yield topOpeandLexeme;
+                                }
+                                case REAL -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempReals++;
+                                    else yield topOpeandLexeme;
+                                }
+                                case STRING -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempStrings++;
+                                    else yield topOpeandLexeme;
+                                }
+                                case NULL -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempNulls++;
+                                    else yield topOpeandLexeme;
+                                }
+                                default -> {
+                                    if (isTemp) yield topOpeandLexeme + " " + tempVariants++;
+                                    else yield topOpeandLexeme;
+                                }
+                            };
+                            if (tempOperand != null) instructions.add(new Instruction("", "asig", tempOperand.lexeme(), "", resultString));
                             tempAssignation.append(operandStack.pop().lexeme());
                             lastOperation.setAssignation(tempAssignation.toString());
                             tempAssignation.setLength(0);
@@ -1471,9 +1517,19 @@ public class Code extends PanelTemplate {
                         }
                     }
                     case 4014 -> inForInit = true;
-                    case 4015 -> inForInit = false;
-                    case 4016 -> inForComp = true;
-                    case 4017 -> inForComp = false;
+                    case 4015 -> {
+                        inForInit = false;
+                        instructions.add(new Instruction("jf", "temp boolean", "", "", "etiqueta " + labels++));
+                        instructions.add(new Instruction("jmp", "", "", "", "etiqueta " + labels++));
+                    }
+                    case 4016 -> {
+                        instructions.add(new Instruction("etiqueta " + labels++, "", "", "", ""));
+                        inForComp = true;
+                    }
+                    case 4017 -> {
+                        instructions.add(new Instruction("jmp", "", "", "", "etiqueta " + labels));
+                        inForComp = false;
+                    }
                     case 4018 -> inForInc = true;
                     case 4019 -> {
                         inForInc = false;
@@ -1551,6 +1607,7 @@ public class Code extends PanelTemplate {
                         for (Quadruple quadruple : quadruples) {
                             if (quadruple.getAmbit() == ambitStack.peek().getId()) {
                                 quadruple.increaseCalls();
+                                instructions.add(new Instruction("", "call", operandStack.peek().lexeme(), "", ""));
                                 switch (operandStack.peek().type()) {
                                     case BOOLEAN -> quadruple.increaseTempBooleans();
                                     case NUMBER -> quadruple.increaseTempNumbers();
@@ -1631,8 +1688,12 @@ public class Code extends PanelTemplate {
                         functionStack.pop();
                     }
                     case 4035 -> declaringFunType = true;
-                    case 4036 -> inCustomFun = true;
+                    case 4036 -> {
+                        inCustomFun = true;
+                        functionBegin = true;
+                    }
                     case 4037 -> {
+                        instructions.add(new Instruction("end", labelStack.pop(), "", "", ""));
                         for (Quadruple quadruple : quadruples) {
                             if (quadruple.getAmbit() == ambitStack.peek().getId()) {
                                 quadruple.increaseFunctionLabels();
@@ -1661,6 +1722,8 @@ public class Code extends PanelTemplate {
                     case 4039 -> inArrPos = true;
                     case 4040 -> inArrPos = false;
                     case 4041 -> arrowFunction = true;
+                    case 4042 -> instructions.add(new Instruction("begin", "main", "", "", ""));
+                    case 4043 -> instructions.add(new Instruction("", "jf", instructions.getLast().result(), "", "etiqueta " + labels));
                 }
             } else if (topSyntaxStack < 0) {
                 int token = syntaxTokens.getFirst().token();
@@ -1669,12 +1732,29 @@ public class Code extends PanelTemplate {
                     int line = syntaxTokens.getFirst().line();
                     System.out.println("Lexema: " + lexeme + ", Linea: " + line);
 
+                    if (token == -65) instructions.add(new Instruction("etiqueta " + labels++, "", "", "", ""));
+
+                    if (functionBegin && token == -58) {
+                        labelStack.push(lexeme);
+                        instructions.add(new Instruction("begin", lexeme, "", "", ""));
+                        functionBegin = false;
+                    }
+
+                    if (token == -63) {
+                        for (int i = instructions.size() - 1; i >= 0; i--) {
+                            if (instructions.get(i).action().equals("jf")) {
+                                instructions.add(new Instruction(instructions.get(i).result(), "", "", "", ""));
+                            }
+                        }
+                    }
+
                     // Cuádruplos
                     switch(token) {
                         case -68, -78 -> {
                             for (Quadruple quadruple : quadruples) {
                                 if (quadruple.getAmbit() == ambitStack.peek().getId()) {
                                     quadruple.increaseCalls();
+                                    instructions.add(new Instruction("", "call", lexeme, "", ""));
                                 }
                             }
                         }
@@ -1930,10 +2010,17 @@ public class Code extends PanelTemplate {
 
     private void doOperation() {
         Operation lastOperation = operations.getLast();
-        int sheet = getSheet(operatorStack.pop().token());
-        int column = getPosition(operandStack.pop().type());
-        int row = getPosition(operandStack.pop().type());
+
+        Operator topOperator = operatorStack.pop();
+        Operand operand1 = operandStack.pop();
+        Operand operand2 = operandStack.pop();
+
+        int sheet = getSheet(topOperator.token());
+        int column = getPosition(operand1.type());
+        int row = getPosition(operand2.type());
+
         int result = semMatrix[sheet][column][row];
+
         String resultLexeme = "temp variant";
         Type resultType = Type.VARIANT;
         switch (result) {
@@ -1945,6 +2032,8 @@ public class Code extends PanelTemplate {
                         quadruple.increaseTempNulls();
                     }
                 }
+                instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempNulls));
+                tempNulls++;
             }
             case -71 -> {
                 resultLexeme = "temp real";
@@ -1954,6 +2043,8 @@ public class Code extends PanelTemplate {
                         quadruple.increasetempReals();
                     }
                 }
+                instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempReals));
+                tempReals++;
             }
             case -72 -> {
                 resultLexeme = "temp boolean";
@@ -1963,6 +2054,8 @@ public class Code extends PanelTemplate {
                         quadruple.increaseTempBooleans();
                     }
                 }
+                instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempBooleans));
+                tempBooleans++;
             }
             case -90 -> {
                 resultLexeme = "temp number";
@@ -1972,6 +2065,8 @@ public class Code extends PanelTemplate {
                         quadruple.increaseTempNumbers();
                     }
                 }
+                instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempNumbers));
+                tempNumbers++;
             }
             case -91 -> {
                 resultLexeme = "temp string";
@@ -1981,6 +2076,8 @@ public class Code extends PanelTemplate {
                         quadruple.increaseTempStrings();
                     }
                 }
+                instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempStrings));
+                tempStrings++;
             }
             case 600, 601, 602, 603, 604, 605, 606, 607, 608 -> {
                 addError(result, syntaxTokens.getFirst().lexeme(), ErrorType.SEMANTICS_1, syntaxTokens.getFirst().line());
@@ -1993,6 +2090,8 @@ public class Code extends PanelTemplate {
                     quadruple.increaseTempVariants();
                 }
             }
+            instructions.add(new Instruction("", topOperator.lexeme(), operand2.lexeme(), operand1.lexeme(), resultLexeme + " " + tempVariants));
+            tempVariants++;
         }
         lastOperation.addCounter(resultType);
         operandStack.push(new Operand(result, resultLexeme, resultType));
@@ -2450,5 +2549,9 @@ public class Code extends PanelTemplate {
 
     public LinkedList<Quadruple> getQuadruples() {
         return quadruples;
+    }
+
+    public LinkedList<Instruction> getInstructions() {
+        return instructions;
     }
 }
