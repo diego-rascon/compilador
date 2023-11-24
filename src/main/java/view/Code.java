@@ -2326,21 +2326,7 @@ public class Code extends PanelTemplate {
         for (Element element : elementsStack) {
             if (element.getId().equals(lexeme)) {
                 var elementAmbit = element.getAmbit();
-                var ambitOpened = false;
-                for (Ambit activeAmbit : ambitStack) {
-                    if (activeAmbit.getId() == elementAmbit) {
-                        switch (currentType) {
-                            case DEC_GET -> {
-                                if (element.getClassType().equals("get")) ambitOpened = true;
-                            }
-                            case DEC_SET -> {
-                                if (element.getClassType().equals("set")) ambitOpened = true;
-                            }
-                            default -> ambitOpened = true;
-                        }
-                        break;
-                    }
-                }
+                var ambitOpened = elementAmbit == ambitStack.peek().getId();
                 if (ambitOpened) addError(error, lexeme, ErrorType.AMBIT, lineNum);
             }
         }
