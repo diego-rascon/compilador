@@ -422,9 +422,15 @@ public class Code extends PanelTemplate {
         addSemanticsError();
         updateTables();
 
+        /*
         for (Quadruple quadruple : quadruples) {
             System.out.println(quadruple);
         }
+
+        for (Semantics semantics : semanticsList) {
+            System.out.println(semantics);
+        }
+         */
 
         try {
             txtResult.close();
@@ -602,7 +608,6 @@ public class Code extends PanelTemplate {
         // // Regla 13 & 14
         arrowFunction = false;
         declaringFunType = false;
-        functionStack.clear();
 
         // // Regla 16 & 17
         inCustomFun = false;
@@ -1662,6 +1667,7 @@ public class Code extends PanelTemplate {
                 if (token == topSyntaxStack) {
                     String lexeme = syntaxTokens.getFirst().lexeme();
                     int line = syntaxTokens.getFirst().line();
+                    System.out.println("Lexema: " + lexeme + ", Linea: " + line);
 
                     // Cuádruplos
                     switch(token) {
