@@ -324,7 +324,6 @@ public class FileHandler {
             }
 
             int[] quadTotals = new int[quadruplesHeaders.length];
-            for (int total : quadTotals) total = 0;
 
             LinkedList<Quadruple> quadruples = codePanel.getQuadruples();
 
@@ -435,7 +434,7 @@ public class FileHandler {
                 quadTotals[19] += functions;
                 functionCell.setCellValue(functions);
 
-                final XSSFCell mainCell = row.createCell(columns++);
+                final XSSFCell mainCell = row.createCell(columns);
                 int mains = quadruple.getMainLabels();
                 quadTotals[20] += mains;
                 mainCell.setCellValue(mains);
